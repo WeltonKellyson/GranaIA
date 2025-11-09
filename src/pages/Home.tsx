@@ -314,69 +314,144 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== SEÇÃO 5 - PLANO ÚNICO (compacto) ===== */}
-      <section className="min-h-screen bg-white flex flex-col items-center justify-center px-6 md:px-12 lg:px-24 py-16">
-        {/* Título e subtítulo */}
-        <div className="text-center mb-12 max-w-2xl">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 leading-tight">
-            Escolha o plano ideal para seu{" "}
-            <span className="text-green-600">negócio</span>
-          </h2>
-          <p className="text-gray-600 mt-3 text-base md:text-lg">
-            Teste grátis por 7 dias. Sem compromisso, sem cartão de crédito.
-          </p>
-        </div>
+      {/* ===== SEÇÃO 5 - PLANOS ===== */}
+<section className="min-h-screen bg-white flex flex-col items-center justify-center px-6 md:px-12 lg:px-24 py-10">
+  {/* Título */}
+  <div className="text-center mb-10">
+    <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
+      Escolha o plano ideal para seu{" "}
+      <span className="text-green-600">negócio</span>
+    </h2>
+    <p className="text-gray-600 mt-3 text-base md:text-lg">
+      Teste grátis por 7 dias. Sem compromisso, sem cartão de crédito.
+    </p>
+  </div>
 
-        {/* Card Único */}
-        <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-lg border border-green-100 text-center transform transition duration-300 hover:scale-[1.02] hover:shadow-2xl">
-          {/* Destaque superior */}
-          <div className="inline-block mb-4">
-            <span className="bg-green-100 text-green-700 px-4 py-1 rounded-full text-xs font-semibold shadow-sm">
-              MAIS COMPLETO
-            </span>
+  {/* Planos */}
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl items-stretch">
+    {[
+      {
+        name: "GranaIA Starter",
+        price: "R$5,99",
+        period: "/mês",
+        description:
+          "Foco em autônomos e microempreendedores que querem praticidade pelo WhatsApp.",
+        benefits: [
+          "Registre receitas e despesas diretamente pelo WhatsApp",
+          "Controle seu fluxo de caixa sem precisar de planilhas",
+          "Receba confirmação automática de cada transação",
+          "Acesso completo ao bot inteligente do GranaIA",
+          "Suporte básico via WhatsApp",
+        ],
+        button: "Assinar Starter",
+        popular: false,
+      },
+      {
+        name: "GranaIA Premium",
+        price: "R$9,99",
+        period: "/mês",
+        description:
+          "Tudo o que você precisa para automatizar seu controle financeiro.",
+        benefits: [
+          "Dashboard personalizada com visão em tempo real",
+          "Edição e exclusão de transações",
+          "Lembretes automáticos de contas a pagar e receber",
+          "Relatórios inteligentes com gráficos interativos",
+          "Categorização automática de despesas e receitas",
+          "IA para análise financeira personalizada",
+          "Exportação de dados (CSV, Excel e PDF)",
+          "Suporte dedicado via WhatsApp",
+        ],
+        button: "Testar grátis por 7 dias",
+        popular: true,
+      },
+      {
+        name: "GranaIA Vitalício",
+        price: "R$99,99",
+        period: "/pagamento único",
+        description:
+          "Pague uma vez e tenha acesso completo ao GranaIA para sempre.",
+        benefits: [
+          "Todos os recursos do plano Premium",
+          "Acesso vitalício com atualizações inclusas",
+          "Suporte prioritário",
+          "Sem mensalidades ou taxas extras",
+        ],
+        button: "Adquirir Vitalício",
+        popular: false,
+      },
+    ].map((plan, index) => (
+      <div
+        key={index}
+        className={`relative bg-white rounded-2xl border-2 flex flex-col justify-between transition-all duration-300 cursor-pointer transform hover:scale-[1.03] ${
+          plan.popular
+            ? "border-green-500 shadow-xl scale-[1.03]"
+            : "border-gray-200 shadow-md hover:shadow-lg"
+        }`}
+      >
+        {/* Selo de popular */}
+        {plan.popular && (
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-600 text-white text-xs font-semibold px-4 py-1 rounded-full shadow-md">
+            MAIS POPULAR
           </div>
+        )}
 
-          {/* Nome e preço */}
-          <h3 className="text-xl font-extrabold text-gray-900 mb-1">
-            GranaIA Premium
+        {/* Conteúdo */}
+        <div className="p-6 text-center flex-grow flex flex-col justify-start">
+          <h3 className="text-lg md:text-xl font-extrabold text-gray-900 mb-2">
+            {plan.name}
           </h3>
-          <p className="text-green-600 text-4xl font-extrabold mb-1">
-            R$9,99<span className="text-base font-semibold text-gray-500">/mês</span>
-          </p>
-          <p className="text-gray-600 font-medium mb-6 text-sm">
-            Tudo o que você precisa para automatizar seu controle financeiro.
+          <p className="text-green-600 text-3xl md:text-4xl font-extrabold mb-1">
+            {plan.price}
+            <span className="text-base font-semibold text-gray-500">
+              {plan.period}
+            </span>
           </p>
 
-          {/* Benefícios */}
-          <div className="text-left max-w-sm mx-auto space-y-3 mb-8">
-            {[
-              "Dashboard personalizada com visão em tempo real",
-              "Edição e exclusão de transações",
-              "Lembretes automáticos de contas a pagar e receber",
-              "Relatórios inteligentes com gráficos interativos",
-              "Categorização automática de despesas e receitas",
-              "IA para análise financeira personalizada",
-              "Exportação de dados (CSV, Excel e PDF)",
-              "Suporte dedicado via WhatsApp",
-            ].map((benefit, index) => (
-              <div key={index} className="flex items-start gap-3">
-                <span className="text-green-600 font-bold text-lg leading-none mt-[2px]">✓</span>
+          {/* Subtexto extra apenas para o plano vitalício */}
+          {plan.name === "GranaIA Vitalício" && (
+            <p className="text-green-600 text-sm font-semibold mb-4">
+              (Acesso Vitalício)
+            </p>
+          )}
+          <p className="text-gray-600 text-sm md:text-base font-medium mb-5">
+            {plan.description}
+          </p>
+
+          <div className="text-left space-y-2 mb-6">
+            {plan.benefits.map((benefit, i) => (
+              <div key={i} className="flex items-start gap-2">
+                <span className="text-green-600 font-bold text-lg leading-none mt-[1px]">
+                  ✓
+                </span>
                 <p className="text-gray-700 text-sm">{benefit}</p>
               </div>
             ))}
           </div>
-
-          {/* CTA */}
-          <button className="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-full shadow-md transition duration-300 text-base">
-            Testar grátis por 7 dias
-          </button>
-
-          {/* Rodapé do card */}
-          <p className="text-gray-500 text-xs mt-5">
-            Sem taxa de setup • Cancelamento a qualquer momento
-          </p>
         </div>
-      </section>
+
+        {/* Botão fixado na base */}
+        <div className="px-6 pb-6 mt-auto">
+          <button
+            className={`w-full py-3 rounded-full font-semibold transition duration-300 ${
+              plan.popular
+                ? "bg-green-600 text-white hover:bg-green-700"
+                : "bg-gray-900 text-white hover:bg-gray-800"
+            }`}
+          >
+            {plan.button}
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  {/* Rodapé da seção */}
+  <p className="text-gray-500 text-xs mt-8 text-center">
+    Plano Premium com 7 dias gratuitos • Sem taxa de setup • Cancelamento a qualquer momento
+  </p>
+</section>
+
 
       {/* ===== SEÇÃO 6 - DEPOIMENTOS ===== */}
       <section className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-8 md:px-16 lg:px-24 py-20">

@@ -57,14 +57,10 @@ export default function Home() {
         Login
       </button>
 
-      {/* ===== HERO SECTION (100% VIEWPORT) ===== */}
-      <section className="h-screen flex flex-col items-center justify-center text-center space-y-8 max-w-3xl mx-auto px-6 md:px-12">
+      {/* ===== SEÇÂO 1 ===== */}
+      <section className="min-h-screen flex flex-col items-center justify-center text-center space-y-8 max-w-3xl mx-auto px-6 md:px-12">
         {/* Logo */}
-        <img
-          src={logonomegranaia}
-          alt="Logo GranaIA"
-          className="w-280 md:w-320 mx-auto mb-2"
-        />
+        <img src={logonomegranaia} alt="Logo GranaIA" className="w-280 md:w-320 mx-auto mb-2 transition-transform duration-300 hover:scale-110" />
 
         {/* Título principal */}
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-gray-900">
@@ -72,27 +68,60 @@ export default function Home() {
           <span className="text-green-600">direto do WhatsApp</span>
         </h1>
 
-        {/* Subtítulo */}
-        <p className="text-lg text-gray-600 max-w-2xl">
-          Simples, rápido e sem planilhas. Registre receitas, despesas e
-          consulte sua saúde financeira pelo WhatsApp.
+        {/* Subtítulo em destaque */}
+        <p className="text-xl md:text-2xl font-bold text-gray-900">
+          Simples, rápido e sem planilhas.
+        </p>
+
+        {/* Texto descritivo */}
+        <p className="text-gray-600 max-w-2xl">
+          No <span className="font-semibold text-gray-800">GranaIA</span>, você
+          registra receitas, despesas, contas a pagar e a receber por texto ou áudio e
+          consulta sua saúde financeira direto pelo WhatsApp.{" "}
+          <span className="text-green-600 font-semibold">
+            Planos a partir de R$5,99/mês.
+          </span>
         </p>
 
         {/* CTA principal */}
-        <button className="bg-green-600 hover:bg-green-700 transition-all duration-200 text-white px-10 py-4 rounded-xl font-semibold shadow-lg">
-          Teste grátis por 7 dias
-        </button>
+        <div className="flex flex-col items-center space-y-2">
+          <button
+            className="bg-gradient-to-r from-green-500 via-green-600 to-green-700 
+                      hover:from-green-600 hover:via-green-700 hover:to-green-800 
+                      transform hover:scale-105 
+                      transition-all duration-300 ease-in-out 
+                      text-white px-10 py-4 rounded-xl font-semibold 
+                      shadow-md hover:shadow-lg"
+          >
+            Teste grátis GranaIA Starter por 7 dias
+          </button>
+        </div>
 
         {/* Destaques */}
-        <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-500 mt-4">
+        <div className="flex flex-wrap justify-center gap-8 text-sm text-gray-600 mt-6">
           <div className="flex items-center gap-2">
-            <span>🔒</span> <p>Segurança bancária AES-256</p>
+            <img
+              src="https://img.icons8.com/?size=100&id=2862&format=png&color=25D366"
+              alt="Cadeado de segurança"
+              className="w-5 h-5"
+            />
+            <p>Segurança bancária AES-256</p>
           </div>
           <div className="flex items-center gap-2">
-            <span>💬</span> <p>100% pelo WhatsApp</p>
+            <img
+              src="https://img.icons8.com/?size=100&id=964RahB4l606&format=png&color=25D366"
+              alt="Ícone do WhatsApp"
+              className="w-5 h-5"
+            />
+            <p>100% pelo WhatsApp</p>
           </div>
           <div className="flex items-center gap-2">
-            <span>⚙️</span> <p>Configuração em 2 minutos</p>
+            <img
+              src="https://img.icons8.com/?size=100&id=53420&format=png&color=25D366"
+              alt="Ícone de Configuração"
+              className="w-5 h-5"
+            />
+            <p>Configuração em 2 minutos</p>
           </div>
         </div>
       </section>
@@ -103,7 +132,13 @@ export default function Home() {
         <div className="flex-1 text-center md:text-left space-y-8 max-w-xl">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-green-50 text-green-600 px-4 py-1 rounded-full text-sm font-medium shadow-sm">
-            <span>💬</span>
+            <span>
+            <img
+              src="https://img.icons8.com/?size=100&id=964RahB4l606&format=png&color=000000"
+              alt="WhatsApp"
+              style={{ width: "24px", height: "24px", verticalAlign: "middle" }}
+            />
+          </span>
             <span>Como funciona</span>
           </div>
 
@@ -121,8 +156,10 @@ export default function Home() {
 
           {/* Itens explicativos */}
           <div className="flex flex-col gap-6 mt-6">
-            <div className="flex items-start gap-4">
-              <div className="bg-green-100 text-green-600 p-2 rounded-full text-lg">🎙️</div>
+            <div className="flex items-start gap-3">
+              <span className="w-5 h-5 mt-1 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+              </span>
               <div>
                 <h3 className="font-semibold text-lg text-gray-900">
                   Áudio ou texto, você escolhe
@@ -133,8 +170,10 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex items-start gap-4">
-              <div className="bg-green-100 text-green-600 p-2 rounded-full text-lg">⚡</div>
+            <div className="flex items-start gap-3">
+              <span className="w-5 h-5 mt-1 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+              </span>
               <div>
                 <h3 className="font-semibold text-lg text-gray-900">
                   Confirmação instantânea
@@ -145,8 +184,10 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex items-start gap-4">
-              <div className="bg-green-100 text-green-600 p-2 rounded-full text-lg">💰</div>
+            <div className="flex items-start gap-3">
+              <span className="w-5 h-5 mt-1 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+              </span>
               <div>
                 <h3 className="font-semibold text-lg text-gray-900">
                   Contas a pagar e receber
@@ -184,13 +225,17 @@ export default function Home() {
         <div className="flex-1 text-center md:text-left space-y-8 max-w-xl">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-green-50 text-green-600 px-4 py-1 rounded-full text-sm font-medium shadow-sm">
-            <span>📈</span>
+            <img
+              src="https://img.icons8.com/?size=100&id=ALrL90O362w9&format=png&color=25D366"
+              alt="Ícone de Análises"
+              className="w-4 h-4"
+            />
             <span>Análises Inteligentes</span>
           </div>
 
           {/* Título e subtítulo */}
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight">
-            Visualize o caixa da sua empresa{" "}
+            Acompanhe suas finanças{" "}
             <span className="text-green-600">em tempo real</span>
           </h2>
           <p className="text-gray-600 text-lg">
@@ -200,8 +245,10 @@ export default function Home() {
 
           {/* Destaques */}
           <div className="flex flex-col gap-6 mt-6">
-            <div className="flex items-start gap-4">
-              <div className="bg-green-100 text-green-600 p-2 rounded-full text-lg">✅</div>
+            <div className="flex items-start gap-3">
+              <span className="w-5 h-5 mt-1 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+              </span>
               <div>
                 <h3 className="font-semibold text-lg text-gray-900">
                   Fluxo de caixa detalhado
@@ -212,8 +259,10 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex items-start gap-4">
-              <div className="bg-green-100 text-green-600 p-2 rounded-full text-lg">🧠</div>
+            <div className="flex items-start gap-3">
+              <span className="w-5 h-5 mt-1 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+              </span>
               <div>
                 <h3 className="font-semibold text-lg text-gray-900">
                   Categorização automática
@@ -224,8 +273,10 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex items-start gap-4">
-              <div className="bg-green-100 text-green-600 p-2 rounded-full text-lg">📊</div>
+            <div className="flex items-start gap-3">
+              <span className="w-5 h-5 mt-1 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+              </span>
               <div>
                 <h3 className="font-semibold text-lg text-gray-900">
                   Relatórios profissionais
@@ -255,8 +306,12 @@ export default function Home() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl w-full">
           {/* Card 1 */}
           <div className="bg-white shadow-md rounded-2xl p-8 text-center transform transition duration-300 hover:scale-105 hover:shadow-xl">
-            <div className="bg-green-100 text-green-600 w-14 h-14 mx-auto flex items-center justify-center rounded-xl text-3xl mb-4">
-              🎙️
+            <div className="bg-green-100 w-14 h-14 mx-auto flex items-center justify-center rounded-xl mb-4">
+              <img
+                src="https://img.icons8.com/?size=100&id=8XhS2MrAHUXV&format=png&color=25D366"
+                alt="Ícone de microfone"
+                className="w-8 h-8"
+              />
             </div>
             <h3 className="font-semibold text-xl text-gray-900 mb-2">
               Registro por voz ou texto no WhatsApp
@@ -268,8 +323,12 @@ export default function Home() {
 
           {/* Card 2 */}
           <div className="bg-white shadow-md rounded-2xl p-8 text-center transform transition duration-300 hover:scale-105 hover:shadow-xl">
-            <div className="bg-green-100 text-green-600 w-14 h-14 mx-auto flex items-center justify-center rounded-xl text-3xl mb-4">
-              📊
+            <div className="bg-green-100 w-14 h-14 mx-auto flex items-center justify-center rounded-xl mb-4">
+              <img
+                src="https://img.icons8.com/?size=100&id=ALrL90O362w9&format=png&color=25D366"
+                alt="Ícone de gráfico"
+                className="w-8 h-8"
+              />
             </div>
             <h3 className="font-semibold text-xl text-gray-900 mb-2">
               Fluxo de caixa no bolso
@@ -281,8 +340,12 @@ export default function Home() {
 
           {/* Card 3 */}
           <div className="bg-white shadow-md rounded-2xl p-8 text-center transform transition duration-300 hover:scale-105 hover:shadow-xl">
-            <div className="bg-green-100 text-green-600 w-14 h-14 mx-auto flex items-center justify-center rounded-xl text-3xl mb-4">
-              ⚡
+            <div className="bg-green-100 w-14 h-14 mx-auto flex items-center justify-center rounded-xl mb-4">
+              <img
+                src="https://img.icons8.com/?size=100&id=16421&format=png&color=25D366"
+                alt="Ícone de raio"
+                className="w-8 h-8"
+              />
             </div>
             <h3 className="font-semibold text-xl text-gray-900 mb-2">
               Mais tempo para vender e crescer
@@ -294,8 +357,12 @@ export default function Home() {
 
           {/* Card 4 */}
           <div className="bg-white shadow-md rounded-2xl p-8 text-center transform transition duration-300 hover:scale-105 hover:shadow-xl">
-            <div className="bg-green-100 text-green-600 w-14 h-14 mx-auto flex items-center justify-center rounded-xl text-3xl mb-4">
-              🔒
+            <div className="bg-green-100 w-14 h-14 mx-auto flex items-center justify-center rounded-xl mb-4">
+              <img
+                src="https://img.icons8.com/?size=100&id=2862&format=png&color=25D366"
+                alt="Ícone de cadeado"
+                className="w-8 h-8"
+              />
             </div>
             <h3 className="font-semibold text-xl text-gray-900 mb-2">
               Segurança bancária
@@ -309,151 +376,154 @@ export default function Home() {
         {/* CTA Secundário */}
         <div className="mt-16 text-center">
           <p className="text-gray-700 text-lg mb-4">
-            Planos a partir de <span className="text-green-600 font-semibold">R$29/mês</span>
+            Planos a partir de <span className="text-green-600 font-semibold">R$5,99/mês</span>
           </p>
-          <button className="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-4 rounded-full shadow-md transition duration-300">
-            Testar Essentials grátis por 7 dias
+          <button
+            className="bg-gradient-to-r from-green-500 via-green-600 to-green-700 
+                      hover:from-green-600 hover:via-green-700 hover:to-green-800 
+                      transform hover:scale-105 
+                      transition-all duration-300 ease-in-out 
+                      text-white px-10 py-4 rounded-xl font-semibold 
+                      shadow-md hover:shadow-lg"
+          >
+            Testar GranaIA Starter grátis por 7 dias
           </button>
         </div>
       </section>
 
       {/* ===== SEÇÃO 5 - PLANOS ===== */}
-<section className="min-h-screen bg-white flex flex-col items-center justify-center px-6 md:px-12 lg:px-24 py-10">
-  {/* Título */}
-  <div className="text-center mb-10">
-    <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
-      Escolha o plano ideal para seu{" "}
-      <span className="text-green-600">negócio</span>
-    </h2>
-    <p className="text-gray-600 mt-3 text-base md:text-lg">
-      Teste grátis por 7 dias. Sem compromisso, sem cartão de crédito.
-    </p>
-  </div>
-
-  {/* Planos */}
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl items-stretch">
-    {[
-      {
-        name: "GranaIA Starter",
-        price: "R$5,99",
-        period: "/mês",
-        description:
-          "Foco em autônomos e microempreendedores que querem praticidade pelo WhatsApp.",
-        benefits: [
-          "Registre receitas e despesas diretamente pelo WhatsApp",
-          "Controle seu fluxo de caixa sem precisar de planilhas",
-          "Receba confirmação automática de cada transação",
-          "Acesso completo ao bot inteligente do GranaIA",
-          "Suporte básico via WhatsApp",
-        ],
-        button: "Assinar Starter",
-        popular: false,
-      },
-      {
-        name: "GranaIA Premium",
-        price: "R$9,99",
-        period: "/mês",
-        description:
-          "Tudo o que você precisa para automatizar seu controle financeiro.",
-        benefits: [
-          "Dashboard personalizada com visão em tempo real",
-          "Edição e exclusão de transações",
-          "Lembretes automáticos de contas a pagar e receber",
-          "Relatórios inteligentes com gráficos interativos",
-          "Categorização automática de despesas e receitas",
-          "IA para análise financeira personalizada",
-          "Exportação de dados (CSV, Excel e PDF)",
-          "Suporte dedicado via WhatsApp",
-        ],
-        button: "Testar grátis por 7 dias",
-        popular: true,
-      },
-      {
-        name: "GranaIA Vitalício",
-        price: "R$99,99",
-        period: "/pagamento único",
-        description:
-          "Pague uma vez e tenha acesso completo ao GranaIA para sempre.",
-        benefits: [
-          "Todos os recursos do plano Premium",
-          "Acesso vitalício com atualizações inclusas",
-          "Suporte prioritário",
-          "Sem mensalidades ou taxas extras",
-        ],
-        button: "Adquirir Vitalício",
-        popular: false,
-      },
-    ].map((plan, index) => (
-      <div
-        key={index}
-        className={`relative bg-white rounded-2xl border-2 flex flex-col justify-between transition-all duration-300 cursor-pointer transform hover:scale-[1.03] ${
-          plan.popular
-            ? "border-green-500 shadow-xl scale-[1.03]"
-            : "border-gray-200 shadow-md hover:shadow-lg"
-        }`}
-      >
-        {/* Selo de popular */}
-        {plan.popular && (
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-600 text-white text-xs font-semibold px-4 py-1 rounded-full shadow-md">
-            MAIS POPULAR
-          </div>
-        )}
-
-        {/* Conteúdo */}
-        <div className="p-6 text-center flex-grow flex flex-col justify-start">
-          <h3 className="text-lg md:text-xl font-extrabold text-gray-900 mb-2">
-            {plan.name}
-          </h3>
-          <p className="text-green-600 text-3xl md:text-4xl font-extrabold mb-1">
-            {plan.price}
-            <span className="text-base font-semibold text-gray-500">
-              {plan.period}
-            </span>
+      <section className="min-h-screen bg-white flex flex-col items-center justify-center px-6 md:px-12 lg:px-24 py-10">
+        {/* Título */}
+        <div className="text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
+            Escolha o plano ideal para seu{" "}
+            <span className="text-green-600">negócio</span>
+          </h2>
+          <p className="text-gray-600 mt-3 text-base md:text-lg">
+            Teste grátis por 7 dias. Sem compromisso, sem cartão de crédito.
           </p>
+        </div>
 
-          {/* Subtexto extra apenas para o plano vitalício */}
-          {plan.name === "GranaIA Vitalício" && (
-            <p className="text-green-600 text-sm font-semibold mb-4">
-              (Acesso Vitalício)
-            </p>
-          )}
-          <p className="text-gray-600 text-sm md:text-base font-medium mb-5">
-            {plan.description}
-          </p>
+        {/* Planos */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl items-stretch">
+          {[
+            {
+              name: "GranaIA Starter",
+              price: "R$5,99",
+              period: "/mês",
+              description:
+                "Foco em autônomos e microempreendedores que querem praticidade pelo WhatsApp.",
+              benefits: [
+                "Registre receitas e despesas diretamente pelo WhatsApp",
+                "Controle seu fluxo de caixa sem precisar de planilhas",
+                "Receba confirmação automática de cada transação",
+                "Acesso completo ao bot inteligente do GranaIA",
+                "Suporte básico via WhatsApp",
+              ],
+              button: "Assinar Starter",
+              popular: false,
+            },
+            {
+              name: "GranaIA Premium",
+              price: "R$9,99",
+              period: "/mês",
+              description:
+                "Tudo o que você precisa para automatizar seu controle financeiro.",
+              benefits: [
+                "Dashboard personalizada com visão em tempo real",
+                "Edição e exclusão de transações",
+                "Lembretes automáticos de contas a pagar e receber",
+                "Relatórios inteligentes com gráficos interativos",
+                "Categorização automática de despesas e receitas",
+                "IA para análise financeira personalizada",
+                "Exportação de dados (CSV, Excel e PDF)",
+                "Suporte dedicado via WhatsApp",
+              ],
+              button: "Assinar Premium",
+              popular: true,
+            },
+            {
+              name: "GranaIA Vitalício",
+              price: "R$99,99",
+              period: "/pagamento único",
+              description:
+                "Pague uma vez e tenha acesso completo ao GranaIA para sempre.",
+              benefits: [
+                "Todos os recursos do plano Premium",
+                "Acesso vitalício com atualizações inclusas",
+                "Suporte prioritário",
+                "Sem mensalidades ou taxas extras",
+              ],
+              button: "Adquirir Vitalício",
+              popular: false,
+            },
+          ].map((plan, index) => (
+            <div
+              key={index}
+              className={`relative bg-white rounded-2xl border-2 flex flex-col justify-between transition-all duration-300 cursor-pointer transform hover:scale-[1.03] ${
+                plan.popular
+                  ? "border-green-500 shadow-xl scale-[1.03]"
+                  : "border-gray-200 shadow-md hover:shadow-lg"
+              }`}
+            >
+              {/* Selo de popular */}
+              {plan.popular && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-600 text-white text-xs font-semibold px-4 py-1 rounded-full shadow-md">
+                  MAIS POPULAR
+                </div>
+              )}
 
-          <div className="text-left space-y-2 mb-6">
-            {plan.benefits.map((benefit, i) => (
-              <div key={i} className="flex items-start gap-2">
-                <span className="text-green-600 font-bold text-lg leading-none mt-[1px]">
-                  ✓
-                </span>
-                <p className="text-gray-700 text-sm">{benefit}</p>
+              {/* Conteúdo */}
+              <div className="p-6 text-center flex-grow flex flex-col justify-start">
+                <h3 className="text-lg md:text-xl font-extrabold text-gray-900 mb-2">
+                  {plan.name}
+                </h3>
+                <p className="text-green-600 text-3xl md:text-4xl font-extrabold mb-1">
+                  {plan.price}
+                  <span className="text-base font-semibold text-gray-500">
+                    {plan.period}
+                  </span>
+                </p>
+
+                {/* Subtexto extra apenas para o plano vitalício */}
+                {plan.name === "GranaIA Vitalício" && (
+                  <p className="text-green-600 text-sm font-semibold mb-4">
+                    (Acesso Vitalício)
+                  </p>
+                )}
+                <p className="text-gray-600 text-sm md:text-base font-medium mb-5">
+                  {plan.description}
+                </p>
+
+                <div className="text-left space-y-2 mb-6">
+                  {plan.benefits.map((benefit, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <span className="text-green-600 font-bold text-lg leading-none mt-[1px]">
+                        ✓
+                      </span>
+                      <p className="text-gray-700 text-sm">{benefit}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
+
+              {/* Botão fixado na base */}
+              <div className="px-6 pb-6 mt-auto">
+                <button
+                  className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+                >
+                  {plan.button}
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* Botão fixado na base */}
-        <div className="px-6 pb-6 mt-auto">
-          <button
-            className={`w-full py-3 rounded-full font-semibold transition duration-300 ${
-              plan.popular
-                ? "bg-green-600 text-white hover:bg-green-700"
-                : "bg-gray-900 text-white hover:bg-gray-800"
-            }`}
-          >
-            {plan.button}
-          </button>
-        </div>
-      </div>
-    ))}
-  </div>
-
-  {/* Rodapé da seção */}
-  <p className="text-gray-500 text-xs mt-8 text-center">
-    Plano Premium com 7 dias gratuitos • Sem taxa de setup • Cancelamento a qualquer momento
-  </p>
-</section>
+        {/* Rodapé da seção */}
+        <p className="text-gray-500 text-xs mt-8 text-center">
+          Plano GranaIA Starter com 7 dias gratuitos • Sem taxa de setup • Cancelamento a qualquer momento
+        </p>
+      </section>
 
 
       {/* ===== SEÇÃO 6 - DEPOIMENTOS ===== */}
@@ -461,7 +531,7 @@ export default function Home() {
         {/* Título e subtítulo */}
         <div className="text-center max-w-4xl mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight">
-            Empreendedores como você estão{" "}
+            Pessoas como você estão{" "}
             <span className="text-green-600">simplificando suas finanças.</span>
           </h2>
           <p className="text-gray-600 mt-4 text-lg">
@@ -530,7 +600,7 @@ export default function Home() {
             <div>
               <div className="flex mb-4 text-green-600 text-lg">★★★★★</div>
               <p className="text-gray-700 italic mb-6">
-                "Simples, eficiente e barato. Em uma semana já estava organizando todas as finanças da empresa sem esforço. Recomendo!"
+                "Simples, eficiente e barato. Em uma semana já estava organizando todas as finanças sem esforço. Recomendo!"
               </p>
             </div>
             <div className="flex items-center gap-4 mt-auto">
@@ -626,7 +696,7 @@ export default function Home() {
             🚀 <p>Setup em 5 minutos</p>
           </div>
           <div className="flex items-center gap-2">
-            🎁 <p>7 dias grátis (Premium)</p>
+            🎁 <p>7 dias grátis (GranaIA Starter)</p>
           </div>
           <div className="flex items-center gap-2">
             💳 <p>Sem cartão de crédito</p>
@@ -641,7 +711,7 @@ export default function Home() {
         </button>
 
         <p className="text-green-100 mt-4 text-sm">
-          R$9,99/mês após o período gratuito • Cancele quando quiser
+          R$5,99/mês após o período gratuito • Cancele quando quiser
         </p>
       </div>
 
@@ -651,7 +721,7 @@ export default function Home() {
         <div className="max-w-sm text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
             <img
-              src={logo}
+              src={logogranaia}
               alt="Logo GranaIA"
               className="w-10 h-10 rounded-lg shadow-sm"
             />
@@ -667,7 +737,14 @@ export default function Home() {
           <div className="flex flex-wrap gap-4 text-xs text-gray-400">
             <span>🔒 Seguro</span>
             <span>🇧🇷 Feito no Brasil</span>
-            <span>💬 WhatsApp</span>
+            <span className="inline-flex items-center gap-2">
+              <img
+                src="https://img.icons8.com/?size=100&id=964RahB4l606&format=png&color=25D366"
+                alt="Ícone do WhatsApp"
+                className="w-5 h-5"
+              />
+              <span>WhatsApp</span>
+            </span>
           </div>
         </div>
 
@@ -689,7 +766,6 @@ export default function Home() {
             <ul className="space-y-2 text-sm text-gray-400">
               <li><a href="#" className="hover:text-green-400">Privacidade</a></li>
               <li><a href="#" className="hover:text-green-400">Termos de Uso</a></li>
-              <li><a href="#" className="hover:text-green-400">LGPD</a></li>
             </ul>
           </div>
         </div>

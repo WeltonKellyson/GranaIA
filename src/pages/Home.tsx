@@ -98,8 +98,8 @@ export default function Home() {
         </div>
 
         {/* Destaques */}
-        <div className="flex flex-wrap justify-center gap-8 text-sm text-gray-600 mt-6">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600 mt-6">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <img
               src="https://img.icons8.com/?size=100&id=2862&format=png&color=25D366"
               alt="Cadeado de segurança"
@@ -107,7 +107,8 @@ export default function Home() {
             />
             <p>Segurança bancária AES-256</p>
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-2 flex-shrink-0">
             <img
               src="https://img.icons8.com/?size=100&id=964RahB4l606&format=png&color=25D366"
               alt="Ícone do WhatsApp"
@@ -115,7 +116,8 @@ export default function Home() {
             />
             <p>100% pelo WhatsApp</p>
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-2 flex-shrink-0">
             <img
               src="https://img.icons8.com/?size=100&id=53420&format=png&color=25D366"
               alt="Ícone de Configuração"
@@ -127,18 +129,16 @@ export default function Home() {
       </section>
 
       {/* ===== SEÇÃO 2 - COMO FUNCIONA ===== */}
-      <section className="h-screen bg-gray-50 flex flex-col md:flex-row items-center justify-center px-8 md:px-16 lg:px-24 gap-12">
+      <section className="min-h-screen bg-white flex flex-col md:flex-row items-center justify-center px-8 md:px-16 lg:px-24 gap-12 py-20">
         {/* Texto (lado esquerdo) */}
         <div className="flex-1 text-center md:text-left space-y-8 max-w-xl">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-green-50 text-green-600 px-4 py-1 rounded-full text-sm font-medium shadow-sm">
-            <span>
+          <div className="flex items-center justify-center gap-2 bg-green-50 text-green-600 px-4 py-2 rounded-full text-sm font-medium shadow-sm w-fit mx-auto md:mx-0">
             <img
-              src="https://img.icons8.com/?size=100&id=964RahB4l606&format=png&color=000000"
+              src="https://img.icons8.com/?size=100&id=964RahB4l606&format=png&color=25D366"
               alt="WhatsApp"
-              style={{ width: "24px", height: "24px", verticalAlign: "middle" }}
+              className="w-5 h-5 object-contain"
             />
-          </span>
             <span>Como funciona</span>
           </div>
 
@@ -692,16 +692,16 @@ export default function Home() {
         </p>
 
         <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-green-100 mb-8">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             🚀 <p>Setup em 5 minutos</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             🎁 <p>7 dias grátis (GranaIA Starter)</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             💳 <p>Sem cartão de crédito</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             🔒 <p>Dados 100% seguros</p>
           </div>
         </div>

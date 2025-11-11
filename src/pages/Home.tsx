@@ -2,6 +2,9 @@ import { useState } from "react";
 import whats from "../assets/whats.png";
 import logo from "../assets/logo.png";
 import dash from "../assets/dash.png";
+import nomelogo from "../assets/granaianomelogo.png";
+import logogranaia from "../assets/logogranaia.png";
+import logonome from "../assets/logonomegranaia.png";
 
 export default function Home() {
   const [count, setCount] = useState(0);
@@ -58,9 +61,9 @@ export default function Home() {
       <section className="h-screen flex flex-col items-center justify-center text-center space-y-8 max-w-3xl mx-auto px-6 md:px-12">
         {/* Logo */}
         <img
-          src={logo}
+          src={logonome}
           alt="Logo GranaIA"
-          className="w-28 md:w-32 mx-auto mb-2"
+          className="w-280 md:w-320 mx-auto mb-2"
         />
 
         {/* Título principal */}

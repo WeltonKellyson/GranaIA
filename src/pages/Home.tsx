@@ -1,15 +1,16 @@
 import { useState } from "react";
 import whats from '../assets/whats.png';
-import logo from '../assets/logo.png';
 import dash from '../assets/dash.png';
 import granianomelogo from '../assets/granianomelogo.png';
 import logogranaia from '../assets/logogranaia.png';
 import logonomegranaia from '../assets/logonomegranaia.png';
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
   const [count, setCount] = useState(0);
-
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const navigate = useNavigate();
+
   const faqs = [
     {
       question: "Preciso entender de finanças para usar?",
@@ -48,10 +49,12 @@ export default function Home() {
     },
   ];
 
+
   return (
     <div className="relative bg-[#fafaf7] text-gray-900 scroll-smooth overflow-x-hidden">
       {/* ===== BOTÃO LOGIN FIXO ===== */}
       <button
+        onClick={() => navigate("/login")}
         className="fixed top-6 right-8 bg-white border border-gray-200 shadow-md text-gray-700 px-5 py-2 rounded-lg font-medium hover:bg-gray-50 hover:shadow-lg transition-all duration-300 z-50"
       >
         Login

@@ -79,7 +79,51 @@ export default function Dashboard() {
       tipo: 'Receita',
       valor: 780,
     },
+    {
+      data: '03/11/2025',
+      descricao: 'Venda de produto',
+      tipo: 'Receita',
+      valor: 780,
+    },
+    {
+      data: '03/11/2025',
+      descricao: 'Venda de produto',
+      tipo: 'Receita',
+      valor: 780,
+    },
+    {
+      data: '03/11/2025',
+      descricao: 'Venda de produto',
+      tipo: 'Receita',
+      valor: 780,
+    },
+    {
+      data: '03/11/2025',
+      descricao: 'Venda de produto',
+      tipo: 'Receita',
+      valor: 780,
+    },
+    {
+      data: '03/11/2025',
+      descricao: 'Venda de produto',
+      tipo: 'Receita',
+      valor: 780,
+    },
   ];
+
+  const categoriasfiltos = [
+    'Salário',
+    'Venda',
+    'Investimento',
+    'Contas',
+    'Outros',
+  ];
+
+  const [filtros, setFiltros] = useState({
+    mes: '',
+    categoria: 'todas',
+    tipo: 'todos',
+  });
 
   // ===== PAGINAÇÃO =====
   const [paginaAtual, setPaginaAtual] = useState(1);
@@ -140,7 +184,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 p-6 md:p-10 space-y-10">
+    <div className="min-h-screen bg-gray-50 text-gray-800 p-6 md:p-10 space-y-10 overflow-x-hidden">
       {/* ===== CABEÇALHO ===== */}
       <header className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <h1 className="text-3xl font-extrabold text-gray-900">
@@ -188,6 +232,79 @@ export default function Dashboard() {
               R$ {resumo.despesas.toFixed(2)}
             </h3>
           </div>
+        </div>
+      </section>
+
+      {/* ===== FILTROS ===== */}
+      <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">Filtros</h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Filtro de Mês/Data */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Mês / Data
+            </label>
+            <input
+              type="month"
+              value={filtros.mes || ''}
+              onChange={(e) => setFiltros({ ...filtros, mes: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white 
+        text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+            />
+          </div>
+
+          {/* Filtro de Categoria */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Categoria
+            </label>
+            <select
+              value={filtros.categoria || 'todas'}
+              onChange={(e) =>
+                setFiltros({ ...filtros, categoria: e.target.value })
+              }
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white 
+        text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+            >
+              <option value="todas">Todas</option>
+              {categoriasfiltos.map((cat, i) => (
+                <option key={i} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Filtro de Tipo (Receita / Despesa) */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tipo
+            </label>
+            <select
+              value={filtros.tipo || 'todos'}
+              onChange={(e) => setFiltros({ ...filtros, tipo: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white 
+        text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+            >
+              <option value="todos">Todos</option>
+              <option value="Receita">Receita</option>
+              <option value="Despesa">Despesa</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Botão de limpar filtros */}
+        <div className="flex justify-end mt-4">
+          <button
+            onClick={() =>
+              setFiltros({ mes: '', categoria: 'todas', tipo: 'todos' })
+            }
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
+      border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 transition"
+          >
+            Limpar Filtros
+          </button>
         </div>
       </section>
 
@@ -275,7 +392,7 @@ export default function Dashboard() {
                   </div>
                 </th>
 
-                <th className="px-4 py-2 text-left">Descrição</th>
+                <th className="px-4 py-2 text-left">Categoria</th>
 
                 <th
                   className="px-4 py-2 text-left cursor-pointer hover:bg-gray-100 transition"
@@ -317,38 +434,45 @@ export default function Dashboard() {
               ))}
             </tbody>
           </table>
-          <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
+          {/* ===== PAGINAÇÃO ===== */}
+          <div className="flex justify-between items-center mt-4 text-sm text-gray-700">
             <span>
               Mostrando {inicio + 1}–{Math.min(fim, transacoes.length)} de{' '}
               {transacoes.length}
             </span>
+
             <div className="flex gap-2">
+              {/* Botão Anterior */}
               <button
                 onClick={() => setPaginaAtual((prev) => Math.max(prev - 1, 1))}
                 disabled={paginaAtual === 1}
-                className="px-3 py-1 border rounded-lg bg-white hover:bg-gray-50 disabled:opacity-50"
+                className="px-3 py-1 border rounded-lg bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:text-gray-400 transition"
               >
                 Anterior
               </button>
+
+              {/* Botões de página */}
               {Array.from({ length: totalPaginas }, (_, i) => (
                 <button
                   key={i}
                   onClick={() => setPaginaAtual(i + 1)}
-                  className={`px-3 py-1 border rounded-lg transition ${
+                  className={`px-3 py-1 border rounded-lg font-medium transition ${
                     paginaAtual === i + 1
                       ? 'bg-green-600 text-white border-green-600'
-                      : 'bg-white hover:bg-gray-50'
+                      : 'bg-white text-gray-700 hover:bg-gray-100'
                   }`}
                 >
                   {i + 1}
                 </button>
               ))}
+
+              {/* Botão Próximo */}
               <button
                 onClick={() =>
                   setPaginaAtual((prev) => Math.min(prev + 1, totalPaginas))
                 }
                 disabled={paginaAtual === totalPaginas}
-                className="px-3 py-1 border rounded-lg bg-white hover:bg-gray-50 disabled:opacity-50"
+                className="px-3 py-1 border rounded-lg bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:text-gray-400 transition"
               >
                 Próximo
               </button>

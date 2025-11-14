@@ -22,25 +22,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Verifica se há um token salvo ao carregar a aplicação
     const initAuth = async () => {
+      console.log('[AuthContext] Iniciando autenticação...');
       try {
-        if (apiService.isAuthenticated()) {
+        const isAuth = apiService.isAuthenticated();
+        console.log('[AuthContext] isAuthenticated:', isAuth);
+
+        if (isAuth) {
           const userData = apiService.getUserData();
+          console.log('[AuthContext] userData:', userData);
+
           if (userData) {
             setUser(userData);
             // Busca o perfil completo do usuário
             try {
+              console.log('[AuthContext] Buscando perfil completo...');
               const response = await apiService.getCurrentUser();
+              console.log('[AuthContext] Response getCurrentUser:', response);
+
               if (response.success && response.data) {
+                console.log('[AuthContext] UserProfile recebido:', response.data);
                 setUserProfile(response.data);
+              } else {
+                console.error('[AuthContext] getCurrentUser não teve sucesso:', response);
               }
             } catch (error) {
-              console.error('Erro ao buscar perfil:', error);
+              console.error('[AuthContext] Erro ao buscar perfil:', error);
             }
           }
         }
       } catch (error) {
-        console.error('Erro ao inicializar autenticação:', error);
+        console.error('[AuthContext] Erro ao inicializar autenticação:', error);
       } finally {
+        console.log('[AuthContext] Finalizando loading...');
         setLoading(false);
       }
     };
@@ -49,16 +62,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (data: LoginData) => {
+    console.log('[AuthContext] Fazendo login...');
     setLoading(true);
     try {
       const response = await apiService.login(data);
+      console.log('[AuthContext] Response login:', response);
+
       if (response.success && response.data) {
-        setUser({
+        const userData = {
           id: response.data.user_id,
           email: response.data.email,
           name: response.data.name,
-        });
+        };
+        console.log('[AuthContext] Setando user:', userData);
+        setUser(userData);
+
         // Busca o perfil completo
+        console.log('[AuthContext] Chamando refreshUserProfile...');
         await refreshUserProfile();
       } else {
         throw new Error(response.message || 'Erro ao fazer login');
@@ -89,15 +109,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const refreshUserProfile = async () => {
+    console.log('[AuthContext] refreshUserProfile iniciado');
     try {
+      console.log('[AuthContext] Chamando getCurrentUser...');
       const response = await apiService.getCurrentUser();
-      console.log('Response getCurrentUser:', response);
+      console.log('[AuthContext] Response getCurrentUser:', response);
+
       if (response.success && response.data) {
-        console.log('UserProfile recebido:', response.data);
+        console.log('[AuthContext] UserProfile recebido:', response.data);
+        console.log('[AuthContext] remotejid:', response.data.remotejid);
         setUserProfile(response.data);
+      } else {
+        console.error('[AuthContext] getCurrentUser falhou:', response);
       }
     } catch (error) {
-      console.error('Erro ao atualizar perfil:', error);
+      console.error('[AuthContext] Erro ao atualizar perfil:', error);
     }
   };
 

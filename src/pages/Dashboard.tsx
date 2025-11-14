@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   LineChart,
   Line,
@@ -17,16 +18,29 @@ import {
   ArrowUpCircleIcon,
   BanknotesIcon,
   ArrowPathIcon,
+  UserCircleIcon,
+  ArrowRightOnRectangleIcon,
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 import { saveAs } from 'file-saver';
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
   // ===== MOCK DE DADOS =====
   const resumo = {
     saldo: 2850.45,
     receitas: 5200.0,
     despesas: 2350.55,
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   const fluxoMensal = [
@@ -190,13 +204,45 @@ export default function Dashboard() {
         <h1 className="text-3xl font-extrabold text-gray-900">
           Dashboard <span className="text-green-600">Financeiro</span>
         </h1>
-        <button
-          onClick={exportToCSV}
-          className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-medium shadow-md transition"
-        >
-          <ArrowPathIcon className="w-5 h-5" />
-          Exportar Relatório
-        </button>
+
+        <div className="flex items-center gap-4">
+          <button
+            onClick={exportToCSV}
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-medium shadow-md transition"
+          >
+            <ArrowPathIcon className="w-5 h-5" />
+            Exportar Relatório
+          </button>
+
+          {/* Menu do usuário */}
+          <div className="relative">
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 px-4 py-2 rounded-lg font-medium shadow-sm transition"
+            >
+              <UserCircleIcon className="w-5 h-5 text-gray-600" />
+              <span className="hidden md:inline text-gray-700">{user?.name}</span>
+              <ChevronDownIcon className="w-4 h-4 text-gray-600" />
+            </button>
+
+            {/* Dropdown */}
+            {showUserMenu && (
+              <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                <div className="px-4 py-3 border-b border-gray-200">
+                  <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                  <p className="text-xs text-gray-500 mt-1">{user?.email}</p>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition"
+                >
+                  <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                  Sair da conta
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </header>
 
       {/* ===== CARDS DE RESUMO ===== */}

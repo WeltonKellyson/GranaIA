@@ -76,7 +76,10 @@ export default function Dashboard() {
   };
 
   const loadData = async () => {
-    if (!userProfile?.remotejid) return;
+    if (!userProfile?.remotejid) {
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     try {
@@ -114,7 +117,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadData();
-  }, [userProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userProfile?.remotejid]);
 
   const handleDeleteGasto = async (id: string) => {
     if (!confirm('Tem certeza que deseja deletar este gasto?')) return;

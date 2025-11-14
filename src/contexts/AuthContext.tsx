@@ -91,7 +91,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshUserProfile = async () => {
     try {
       const response = await apiService.getCurrentUser();
+      console.log('Response getCurrentUser:', response);
       if (response.success && response.data) {
+        console.log('UserProfile recebido:', response.data);
         setUserProfile(response.data);
       }
     } catch (error) {

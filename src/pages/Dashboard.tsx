@@ -76,18 +76,24 @@ export default function Dashboard() {
   };
 
   const loadData = async () => {
+    console.log('userProfile:', userProfile);
+    console.log('remotejid:', userProfile?.remotejid);
+
     if (!userProfile?.remotejid) {
+      console.warn('Sem remotejid, não é possível carregar dados');
       setLoading(false);
       return;
     }
 
     setLoading(true);
     try {
+      console.log('Buscando gastos com remotejid:', userProfile.remotejid);
       // Buscar gastos
       const gastosResponse = await apiService.getGastos({
         usuario: userProfile.remotejid,
         page_size: 100,
       });
+      console.log('Gastos recebidos:', gastosResponse);
       setGastos(gastosResponse.data);
 
       // Buscar receitas

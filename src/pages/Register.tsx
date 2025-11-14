@@ -72,6 +72,9 @@ const Register: React.FC = () => {
         senha: formData.senha,
       });
 
+      // Salva o phone no localStorage para usar como remotejid temporário
+      localStorage.setItem('user_phone', formData.phone);
+
       // Cadastro realizado com sucesso, redireciona para login
       alert('Cadastro realizado com sucesso! Faça login para continuar.');
       navigate('/login');

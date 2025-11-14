@@ -33,7 +33,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
           if (userData) {
             setUser(userData);
-            // Busca o perfil completo do usuário
+
+            // Tenta buscar o perfil completo do usuário
             try {
               console.log('[AuthContext] Buscando perfil completo...');
               const response = await apiService.getCurrentUser();
@@ -43,10 +44,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 console.log('[AuthContext] UserProfile recebido:', response.data);
                 setUserProfile(response.data);
               } else {
-                console.error('[AuthContext] getCurrentUser não teve sucesso:', response);
+                console.warn('[AuthContext] API /auth/me não disponível, usando dados do localStorage');
+                // WORKAROUND: Cria um userProfile temporário usando localStorage
+                const phone = localStorage.getItem('user_phone');
+                const remotejid = localStorage.getItem('user_remotejid') || phone || '';
+
+                if (remotejid) {
+                  const tempProfile: UserProfile = {
+                    id: userData.id,
+                    name: userData.name,
+                    email: userData.email,
+                    phone: phone,
+                    remotejid: remotejid,
+                    tipo_premium: null,
+                    premium_until: null,
+                    is_premium_active: false,
+                  };
+                  console.log('[AuthContext] UserProfile temporário criado:', tempProfile);
+                  setUserProfile(tempProfile);
+                }
               }
             } catch (error) {
               console.error('[AuthContext] Erro ao buscar perfil:', error);
+              // WORKAROUND: Mesmo com erro, tenta criar perfil temporário
+              const phone = localStorage.getItem('user_phone');
+              const remotejid = localStorage.getItem('user_remotejid') || phone || '';
+
+              if (remotejid) {
+                const tempProfile: UserProfile = {
+                  id: userData.id,
+                  name: userData.name,
+                  email: userData.email,
+                  phone: phone,
+                  remotejid: remotejid,
+                  tipo_premium: null,
+                  premium_until: null,
+                  is_premium_active: false,
+                };
+                console.log('[AuthContext] UserProfile temporário criado (fallback):', tempProfile);
+                setUserProfile(tempProfile);
+              }
             }
           }
         }
@@ -77,9 +114,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('[AuthContext] Setando user:', userData);
         setUser(userData);
 
-        // Busca o perfil completo
+        // Tenta buscar o perfil completo
         console.log('[AuthContext] Chamando refreshUserProfile...');
-        await refreshUserProfile();
+        try {
+          await refreshUserProfile();
+        } catch (error) {
+          console.warn('[AuthContext] Erro ao buscar perfil após login, criando temporário');
+          // WORKAROUND: Cria perfil temporário se a API falhar
+          const phone = localStorage.getItem('user_phone');
+          const remotejid = response.data.remotejid || localStorage.getItem('user_remotejid') || phone || '';
+
+          if (remotejid) {
+            const tempProfile: UserProfile = {
+              id: userData.id,
+              name: userData.name,
+              email: userData.email,
+              phone: phone,
+              remotejid: remotejid,
+              tipo_premium: null,
+              premium_until: null,
+              is_premium_active: false,
+            };
+            console.log('[AuthContext] UserProfile temporário criado após login:', tempProfile);
+            setUserProfile(tempProfile);
+          }
+        }
       } else {
         throw new Error(response.message || 'Erro ao fazer login');
       }
@@ -120,10 +179,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('[AuthContext] remotejid:', response.data.remotejid);
         setUserProfile(response.data);
       } else {
-        console.error('[AuthContext] getCurrentUser falhou:', response);
+        console.warn('[AuthContext] getCurrentUser falhou, criando perfil temporário');
+        // WORKAROUND: Cria perfil temporário se a API falhar
+        const userData = apiService.getUserData();
+        if (userData) {
+          const phone = localStorage.getItem('user_phone');
+          const remotejid = localStorage.getItem('user_remotejid') || phone || '';
+
+          if (remotejid) {
+            const tempProfile: UserProfile = {
+              id: userData.id,
+              name: userData.name,
+              email: userData.email,
+              phone: phone,
+              remotejid: remotejid,
+              tipo_premium: null,
+              premium_until: null,
+              is_premium_active: false,
+            };
+            console.log('[AuthContext] UserProfile temporário criado em refreshUserProfile:', tempProfile);
+            setUserProfile(tempProfile);
+          }
+        }
       }
     } catch (error) {
       console.error('[AuthContext] Erro ao atualizar perfil:', error);
+      // WORKAROUND: Mesmo com erro, cria perfil temporário
+      const userData = apiService.getUserData();
+      if (userData) {
+        const phone = localStorage.getItem('user_phone');
+        const remotejid = localStorage.getItem('user_remotejid') || phone || '';
+
+        if (remotejid) {
+          const tempProfile: UserProfile = {
+            id: userData.id,
+            name: userData.name,
+            email: userData.email,
+            phone: phone,
+            remotejid: remotejid,
+            tipo_premium: null,
+            premium_until: null,
+            is_premium_active: false,
+          };
+          console.log('[AuthContext] UserProfile temporário criado (erro):', tempProfile);
+          setUserProfile(tempProfile);
+        }
+      }
     }
   };
 

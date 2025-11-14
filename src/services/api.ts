@@ -192,6 +192,10 @@ class ApiService {
         localStorage.setItem('user_id', result.data.user_id);
         localStorage.setItem('user_email', result.data.email);
         localStorage.setItem('user_name', result.data.name);
+        // Salva o remotejid se vier da API
+        if (result.data.remotejid) {
+          localStorage.setItem('user_remotejid', result.data.remotejid);
+        }
       }
 
       return result;
@@ -229,6 +233,8 @@ class ApiService {
     localStorage.removeItem('user_id');
     localStorage.removeItem('user_email');
     localStorage.removeItem('user_name');
+    localStorage.removeItem('user_phone');
+    localStorage.removeItem('user_remotejid');
   }
 
   isAuthenticated(): boolean {

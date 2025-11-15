@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   LockClosedIcon,
@@ -10,15 +10,54 @@ import {
   ChatBubbleOvalLeftEllipsisIcon,
 } from '@heroicons/react/24/outline';
 import logonomegranaia from '../assets/logonomegranaia1.png';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login, isAuthenticated, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    senha: '',
+  });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  // Redireciona se já estiver autenticado
+  useEffect(() => {
+    if (isAuthenticated && !loading) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, loading, navigate]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+    setError('');
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login efetuado');
-    navigate('/dashboard');
+
+    if (!formData.email || !formData.senha) {
+      setError('Por favor, preencha todos os campos');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await login(formData);
+      // O redirecionamento será feito pelo useEffect quando isAuthenticated mudar
+    } catch (err: any) {
+      console.error('Erro ao fazer login:', err);
+      setError(err.message || 'Email ou senha incorretos. Tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -50,14 +89,24 @@ export default function Login() {
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
+            {/* Mensagem de erro */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email ou nome de usuário <span className="text-red-500">*</span>
+                Email <span className="text-red-500">*</span>
               </label>
               <input
-                type="text"
-                placeholder="seu@email.com ou nome de usuário"
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="seu@email.com"
                 className="border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500"
                 required
               />
@@ -71,6 +120,9 @@ export default function Login() {
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
+                  name="senha"
+                  value={formData.senha}
+                  onChange={handleChange}
                   placeholder="Sua senha"
                   className="border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
@@ -92,10 +144,15 @@ export default function Login() {
             {/* Botão Entrar */}
             <button
               type="submit"
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2"
+              disabled={isLoading}
+              className={`w-full font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2 ${
+                isLoading
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-green-600 hover:bg-green-700 text-white'
+              }`}
             >
               <LockClosedIcon className="w-5 h-5" />
-              Entrar
+              {isLoading ? 'Entrando...' : 'Entrar'}
             </button>
           </form>
 
@@ -113,13 +170,13 @@ export default function Login() {
           <div className="bg-blue-50 text-blue-700 border border-blue-200 rounded-lg p-4 mt-5 text-center">
             <p className="font-semibold mb-1 text-sm">Novo por aqui?</p>
             <p className="text-sm mb-3">
-              Conheça nossos planos e comece com 7 dias grátis!
+              Crie sua conta e comece a controlar suas finanças!
             </p>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/register')}
               className="w-full border border-blue-500 text-blue-600 font-semibold py-2 rounded-lg hover:bg-blue-500 hover:text-white transition"
             >
-              Ver Planos e Criar Conta
+              Criar Conta
             </button>
           </div>
         </div>

@@ -6,7 +6,14 @@ import {
   Cell,
   ResponsiveContainer,
   Tooltip,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Legend,
 } from 'recharts';
+
 import {
   ArrowDownCircleIcon,
   ArrowUpCircleIcon,
@@ -52,20 +59,35 @@ export default function Dashboard() {
   // Estados dos dados
   const [gastos, setGastos] = useState<GastoResponse[]>([]);
   const [receitas, setReceitas] = useState<ReceitaResponse[]>([]);
-  const [gastoDashboard, setGastoDashboard] = useState<GastoDashboard | null>(null);
-  const [receitaDashboard, setReceitaDashboard] = useState<ReceitaDashboard | null>(null);
+  const [gastoDashboard, setGastoDashboard] = useState<GastoDashboard | null>(
+    null,
+  );
+  const [receitaDashboard, setReceitaDashboard] =
+    useState<ReceitaDashboard | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Estados dos modais
   const [showGastoModal, setShowGastoModal] = useState(false);
   const [showReceitaModal, setShowReceitaModal] = useState(false);
   const [editingGasto, setEditingGasto] = useState<GastoResponse | null>(null);
-  const [editingReceita, setEditingReceita] = useState<ReceitaResponse | null>(null);
+  const [editingReceita, setEditingReceita] = useState<ReceitaResponse | null>(
+    null,
+  );
+
+  // Estado dos filtros
+  const [filtros, setFiltros] = useState({
+    mes: '',
+    categoria: 'todas',
+    tipo: 'todos',
+  });
 
   // Estados da tabela
   const [paginaAtual, setPaginaAtual] = useState(1);
   const itensPorPagina = 10;
-  const [ordenacao, setOrdenacao] = useState<{ campo: 'data' | 'tipo'; ordem: 'asc' | 'desc' }>({
+  const [ordenacao, setOrdenacao] = useState<{
+    campo: 'data' | 'tipo';
+    ordem: 'asc' | 'desc';
+  }>({
     campo: 'data',
     ordem: 'desc',
   });
@@ -202,8 +224,55 @@ export default function Dashboard() {
     })),
   ];
 
+  // === APLICAR FILTROS ===
+  const transacoesFiltradas = todasTransacoes.filter((t) => {
+    const anoMes = t.data.slice(0, 7); // pega "2025-03" por exemplo
+
+    const filtroMesOK = filtros.mes ? anoMes === filtros.mes : true;
+
+    const filtroCategoriaOK =
+      filtros.categoria === 'todas' ? true : t.categoria === filtros.categoria;
+
+    const filtroTipoOK =
+      filtros.tipo === 'todos' ? true : t.tipo === filtros.tipo;
+
+    return filtroMesOK && filtroCategoriaOK && filtroTipoOK;
+  });
+
+  // === AGRUPAMENTO POR MÊS PARA O GRÁFICO DE LINHA ===
+  const fluxoMensal = (() => {
+    const mapa: Record<string, { receitas: number; despesas: number }> = {};
+
+    transacoesFiltradas.forEach((t) => {
+      const data = new Date(t.data);
+      if (isNaN(data.getTime())) return;
+
+      // Nome do mês em PT-BR abreviado
+      const mes = data
+        .toLocaleString('pt-BR', { month: 'short' })
+        .replace('.', '');
+
+      if (!mapa[mes]) {
+        mapa[mes] = { receitas: 0, despesas: 0 };
+      }
+
+      if (t.tipo === 'Receita') {
+        mapa[mes].receitas += t.valor;
+      } else {
+        mapa[mes].despesas += t.valor;
+      }
+    });
+
+    // Converter o mapa em array
+    return Object.entries(mapa).map(([mes, valores]) => ({
+      mes: mes.charAt(0).toUpperCase() + mes.slice(1), // Jan, Fev, Mar…
+      receitas: valores.receitas,
+      despesas: valores.despesas,
+    }));
+  })();
+
   // Ordenar transações
-  const transacoesOrdenadas = [...todasTransacoes].sort((a, b) => {
+  const transacoesOrdenadas = [...transacoesFiltradas].sort((a, b) => {
     if (ordenacao.campo === 'data') {
       const dataA = new Date(a.data).getTime();
       const dataB = new Date(b.data).getTime();
@@ -220,7 +289,7 @@ export default function Dashboard() {
   const indiceInicial = (paginaAtual - 1) * itensPorPagina;
   const transacoesPaginadas = transacoesOrdenadas.slice(
     indiceInicial,
-    indiceInicial + itensPorPagina
+    indiceInicial + itensPorPagina,
   );
 
   // Calcular resumo
@@ -240,15 +309,28 @@ export default function Dashboard() {
   // Exportar CSV
   const exportToCSV = () => {
     const headers = ['Data', 'Descrição', 'Tipo', 'Categoria', 'Valor'];
-    const rows = transacoesOrdenadas.map((t) => [
-      new Date(t.data).toLocaleDateString('pt-BR'),
-      t.descricao,
-      t.tipo,
-      t.categoria,
-      `R$ ${t.valor.toFixed(2)}`,
-    ]);
+    const rows = transacoesFiltradas
+      .sort((a, b) => {
+        if (ordenacao.campo === 'data') {
+          return ordenacao.ordem === 'asc'
+            ? new Date(a.data).getTime() - new Date(b.data).getTime()
+            : new Date(b.data).getTime() - new Date(a.data).getTime();
+        }
+        return ordenacao.ordem === 'asc'
+          ? a.tipo.localeCompare(b.tipo)
+          : b.tipo.localeCompare(a.tipo);
+      })
+      .map((t) => [
+        new Date(t.data).toLocaleDateString('pt-BR'),
+        t.descricao,
+        t.tipo,
+        t.categoria,
+        `R$ ${t.valor.toFixed(2)}`,
+      ]);
 
-    const csv = [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
+    const csv = [headers.join(','), ...rows.map((row) => row.join(','))].join(
+      '\n',
+    );
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     saveAs(blob, 'relatorio-financeiro.csv');
@@ -256,7 +338,10 @@ export default function Dashboard() {
 
   const alternarOrdenacao = (campo: 'data' | 'tipo') => {
     if (ordenacao.campo === campo) {
-      setOrdenacao({ campo, ordem: ordenacao.ordem === 'asc' ? 'desc' : 'asc' });
+      setOrdenacao({
+        campo,
+        ordem: ordenacao.ordem === 'asc' ? 'desc' : 'asc',
+      });
     } else {
       setOrdenacao({ campo, ordem: 'desc' });
     }
@@ -297,7 +382,9 @@ export default function Dashboard() {
               className="flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 px-4 py-2 rounded-lg font-medium shadow-sm transition"
             >
               <UserCircleIcon className="w-5 h-5 text-gray-600" />
-              <span className="hidden md:inline text-gray-700">{user?.name}</span>
+              <span className="hidden md:inline text-gray-700">
+                {user?.name}
+              </span>
               <ChevronDownIcon className="w-4 h-4 text-gray-600" />
             </button>
 
@@ -305,7 +392,9 @@ export default function Dashboard() {
             {showUserMenu && (
               <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                 <div className="px-4 py-3 border-b border-gray-200">
-                  <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {user?.name}
+                  </p>
                   <p className="text-xs text-gray-500 mt-1">{user?.email}</p>
                 </div>
                 <button
@@ -352,7 +441,11 @@ export default function Dashboard() {
           <BanknotesIcon className="w-10 h-10 text-green-600" />
           <div>
             <p className="text-sm text-gray-500">Saldo Atual</p>
-            <h3 className={`text-2xl font-bold ${saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <h3
+              className={`text-2xl font-bold ${
+                saldo >= 0 ? 'text-green-600' : 'text-red-600'
+              }`}
+            >
               R$ {saldo.toFixed(2)}
             </h3>
           </div>
@@ -363,7 +456,9 @@ export default function Dashboard() {
           <ArrowUpCircleIcon className="w-10 h-10 text-green-600" />
           <div>
             <p className="text-sm text-gray-500">Receitas</p>
-            <h3 className="text-2xl font-bold text-gray-900">R$ {totalReceitas.toFixed(2)}</h3>
+            <h3 className="text-2xl font-bold text-gray-900">
+              R$ {totalReceitas.toFixed(2)}
+            </h3>
           </div>
         </div>
 
@@ -372,10 +467,142 @@ export default function Dashboard() {
           <ArrowDownCircleIcon className="w-10 h-10 text-red-500" />
           <div>
             <p className="text-sm text-gray-500">Despesas</p>
-            <h3 className="text-2xl font-bold text-gray-900">R$ {totalDespesas.toFixed(2)}</h3>
+            <h3 className="text-2xl font-bold text-gray-900">
+              R$ {totalDespesas.toFixed(2)}
+            </h3>
           </div>
         </div>
       </section>
+
+      {/* ===== FILTROS ===== */}
+      <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">Filtros</h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Filtro de Mês/Data */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Mês / Data
+            </label>
+            <input
+              type="month"
+              value={filtros?.mes || ''}
+              onChange={(e) =>
+                setFiltros((prev: any) => ({ ...prev, mes: e.target.value }))
+              }
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white
+        text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+            />
+          </div>
+
+          {/* Filtro de Categoria */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Categoria
+            </label>
+            <select
+              value={filtros?.categoria || 'todas'}
+              onChange={(e) =>
+                setFiltros((prev: any) => ({
+                  ...prev,
+                  categoria: e.target.value,
+                }))
+              }
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white
+        text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+            >
+              <option value="todas">Todas</option>
+
+              {/* Pega categorias reais vindas do backend */}
+              {Array.from(
+                new Set(
+                  todasTransacoes.map((t) => t.categoria).filter(Boolean),
+                ),
+              ).map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Filtro de Tipo */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tipo
+            </label>
+            <select
+              value={filtros?.tipo || 'todos'}
+              onChange={(e) =>
+                setFiltros((prev: any) => ({ ...prev, tipo: e.target.value }))
+              }
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white
+        text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+            >
+              <option value="todos">Todos</option>
+              <option value="Receita">Receita</option>
+              <option value="Despesa">Despesa</option>
+            </select>
+          </div>
+        </div>
+
+        {/* BOTÃO LIMPAR FILTROS */}
+        <div className="flex justify-end mt-4">
+          <button
+            onClick={() =>
+              setFiltros({
+                mes: '',
+                categoria: 'todas',
+                tipo: 'todos',
+              })
+            }
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
+      border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 transition"
+          >
+            Limpar Filtros
+          </button>
+        </div>
+      </section>
+
+      {/* ===== GRÁFICO: FLUXO DE CAIXA MENSAL ===== */}
+      {fluxoMensal.length > 0 && (
+        <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">
+            Fluxo de Caixa Mensal
+          </h2>
+
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={fluxoMensal}>
+              <CartesianGrid strokeDasharray="3 3" />
+
+              <XAxis dataKey="mes" />
+              <YAxis />
+
+              <Tooltip
+                formatter={(value: number) => `R$ ${value.toFixed(2)}`}
+              />
+
+              <Legend />
+
+              <Line
+                type="monotone"
+                dataKey="receitas"
+                stroke="#16a34a"
+                strokeWidth={3}
+                name="Receitas"
+              />
+
+              <Line
+                type="monotone"
+                dataKey="despesas"
+                stroke="#ef4444"
+                strokeWidth={3}
+                name="Despesas"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </section>
+      )}
 
       {/* ===== GRÁFICOS ===== */}
       {categoriasGastos.length > 0 && (
@@ -396,10 +623,16 @@ export default function Dashboard() {
                 dataKey="value"
               >
                 {categoriasGastos.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={cores[index % cores.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={cores[index % cores.length]}
+                  />
                 ))}
               </Pie>
-              <Tooltip formatter={(value: number) => `R$ ${value.toFixed(2)}`} />
+              <Tooltip
+                formatter={(value: number) => `R$ ${value.toFixed(2)}`}
+              />
+              <Legend />
             </PieChart>
           </ResponsiveContainer>
         </section>
@@ -407,7 +640,9 @@ export default function Dashboard() {
 
       {/* ===== TABELA DE TRANSAÇÕES ===== */}
       <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Movimentações Recentes</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-6">
+          Movimentações Recentes
+        </h2>
 
         {/* Tabela */}
         <div className="overflow-x-auto">
@@ -453,7 +688,10 @@ export default function Dashboard() {
                 </tr>
               ) : (
                 transacoesPaginadas.map((t) => (
-                  <tr key={t.id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <tr
+                    key={t.id}
+                    className="border-b border-gray-100 hover:bg-gray-50"
+                  >
                     <td className="py-3 px-4">
                       {new Date(t.data).toLocaleDateString('pt-BR')}
                     </td>
@@ -485,7 +723,9 @@ export default function Dashboard() {
                               const gasto = gastos.find((g) => g.id === t.id);
                               if (gasto) handleEditGasto(gasto);
                             } else {
-                              const receita = receitas.find((r) => r.id === t.id);
+                              const receita = receitas.find(
+                                (r) => r.id === t.id,
+                              );
                               if (receita) handleEditReceita(receita);
                             }
                           }}
@@ -516,39 +756,54 @@ export default function Dashboard() {
           </table>
         </div>
 
-        {/* Paginação */}
+        {/* ===== PAGINAÇÃO ===== */}
         {totalPaginas > 1 && (
-          <div className="flex items-center justify-between mt-6">
-            <p className="text-sm text-gray-600">
-              Mostrando {indiceInicial + 1} a{' '}
-              {Math.min(indiceInicial + itensPorPagina, transacoesOrdenadas.length)} de{' '}
-              {transacoesOrdenadas.length} transações
-            </p>
+          <div className="flex justify-between items-center mt-4 text-sm text-gray-700">
+            {/* Texto "mostrando X–Y" */}
+            <span>
+              Mostrando {indiceInicial + 1}–
+              {Math.min(
+                indiceInicial + itensPorPagina,
+                transacoesOrdenadas.length,
+              )}{' '}
+              de {transacoesOrdenadas.length}
+            </span>
+
+            {/* Botões */}
             <div className="flex gap-2">
+              {/* Botão Anterior */}
               <button
-                onClick={() => setPaginaAtual(paginaAtual - 1)}
+                onClick={() => setPaginaAtual((prev) => Math.max(prev - 1, 1))}
                 disabled={paginaAtual === 1}
-                className={`px-4 py-2 rounded-lg ${
-                  paginaAtual === 1
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-green-600 text-white hover:bg-green-700'
-                }`}
+                className="px-3 py-1 border rounded-lg bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:text-gray-400 transition"
               >
                 Anterior
               </button>
-              <span className="px-4 py-2 bg-gray-100 rounded-lg">
-                {paginaAtual} / {totalPaginas}
-              </span>
+
+              {/* Botões numerados */}
+              {Array.from({ length: totalPaginas }, (_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setPaginaAtual(i + 1)}
+                  className={`px-3 py-1 border rounded-lg font-medium transition ${
+                    paginaAtual === i + 1
+                      ? 'bg-green-600 text-white border-green-600'
+                      : 'bg-white text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              {/* Botão Próximo */}
               <button
-                onClick={() => setPaginaAtual(paginaAtual + 1)}
+                onClick={() =>
+                  setPaginaAtual((prev) => Math.min(prev + 1, totalPaginas))
+                }
                 disabled={paginaAtual === totalPaginas}
-                className={`px-4 py-2 rounded-lg ${
-                  paginaAtual === totalPaginas
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-green-600 text-white hover:bg-green-700'
-                }`}
+                className="px-3 py-1 border rounded-lg bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:text-gray-400 transition"
               >
-                Próxima
+                Próximo
               </button>
             </div>
           </div>

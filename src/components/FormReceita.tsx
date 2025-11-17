@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { apiService, ReceitaResponse, ReceitaCreate, ReceitaUpdate } from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
 
 interface FormReceitaProps {
   receita?: ReceitaResponse | null;
@@ -9,7 +8,6 @@ interface FormReceitaProps {
 }
 
 const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel }) => {
-  const { userProfile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -71,18 +69,12 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
         await apiService.updateReceita(receita.id, updateData);
       } else {
         // Criar nova receita
-        if (!userProfile?.remotejid) {
-          setError('Erro ao identificar usuário');
-          return;
-        }
-
         const createData: ReceitaCreate = {
           descricao: formData.descricao,
           valor: formData.valor,
           categoria: formData.categoria,
           origem: formData.origem || null,
           data: formData.data || null,
-          usuario: userProfile.remotejid,
         };
         await apiService.createReceita(createData);
       }

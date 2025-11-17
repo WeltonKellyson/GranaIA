@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { apiService, GastoResponse, GastoCreate, GastoUpdate } from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
 
 interface FormGastoProps {
   gasto?: GastoResponse | null;
@@ -9,7 +8,6 @@ interface FormGastoProps {
 }
 
 const FormGasto: React.FC<FormGastoProps> = ({ gasto, onSuccess, onCancel }) => {
-  const { userProfile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -68,17 +66,11 @@ const FormGasto: React.FC<FormGastoProps> = ({ gasto, onSuccess, onCancel }) => 
         await apiService.updateGasto(gasto.id, updateData);
       } else {
         // Criar novo gasto
-        if (!userProfile?.remotejid) {
-          setError('Erro ao identificar usuário');
-          return;
-        }
-
         const createData: GastoCreate = {
           descricao: formData.descricao,
           valor: formData.valor,
           categoria: formData.categoria,
           data: formData.data || null,
-          usuario: userProfile.remotejid,
         };
         await apiService.createGasto(createData);
       }

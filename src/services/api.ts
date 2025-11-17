@@ -59,7 +59,6 @@ export interface GastoCreate {
   valor: number | string;
   categoria: string;
   data?: string | null;
-  usuario: string;
 }
 
 export interface GastoUpdate {
@@ -99,7 +98,6 @@ export interface ReceitaCreate {
   categoria: string;
   origem?: string | null;
   data?: string | null;
-  usuario: string;
 }
 
 export interface ReceitaUpdate {

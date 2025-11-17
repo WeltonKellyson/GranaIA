@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import {
+  EyeIcon,
+  EyeSlashIcon,
+  ShieldCheckIcon,
+} from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
-import logo from '../assets/logonomegranaia1.png';
+import logonomegranaia from '../assets/logonomegranaia1.png';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -30,7 +34,13 @@ const Register: React.FC = () => {
   };
 
   const validateForm = () => {
-    if (!formData.name || !formData.email || !formData.phone || !formData.senha || !formData.confirmSenha) {
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.phone ||
+      !formData.senha ||
+      !formData.confirmSenha
+    ) {
       setError('Por favor, preencha todos os campos');
       return false;
     }
@@ -92,7 +102,11 @@ const Register: React.FC = () => {
       <div className="flex-1 flex items-center justify-center p-8 bg-white">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
-            <img src={logo} alt="Grana IA" className="h-16 mx-auto mb-8" />
+            <img
+              src={logonomegranaia}
+              alt="Logo GranaIA"
+              className="w-64 md:w-72 mx-auto mb-4 transition-transform duration-300 hover:scale-105"
+            />
             <h2 className="text-3xl font-bold text-gray-900">Criar conta</h2>
             <p className="mt-2 text-sm text-gray-600">
               Gerencie suas finanças de forma inteligente
@@ -109,7 +123,10 @@ const Register: React.FC = () => {
             <div className="space-y-4">
               {/* Nome */}
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Nome completo
                 </label>
                 <input
@@ -126,7 +143,10 @@ const Register: React.FC = () => {
 
               {/* Email */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   E-mail
                 </label>
                 <input
@@ -143,7 +163,10 @@ const Register: React.FC = () => {
 
               {/* Telefone */}
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Telefone
                 </label>
                 <input
@@ -160,7 +183,10 @@ const Register: React.FC = () => {
 
               {/* Senha */}
               <div>
-                <label htmlFor="senha" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="senha"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Senha
                 </label>
                 <div className="relative">
@@ -190,7 +216,10 @@ const Register: React.FC = () => {
 
               {/* Confirmar Senha */}
               <div>
-                <label htmlFor="confirmSenha" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="confirmSenha"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Confirmar senha
                 </label>
                 <div className="relative">
@@ -249,41 +278,100 @@ const Register: React.FC = () => {
         </div>
       </div>
 
-      {/* Lado Direito - Painel Informativo */}
-      <div className="hidden lg:flex lg:flex-1 bg-gradient-to-br from-green-500 to-emerald-600 text-white items-center justify-center p-12">
-        <div className="max-w-md">
-          <h2 className="text-4xl font-bold mb-6">
-            Bem-vindo ao Grana IA!
+      {/* ==== LADO DIREITO (INFORMAÇÕES) ==== */}
+      <div className="hidden md:flex w-full md:w-1/2 flex-col justify-center text-white px-12 bg-gradient-to-br from-emerald-900 via-emerald-700 to-green-600">
+        <div className="max-w-lg mx-auto space-y-5">
+          <h2 className="text-4xl font-bold leading-snug">
+            Controle total das suas finanças
           </h2>
-          <p className="text-lg mb-8 text-green-50">
-            Controle suas finanças de forma inteligente e automatizada através do WhatsApp.
+          <p className="text-green-100 text-base">
+            O GranaIA oferece todas as ferramentas que você precisa para
+            gerenciar suas finanças de forma simples e eficiente.
           </p>
-          <ul className="space-y-4">
-            <li className="flex items-start">
-              <svg className="h-6 w-6 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+
+          <ul className="space-y-4 text-sm">
+            <li className="flex items-start gap-3">
+              <svg
+                className="h-6 w-6 flex-shrink-0 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
               <span>Registre gastos e receitas via WhatsApp</span>
             </li>
-            <li className="flex items-start">
-              <svg className="h-6 w-6 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <li className="flex items-start gap-3">
+              <svg
+                className="h-6 w-6 flex-shrink-0 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
               <span>Visualize relatórios detalhados em tempo real</span>
             </li>
-            <li className="flex items-start">
-              <svg className="h-6 w-6 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <li className="flex items-start gap-3">
+              <svg
+                className="h-6 w-6 flex-shrink-0 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
               <span>Receba insights e análises automáticas</span>
             </li>
-            <li className="flex items-start">
-              <svg className="h-6 w-6 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <li className="flex items-start gap-3">
+              <svg
+                className="h-6 w-6 flex-shrink-0 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
               <span>Alcance suas metas financeiras</span>
             </li>
           </ul>
+
+          <div className="mt-6 border border-green-300 rounded-lg p-4 text-green-50 text-sm flex items-center justify-center text-center">
+            <ShieldCheckIcon className="w-5 h-5 mr-2" />
+            <span>
+              Seus dados estão protegidos com criptografia de nível bancário
+            </span>
+          </div>
+
+          {/* Botão Voltar / Ver Planos */}
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={() => navigate('/')}
+              className="px-6 py-2 rounded-lg font-semibold text-green-900 bg-white hover:bg-green-100 shadow-md transition-all duration-300"
+            >
+              Ver Planos
+            </button>
+          </div>
         </div>
       </div>
     </div>

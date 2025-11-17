@@ -226,6 +226,15 @@ export default function Login() {
               Seus dados estão protegidos com criptografia de nível bancário
             </span>
           </div>
+          {/* Botão Voltar / Ver Planos */}
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={() => navigate('/')}
+              className="px-6 py-1 rounded-lg font-semibold text-green-900 bg-white hover:bg-green-100 shadow-md transition-all duration-300"
+            >
+              Ver Planos
+            </button>
+          </div>
         </div>
       </div>
     </div>

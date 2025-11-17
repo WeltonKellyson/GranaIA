@@ -207,10 +207,20 @@ class ApiService {
 
   async getCurrentUser(): Promise<ApiResponse<UserProfile>> {
     try {
+      const headers = this.getAuthHeader();
+      const token = localStorage.getItem('access_token');
+      console.log('[API] Chamando /auth/me');
+      console.log('[API] Token presente:', !!token);
+      console.log('[API] Headers:', headers);
+
       const response = await fetch(`${API_URL}/api/v1/auth/me`, {
         method: 'GET',
-        headers: this.getAuthHeader(),
+        headers: headers,
       });
+
+      console.log('[API] Status da resposta:', response.status);
+      const jsonResponse = await response.json();
+      console.log('[API] Response JSON:', jsonResponse);
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -218,10 +228,11 @@ class ApiService {
           this.logout();
           throw new Error('Sessão expirada. Faça login novamente.');
         }
-        throw new Error('Erro ao obter dados do usuário');
+        // Retorna a resposta mesmo com erro para o workaround funcionar
+        return jsonResponse;
       }
 
-      return await response.json();
+      return jsonResponse;
     } catch (error) {
       console.error('Erro ao obter usuário:', error);
       throw error;

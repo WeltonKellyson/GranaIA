@@ -39,6 +39,7 @@ import {
 import Modal from '../components/Modal';
 import FormGasto from '../components/FormGasto';
 import FormReceita from '../components/FormReceita';
+import PremiumExpiredModal from '../components/PremiumExpiredModal';
 
 type TransacaoTipo = 'Receita' | 'Despesa';
 
@@ -55,6 +56,10 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { user, userProfile, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+
+  // Verifica se o premium está ativo
+  const isPremiumActive = userProfile?.is_premium_active ?? false;
 
   // Estados dos dados
   const [gastos, setGastos] = useState<GastoResponse[]>([]);
@@ -100,10 +105,19 @@ export default function Dashboard() {
   const loadData = async () => {
     console.log('userProfile:', userProfile);
     console.log('remotejid:', userProfile?.remotejid);
+    console.log('isPremiumActive:', isPremiumActive);
 
     if (!userProfile?.remotejid) {
       console.warn('Sem remotejid, não é possível carregar dados');
       setLoading(false);
+      return;
+    }
+
+    // Se o premium não está ativo, não carrega os dados
+    if (!isPremiumActive) {
+      console.warn('Premium expirado, não carregando dados');
+      setLoading(false);
+      setShowPremiumModal(true);
       return;
     }
 
@@ -147,6 +161,14 @@ export default function Dashboard() {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userProfile?.remotejid]);
+
+  // Monitora mudanças no status do premium
+  useEffect(() => {
+    if (userProfile && !isPremiumActive) {
+      console.log('Premium expirado detectado');
+      setShowPremiumModal(true);
+    }
+  }, [isPremiumActive, userProfile]);
 
   const handleDeleteGasto = async (id: string) => {
     if (!confirm('Tem certeza que deseja deletar este gasto?')) return;
@@ -414,20 +436,38 @@ export default function Dashboard() {
       <section className="flex flex-wrap gap-3">
         <button
           onClick={() => {
+            if (!isPremiumActive) {
+              setShowPremiumModal(true);
+              return;
+            }
             setEditingGasto(null);
             setShowGastoModal(true);
           }}
-          className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg font-medium shadow-md transition"
+          disabled={!isPremiumActive}
+          className={`flex items-center gap-2 px-5 py-2 rounded-lg font-medium shadow-md transition ${
+            isPremiumActive
+              ? 'bg-red-600 hover:bg-red-700 text-white'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
         >
           <PlusIcon className="w-5 h-5" />
           Novo Gasto
         </button>
         <button
           onClick={() => {
+            if (!isPremiumActive) {
+              setShowPremiumModal(true);
+              return;
+            }
             setEditingReceita(null);
             setShowReceitaModal(true);
           }}
-          className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-medium shadow-md transition"
+          disabled={!isPremiumActive}
+          className={`flex items-center gap-2 px-5 py-2 rounded-lg font-medium shadow-md transition ${
+            isPremiumActive
+              ? 'bg-green-600 hover:bg-green-700 text-white'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
         >
           <PlusIcon className="w-5 h-5" />
           Nova Receita
@@ -834,6 +874,13 @@ export default function Dashboard() {
           onCancel={handleReceitaCancel}
         />
       </Modal>
+
+      {/* Modal de Premium Expirado */}
+      <PremiumExpiredModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+        premiumUntil={userProfile?.premium_until}
+      />
     </div>
   );
 }

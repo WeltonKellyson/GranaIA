@@ -133,6 +133,35 @@ export interface ReceitaDashboard {
 }
 
 class ApiService {
+  // Event emitter para logout automático
+  private onUnauthorizedCallbacks: Array<() => void> = [];
+
+  // Registrar callback para ser chamado quando houver 401
+  onUnauthorized(callback: () => void) {
+    this.onUnauthorizedCallbacks.push(callback);
+  }
+
+  // Método centralizado para tratar erro 401
+  private handleUnauthorized() {
+    console.log('[API] Token expirado - fazendo logout automático');
+    this.logout();
+    // Notificar todos os listeners
+    this.onUnauthorizedCallbacks.forEach(callback => callback());
+  }
+
+  // Método centralizado para verificar resposta e tratar 401
+  private async handleResponse(response: Response, errorMessage: string) {
+    if (!response.ok) {
+      if (response.status === 401) {
+        this.handleUnauthorized();
+        throw new Error('Sessão expirada. Faça login novamente.');
+      }
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.detail || errorData?.message || errorMessage);
+    }
+    return response;
+  }
+
   private getAuthHeader(): HeadersInit {
     const token = localStorage.getItem('access_token');
     return {
@@ -294,10 +323,7 @@ class ApiService {
         headers: this.getAuthHeader(),
       });
 
-      if (!response.ok) {
-        throw new Error('Erro ao buscar gastos');
-      }
-
+      await this.handleResponse(response, 'Erro ao buscar gastos');
       return await response.json();
     } catch (error) {
       console.error('Erro ao buscar gastos:', error);
@@ -313,11 +339,7 @@ class ApiService {
         body: JSON.stringify(data),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.detail || errorData?.message || 'Erro ao criar gasto');
-      }
-
+      await this.handleResponse(response, 'Erro ao criar gasto');
       return await response.json();
     } catch (error) {
       console.error('Erro ao criar gasto:', error);
@@ -333,11 +355,7 @@ class ApiService {
         body: JSON.stringify(data),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.detail || errorData?.message || 'Erro ao atualizar gasto');
-      }
-
+      await this.handleResponse(response, 'Erro ao atualizar gasto');
       return await response.json();
     } catch (error) {
       console.error('Erro ao atualizar gasto:', error);
@@ -352,9 +370,7 @@ class ApiService {
         headers: this.getAuthHeader(),
       });
 
-      if (!response.ok) {
-        throw new Error('Erro ao deletar gasto');
-      }
+      await this.handleResponse(response, 'Erro ao deletar gasto');
     } catch (error) {
       console.error('Erro ao deletar gasto:', error);
       throw error;
@@ -378,10 +394,7 @@ class ApiService {
         headers: this.getAuthHeader(),
       });
 
-      if (!response.ok) {
-        throw new Error('Erro ao buscar dashboard de gastos');
-      }
-
+      await this.handleResponse(response, 'Erro ao buscar dashboard de gastos');
       return await response.json();
     } catch (error) {
       console.error('Erro ao buscar dashboard de gastos:', error);
@@ -418,10 +431,7 @@ class ApiService {
         headers: this.getAuthHeader(),
       });
 
-      if (!response.ok) {
-        throw new Error('Erro ao buscar receitas');
-      }
-
+      await this.handleResponse(response, 'Erro ao buscar receitas');
       return await response.json();
     } catch (error) {
       console.error('Erro ao buscar receitas:', error);
@@ -437,11 +447,7 @@ class ApiService {
         body: JSON.stringify(data),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.detail || errorData?.message || 'Erro ao criar receita');
-      }
-
+      await this.handleResponse(response, 'Erro ao criar receita');
       return await response.json();
     } catch (error) {
       console.error('Erro ao criar receita:', error);
@@ -457,11 +463,7 @@ class ApiService {
         body: JSON.stringify(data),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.detail || errorData?.message || 'Erro ao atualizar receita');
-      }
-
+      await this.handleResponse(response, 'Erro ao atualizar receita');
       return await response.json();
     } catch (error) {
       console.error('Erro ao atualizar receita:', error);
@@ -476,9 +478,7 @@ class ApiService {
         headers: this.getAuthHeader(),
       });
 
-      if (!response.ok) {
-        throw new Error('Erro ao deletar receita');
-      }
+      await this.handleResponse(response, 'Erro ao deletar receita');
     } catch (error) {
       console.error('Erro ao deletar receita:', error);
       throw error;
@@ -502,10 +502,7 @@ class ApiService {
         headers: this.getAuthHeader(),
       });
 
-      if (!response.ok) {
-        throw new Error('Erro ao buscar dashboard de receitas');
-      }
-
+      await this.handleResponse(response, 'Erro ao buscar dashboard de receitas');
       return await response.json();
     } catch (error) {
       console.error('Erro ao buscar dashboard de receitas:', error);

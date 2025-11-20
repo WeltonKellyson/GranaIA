@@ -20,6 +20,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Registrar listener para logout automático quando o token expirar
+    const handleAutoLogout = () => {
+      console.log('[AuthContext] Sessão expirada - fazendo logout automático');
+      setUser(null);
+      setUserProfile(null);
+      // Forçar navegação para login será feita pelo PrivateRoute
+    };
+
+    apiService.onUnauthorized(handleAutoLogout);
+
     // Verifica se há um token salvo ao carregar a aplicação
     const initAuth = async () => {
       console.log('[AuthContext] Iniciando autenticação...');

@@ -92,9 +92,10 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
     'Salário',
     'Freelance',
     'Investimentos',
-    'Vendas',
     'Bonificação',
+    'Presente',
     'Aluguel',
+    'Venda',
     'Outros',
   ];
 

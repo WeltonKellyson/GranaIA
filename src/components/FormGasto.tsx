@@ -91,8 +91,7 @@ const FormGasto: React.FC<FormGastoProps> = ({ gasto, onSuccess, onCancel }) => 
     'Saúde',
     'Educação',
     'Lazer',
-    'Vestuário',
-    'Serviços',
+    'Compras',
     'Outros',
   ];
 

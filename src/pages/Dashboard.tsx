@@ -18,12 +18,12 @@ import {
   ArrowDownCircleIcon,
   ArrowUpCircleIcon,
   BanknotesIcon,
-  ArrowPathIcon,
+  ArrowUpTrayIcon,
   UserCircleIcon,
   ArrowRightOnRectangleIcon,
   ChevronDownIcon,
   PlusIcon,
-  PencilIcon,
+  PencilSquareIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
 import { saveAs } from 'file-saver';
@@ -393,7 +393,7 @@ export default function Dashboard() {
             onClick={exportToCSV}
             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-medium shadow-md transition"
           >
-            <ArrowPathIcon className="w-5 h-5" />
+            <ArrowUpTrayIcon className="w-5 h-5" />
             Exportar Relatório
           </button>
 
@@ -782,35 +782,35 @@ export default function Dashboard() {
                     <td className="py-3 px-4">
                       <div className="flex items-center justify-center gap-2">
                         <button
-                          onClick={() => {
-                            if (t.tipo === 'Despesa') {
-                              const gasto = gastos.find((g) => g.id === t.id);
-                              if (gasto) handleEditGasto(gasto);
-                            } else {
-                              const receita = receitas.find(
-                                (r) => r.id === t.id,
-                              );
-                              if (receita) handleEditReceita(receita);
-                            }
-                          }}
-                          className="text-yellow-600 hover:text-yellow-700 transition"
-                          title="Editar"
-                        >
-                          <PencilIcon className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (t.tipo === 'Despesa') {
-                              handleDeleteGasto(t.id);
-                            } else {
-                              handleDeleteReceita(t.id);
-                            }
-                          }}
-                          className="text-red-600 hover:text-red-700 transition"
-                          title="Deletar"
-                        >
-                          <TrashIcon className="w-4 h-4" />
-                        </button>
+                        onClick={() => {
+                          if (t.tipo === 'Despesa') {
+                            const gasto = gastos.find((g) => g.id === t.id);
+                            if (gasto) handleEditGasto(gasto);
+                          } else {
+                            const receita = receitas.find((r) => r.id === t.id);
+                            if (receita) handleEditReceita(receita);
+                          }
+                        }}
+                        className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-full shadow-sm hover:shadow-md transition-all duration-200"
+                        title="Editar"
+                      >
+                        <PencilSquareIcon className="w-4 h-4" />
+                      </button>
+
+                      {/* Botão Deletar */}
+                      <button
+                        onClick={() => {
+                          if (t.tipo === 'Despesa') {
+                            handleDeleteGasto(t.id);
+                          } else {
+                            handleDeleteReceita(t.id);
+                          }
+                        }}
+                        className="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-full shadow-sm hover:shadow-md transition-all duration-200"
+                        title="Deletar"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                      </button>
                       </div>
                     </td>
                   </tr>
@@ -874,7 +874,7 @@ export default function Dashboard() {
         )}
       </section>
 
-      {/* Botão Flutuante do WhatsApp */}
+      {/* Botão Flutuante do WhatsApp 
       <a
         href="https://wa.me/5581991189612?text=Olá!%20Gostaria%20de%20falar%20com%20o%20suporte."
         target="_blank"
@@ -886,7 +886,7 @@ export default function Dashboard() {
           alt="Ícone do WhatsApp"
           className="w-20 h-20 md:w-22 md:h-22 hover:scale-110 transition-transform duration-200"
         />
-      </a>
+      </a>*/}
 
       {/* ===== MODAIS ===== */}
       <Modal

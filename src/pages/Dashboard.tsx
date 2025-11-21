@@ -381,7 +381,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 p-6 md:p-10 space-y-10 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-100 text-gray-800 p-6 md:p-10 space-y-10 overflow-x-hidden">
       {/* ===== CABEÇALHO ===== */}
       <header className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <h1 className="text-3xl font-extrabold text-gray-900">

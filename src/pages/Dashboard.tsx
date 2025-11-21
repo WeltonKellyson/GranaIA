@@ -419,6 +419,30 @@ export default function Dashboard() {
                   </p>
                   <p className="text-xs text-gray-500 mt-1">{user?.email}</p>
                 </div>
+
+                {/* Novo item - Suporte */}
+                <a
+                  href="#" // substitua pelo link do grupo de suporte
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center gap-2 px-4 py-3 text-sm text-green-600 hover:bg-green-50 transition"
+                >
+                  <ArrowUpCircleIcon className="w-5 h-5" />
+                  Suporte
+                </a>
+
+                {/* Novo item - GranaIA (bot) */}
+                <a
+                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center gap-2 px-4 py-3 text-sm text-blue-600 hover:bg-blue-50 transition"
+                >
+                  <UserCircleIcon className="w-5 h-5" />
+                  GranaIA pelo WhatsApp
+                </a>
+
+                {/* Já existente - Sair da conta */}
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition"
@@ -433,7 +457,7 @@ export default function Dashboard() {
       </header>
 
       {/* ===== BOTÕES DE AÇÃO ===== */}
-      <section className="flex flex-wrap gap-3">
+      <section className="flex flex-wrap gap-3 justify-center md:justify-start">
         <button
           onClick={() => {
             if (!isPremiumActive) {
@@ -849,6 +873,20 @@ export default function Dashboard() {
           </div>
         )}
       </section>
+
+      {/* Botão Flutuante do WhatsApp */}
+      <a
+        href="https://wa.me/5581991189612?text=Olá!%20Gostaria%20de%20falar%20com%20o%20suporte."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50"
+      >
+        <img
+          src="https://img.icons8.com/?size=100&id=964RahB4l606&format=png&color=25D366"
+          alt="Ícone do WhatsApp"
+          className="w-20 h-20 md:w-22 md:h-22 hover:scale-110 transition-transform duration-200"
+        />
+      </a>
 
       {/* ===== MODAIS ===== */}
       <Modal

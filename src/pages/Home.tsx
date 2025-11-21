@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import whats from '../assets/whats.png';
 import dash from '../assets/dash.png';
-import granianomelogo from '../assets/granianomelogo.png';
+import granianomelogo from '../assets/logogranaia1.png';
 import logogranaia from '../assets/logogranaia.png';
 import logonomegranaia from '../assets/logonomegranaia.png';
 import { useNavigate } from 'react-router-dom';
@@ -135,7 +135,7 @@ export default function Home() {
       </section>
 
       {/* ===== SEÇÃO 2 - COMO FUNCIONA ===== */}
-      <section className="min-h-screen bg-white flex flex-col md:flex-row items-center justify-center px-8 md:px-16 lg:px-24 gap-12 py-20">
+      <section id="funcionalidades" className="min-h-screen bg-white flex flex-col md:flex-row items-center justify-center px-8 md:px-16 lg:px-24 gap-12 py-20">
         {/* Texto (lado esquerdo) */}
         <div className="flex-1 text-center md:text-left space-y-8 max-w-xl">
           {/* Badge */}
@@ -300,7 +300,7 @@ export default function Home() {
       </section>
 
       {/* ===== SEÇÃO 4 - BENEFÍCIOS PRINCIPAIS ===== */}
-      <section className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-8 md:px-16 lg:px-24 py-20">
+      <section id="beneficios" className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-8 md:px-16 lg:px-24 py-20">
         {/* Título e subtítulo */}
         <div className="text-center mb-16 max-w-3xl">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight">
@@ -405,7 +405,7 @@ export default function Home() {
       </section>
 
       {/* ===== SEÇÃO 5 - PLANOS ===== */}
-      <section className="min-h-screen bg-white flex flex-col items-center justify-center px-6 md:px-12 lg:px-24 py-10">
+      <section id="precos" className="min-h-screen bg-white flex flex-col items-center justify-center px-6 md:px-12 lg:px-24 py-10">
         {/* Título */}
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
@@ -424,6 +424,7 @@ export default function Home() {
               name: 'GranaIA Starter',
               price: 'R$5,99',
               period: '/mês',
+              link: "https://pay.kirvano.com/be9147a1-addd-4d1e-bc6b-ce77886be90d",
               description:
                 'Ideal para quem está começando. Controle seus gastos e receitas diretamente pelo sistema GranaIA.',
               benefits: [
@@ -440,6 +441,7 @@ export default function Home() {
               name: 'GranaIA Premium',
               price: 'R$9,99',
               period: '/mês',
+              link: "https://pay.kirvano.com/a7458233-e00c-4747-8c2f-2789512e91da",
               description:
                 'Tudo do plano Starter e mais: controle total das suas finanças também pelo WhatsApp.',
               benefits: [
@@ -456,6 +458,7 @@ export default function Home() {
               name: 'GranaIA Pro',
               price: 'R$79,99',
               period: '/ano',
+              link: "https://pay.kirvano.com/579a78ff-13c4-4ba9-80e2-d782b67c8488",
               description:
                 'Tudo do plano Premium, mas com desconto exclusivo no pagamento anual.',
               benefits: [
@@ -514,7 +517,10 @@ export default function Home() {
 
               {/* Botão fixado na base */}
               <div className="px-6 pb-6 mt-auto">
-                <button className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                <button
+                  onClick={() => window.open(plan.link, "_blank")}
+                  className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+                >
                   {plan.button}
                 </button>
               </div>
@@ -524,13 +530,18 @@ export default function Home() {
 
         {/* Rodapé da seção */}
         <p className="text-gray-500 text-xs mt-8 text-center">
-          Plano GranaIA Starter com 7 dias gratuitos • Sem taxa de setup •
-          Cancelamento a qualquer momento
+          7 dias de acesso gratuito ao GranaIA Starter dentro da plataforma • Nenhuma cobrança durante o período de teste •{" "}
+          <a
+            href="#"
+            className="text-green-600 font-semibold underline hover:text-green-700 transition"
+          >
+            Clique aqui para testar
+          </a>
         </p>
       </section>
 
       {/* ===== SEÇÃO 6 - DEPOIMENTOS ===== */}
-      <section className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-8 md:px-16 lg:px-24 py-20">
+      <section id="depoimentos" className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-8 md:px-16 lg:px-24 py-20">
         {/* Título e subtítulo */}
         <div className="text-center max-w-4xl mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight">
@@ -628,7 +639,7 @@ export default function Home() {
       </section>
 
       {/* ===== SEÇÃO 7 - FAq */}
-      <section className="min-h-screen bg-white flex flex-col items-center justify-center px-8 md:px-16 lg:px-24 py-20">
+      <section id="faq" className="min-h-screen bg-white flex flex-col items-center justify-center px-8 md:px-16 lg:px-24 py-20">
         {/* ===== TÍTULO ===== */}
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight">
@@ -720,7 +731,7 @@ export default function Home() {
           </button>
 
           <p className="text-green-100 mt-4 text-sm">
-            R$5,99/mês após o período gratuito • Cancele quando quiser
+            7 dias de acesso gratuito ao GranaIA Starter dentro da plataforma • Nenhuma cobrança durante o período de teste.
           </p>
         </div>
 
@@ -730,7 +741,7 @@ export default function Home() {
           <div className="max-w-sm text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
               <img
-                src={logogranaia}
+                src={granianomelogo}
                 alt="Logo GranaIA"
                 className="w-10 h-10 rounded-lg shadow-sm"
               />
@@ -763,27 +774,27 @@ export default function Home() {
               <h4 className="text-white font-semibold mb-3">Navegação</h4>
               <ul className="space-y-2 text-sm text-gray-400">
                 <li>
-                  <a href="#" className="hover:text-green-400">
+                  <a href="#funcionalidades" className="hover:text-green-400">
                     Funcionalidades
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-green-400">
+                  <a href="#beneficios" className="hover:text-green-400">
                     Benefícios
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-green-400">
+                  <a href="#precos" className="hover:text-green-400">
                     Preços
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-green-400">
+                  <a href="#depoimentos" className="hover:text-green-400">
                     Depoimentos
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-green-400">
+                  <a href="#faq" className="hover:text-green-400">
                     Perguntas Frequentes
                   </a>
                 </li>
@@ -794,17 +805,17 @@ export default function Home() {
               <h4 className="text-white font-semibold mb-3">Legal</h4>
               <ul className="space-y-2 text-sm text-gray-400">
                 <li>
-                  <a href="#" className="hover:text-green-400">
+                  <a href="javascript:void(0)" className="hover:text-green-400">
                     Privacidade
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-green-400">
+                  <a href="javascript:void(0)" className="hover:text-green-400">
                     Termos de Uso
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-green-400">
+                  <a href="javascript:void(0)" className="hover:text-green-400">
                     LGPD
                   </a>
                 </li>

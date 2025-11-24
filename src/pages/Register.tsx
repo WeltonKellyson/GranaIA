@@ -7,6 +7,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
 import logonomegranaia from '../assets/logonomegranaia1.png';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -33,6 +35,14 @@ const Register: React.FC = () => {
     setError('');
   };
 
+  const handlePhoneChange = (value: string) => {
+    setFormData({
+      ...formData,
+      phone: value,
+    });
+    setError('');
+  };
+
   const validateForm = () => {
     if (
       !formData.name ||
@@ -42,6 +52,13 @@ const Register: React.FC = () => {
       !formData.confirmSenha
     ) {
       setError('Por favor, preencha todos os campos');
+      return false;
+    }
+
+    // Valida se o telefone brasileiro tem 13 dígitos (55 + 11 dígitos)
+    const phoneNumbers = formData.phone.replace(/\D/g, '');
+    if (!phoneNumbers.startsWith('55') || phoneNumbers.length !== 13) {
+      setError('Por favor, insira um número de telefone brasileiro válido (DDD + 9 dígitos)');
       return false;
     }
 
@@ -75,15 +92,18 @@ const Register: React.FC = () => {
     setError('');
 
     try {
+      // Remove formatação do telefone (já vem com código do país da biblioteca)
+      const phoneNumbers = formData.phone.replace(/\D/g, '');
+
       await register({
         name: formData.name,
         email: formData.email,
-        phone: formData.phone,
+        phone: phoneNumbers,
         senha: formData.senha,
       });
 
-      // Salva o phone no localStorage para usar como remotejid temporário
-      localStorage.setItem('user_phone', formData.phone);
+      // Salva o phone no localStorage
+      localStorage.setItem('user_phone', phoneNumbers);
 
       // Cadastro realizado com sucesso, redireciona para login
       alert('Cadastro realizado com sucesso! Faça login para continuar.');
@@ -167,18 +187,45 @@ const Register: React.FC = () => {
                   htmlFor="phone"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Telefone
+                  Telefone (com DDD)
                 </label>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  required
+                <PhoneInput
+                  country={'br'}
                   value={formData.phone}
-                  onChange={handleChange}
-                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="(00) 00000-0000"
+                  onChange={handlePhoneChange}
+                  inputProps={{
+                    name: 'phone',
+                    required: true,
+                  }}
+                  containerClass="w-full"
+                  inputClass="w-full"
+                  buttonClass="border-gray-300"
+                  containerStyle={{
+                    width: '100%',
+                  }}
+                  inputStyle={{
+                    width: '100%',
+                    height: '42px',
+                    fontSize: '14px',
+                    paddingLeft: '48px',
+                    borderRadius: '0.5rem',
+                    border: '1px solid #d1d5db',
+                  }}
+                  buttonStyle={{
+                    borderRadius: '0.5rem 0 0 0.5rem',
+                    border: '1px solid #d1d5db',
+                    backgroundColor: 'white',
+                  }}
+                  dropdownStyle={{
+                    borderRadius: '0.5rem',
+                  }}
+                  preferredCountries={['br', 'us', 'pt']}
+                  enableSearch={true}
+                  searchPlaceholder="Buscar país..."
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  Digite 11 dígitos: DDD + número (ex: 11 98765-4321)
+                </p>
               </div>
 
               {/* Senha */}

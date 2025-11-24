@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import whats from '../assets/whats.png';
+import cvs from '../assets/cvs1.png';
 import dash from '../assets/dash.png';
 import granianomelogo from '../assets/logogranaia1.png';
-import logogranaia from '../assets/logogranaia.png';
-import logonomegranaia from '../assets/logonomegranaia.png';
+import logonomegranaia from '../assets/logonomegranaia1.png';
 import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
@@ -211,9 +210,9 @@ export default function Home() {
         {/* Imagem (lado direito) */}
         <div className="flex-1 flex justify-center">
           <img
-            src={whats}
+            src={cvs}
             alt="Exemplo de conversa no WhatsApp"
-            className="w-[90%] md:w-[85%] lg:w-[75%] rounded-3xl shadow-2xl border border-gray-200 object-contain"
+            className="w-[90%] md:w-[85%] lg:w-[75%] rounded-3xl transition-transform duration-300 hover:scale-110"
           />
         </div>
       </section>

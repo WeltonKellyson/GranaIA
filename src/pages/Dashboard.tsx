@@ -26,8 +26,8 @@ import {
   PencilSquareIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
-import { saveAs } from 'file-saver';
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
+import * as XLSX from 'xlsx';
 import { useAuth } from '../contexts/AuthContext';
 import {
   apiService,
@@ -328,34 +328,138 @@ export default function Dashboard() {
       value: parseFloat(cat.total),
     })) || [];
 
-  // Exportar CSV
-  const exportToCSV = () => {
-    const headers = ['Data', 'Descrição', 'Tipo', 'Categoria', 'Valor'];
-    const rows = transacoesFiltradas
-      .sort((a, b) => {
-        if (ordenacao.campo === 'data') {
+  // Exportar para Excel formatado
+  const exportToExcel = () => {
+    // Criar novo workbook
+    const wb = XLSX.utils.book_new();
+
+    // ===== ABA 1: RESUMO =====
+    const resumoData = [
+      ['RESUMO FINANCEIRO'],
+      [''],
+      ['Indicador', 'Valor'],
+      ['Total de Receitas', `R$ ${totalReceitas.toFixed(2)}`],
+      ['Total de Despesas', `R$ ${totalDespesas.toFixed(2)}`],
+      ['Saldo Atual', `R$ ${saldo.toFixed(2)}`],
+      [''],
+      ['DESPESAS POR CATEGORIA'],
+      [''],
+      ['Categoria', 'Total', 'Quantidade'],
+      ...(gastoDashboard?.por_categoria.map(cat => [
+        cat.categoria,
+        `R$ ${parseFloat(cat.total).toFixed(2)}`,
+        cat.quantidade
+      ]) || []),
+      [''],
+      ['RECEITAS POR CATEGORIA'],
+      [''],
+      ['Categoria', 'Total', 'Quantidade'],
+      ...(receitaDashboard?.por_categoria.map(cat => [
+        cat.categoria,
+        `R$ ${parseFloat(cat.total).toFixed(2)}`,
+        cat.quantidade
+      ]) || []),
+    ];
+    const wsResumo = XLSX.utils.aoa_to_sheet(resumoData);
+
+    // Definir larguras das colunas
+    wsResumo['!cols'] = [
+      { wch: 25 }, // Coluna A
+      { wch: 20 }, // Coluna B
+      { wch: 15 }, // Coluna C
+    ];
+
+    XLSX.utils.book_append_sheet(wb, wsResumo, 'Resumo');
+
+    // ===== ABA 2: RECEITAS =====
+    const receitasData = [
+      ['RECEITAS'],
+      [''],
+      ['Data', 'Descrição', 'Categoria', 'Origem', 'Valor'],
+      ...receitas
+        .sort((a, b) => new Date(b.data || b.created_at).getTime() - new Date(a.data || a.created_at).getTime())
+        .map(r => [
+          new Date(r.data || r.created_at).toLocaleDateString('pt-BR'),
+          r.descricao,
+          r.categoria,
+          r.origem || '-',
+          parseFloat(r.valor).toFixed(2)
+        ]),
+      [''],
+      ['TOTAL', '', '', '', receitas.reduce((sum, r) => sum + parseFloat(r.valor), 0).toFixed(2)]
+    ];
+    const wsReceitas = XLSX.utils.aoa_to_sheet(receitasData);
+    wsReceitas['!cols'] = [
+      { wch: 12 },
+      { wch: 30 },
+      { wch: 20 },
+      { wch: 20 },
+      { wch: 15 }
+    ];
+    XLSX.utils.book_append_sheet(wb, wsReceitas, 'Receitas');
+
+    // ===== ABA 3: DESPESAS =====
+    const despesasData = [
+      ['DESPESAS'],
+      [''],
+      ['Data', 'Descrição', 'Categoria', 'Valor'],
+      ...gastos
+        .sort((a, b) => new Date(b.data || b.created_at).getTime() - new Date(a.data || a.created_at).getTime())
+        .map(g => [
+          new Date(g.data || g.created_at).toLocaleDateString('pt-BR'),
+          g.descricao,
+          g.categoria,
+          parseFloat(g.valor).toFixed(2)
+        ]),
+      [''],
+      ['TOTAL', '', '', gastos.reduce((sum, g) => sum + parseFloat(g.valor), 0).toFixed(2)]
+    ];
+    const wsDespesas = XLSX.utils.aoa_to_sheet(despesasData);
+    wsDespesas['!cols'] = [
+      { wch: 12 },
+      { wch: 30 },
+      { wch: 20 },
+      { wch: 15 }
+    ];
+    XLSX.utils.book_append_sheet(wb, wsDespesas, 'Despesas');
+
+    // ===== ABA 4: TODAS AS TRANSAÇÕES =====
+    const todasData = [
+      ['TODAS AS TRANSAÇÕES'],
+      [''],
+      ['Data', 'Descrição', 'Tipo', 'Categoria', 'Valor'],
+      ...transacoesFiltradas
+        .sort((a, b) => {
+          if (ordenacao.campo === 'data') {
+            return ordenacao.ordem === 'asc'
+              ? new Date(a.data).getTime() - new Date(b.data).getTime()
+              : new Date(b.data).getTime() - new Date(a.data).getTime();
+          }
           return ordenacao.ordem === 'asc'
-            ? new Date(a.data).getTime() - new Date(b.data).getTime()
-            : new Date(b.data).getTime() - new Date(a.data).getTime();
-        }
-        return ordenacao.ordem === 'asc'
-          ? a.tipo.localeCompare(b.tipo)
-          : b.tipo.localeCompare(a.tipo);
-      })
-      .map((t) => [
-        new Date(t.data).toLocaleDateString('pt-BR'),
-        t.descricao,
-        t.tipo,
-        t.categoria,
-        `R$ ${t.valor.toFixed(2)}`,
-      ]);
+            ? a.tipo.localeCompare(b.tipo)
+            : b.tipo.localeCompare(a.tipo);
+        })
+        .map(t => [
+          new Date(t.data).toLocaleDateString('pt-BR'),
+          t.descricao,
+          t.tipo,
+          t.categoria,
+          t.valor.toFixed(2)
+        ])
+    ];
+    const wsTodas = XLSX.utils.aoa_to_sheet(todasData);
+    wsTodas['!cols'] = [
+      { wch: 12 },
+      { wch: 30 },
+      { wch: 12 },
+      { wch: 20 },
+      { wch: 15 }
+    ];
+    XLSX.utils.book_append_sheet(wb, wsTodas, 'Todas Transações');
 
-    const csv = [headers.join(','), ...rows.map((row) => row.join(','))].join(
-      '\n',
-    );
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    saveAs(blob, 'relatorio-financeiro.csv');
+    // Gerar arquivo e fazer download
+    const hoje = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+    XLSX.writeFile(wb, `Relatorio_Financeiro_${hoje}.xlsx`);
   };
 
   const alternarOrdenacao = (campo: 'data' | 'tipo') => {
@@ -390,11 +494,11 @@ export default function Dashboard() {
 
         <div className="flex items-center gap-4">
           <button
-            onClick={exportToCSV}
+            onClick={exportToExcel}
             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-medium shadow-md transition"
           >
             <ArrowUpTrayIcon className="w-5 h-5" />
-            Exportar Relatório
+            Exportar Relatório Excel
           </button>
 
           {/* Menu do usuário */}

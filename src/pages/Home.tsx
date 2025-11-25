@@ -86,6 +86,42 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [typedText, isDeleting]);
 
+  const [satisfaction, setSatisfaction] = useState(0);
+  const [setupTime, setSetupTime] = useState(0);
+
+  useEffect(() => {
+    let start = 0;
+
+    // contador para 98%
+    const endSatisfaction = 98;
+    const duration = 1500;
+    const stepTime = Math.abs(Math.floor(duration / endSatisfaction));
+
+    const timer1 = setInterval(() => {
+      start += 1;
+      setSatisfaction(start);
+      if (start >= endSatisfaction) clearInterval(timer1);
+    }, stepTime);
+
+    // contador para 5 min
+    let start2 = 0;
+    const endSetup = 5;
+    const duration2 = 1200;
+
+    const stepTime2 = Math.abs(Math.floor(duration2 / endSetup));
+
+    const timer2 = setInterval(() => {
+      start2 += 1;
+      setSetupTime(start2);
+      if (start2 >= endSetup) clearInterval(timer2);
+    }, stepTime2);
+
+    return () => {
+      clearInterval(timer1);
+      clearInterval(timer2);
+    };
+  }, []);
+
 
   return (
     <div className="relative bg-[#fafaf7] text-gray-900 scroll-smooth overflow-x-hidden">
@@ -609,13 +645,19 @@ export default function Home() {
         {/* Estatísticas */}
         <div className="flex flex-col md:flex-row justify-center items-center gap-12 mb-16 text-center">
           <div>
-            <p className="text-4xl font-extrabold text-green-600">98%</p>
+            <p className="text-4xl font-extrabold text-green-600">
+              {satisfaction}%
+            </p>
             <p className="text-gray-600 text-base">Taxa de satisfação</p>
           </div>
+
           <div>
-            <p className="text-4xl font-extrabold text-green-600">5min</p>
+            <p className="text-4xl font-extrabold text-green-600">
+              {setupTime}min
+            </p>
             <p className="text-gray-600 text-base">Tempo médio de setup</p>
           </div>
+
           <div>
             <p className="text-4xl font-extrabold text-green-600">24/7</p>
             <p className="text-gray-600 text-base">Disponível no WhatsApp</p>

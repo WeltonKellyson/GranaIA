@@ -256,7 +256,11 @@ export default function Login() {
         {/* Rodapé */}
         <p className="text-xs text-gray-400 mt-4">
           Problemas para acessar?{' '}
-          <a href="#" className="text-blue-600 hover:underline">
+          <a 
+            href="https://chat.whatsapp.com/CicoYlY9JAv3SgpCRIz8Bk"
+            target="_blank"
+            rel="noopener noreferrer" 
+            className="text-blue-600 hover:underline">
             Entre em contato
           </a>
         </p>

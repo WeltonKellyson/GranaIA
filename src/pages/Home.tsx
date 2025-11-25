@@ -88,39 +88,59 @@ export default function Home() {
 
   const [satisfaction, setSatisfaction] = useState(0);
   const [setupTime, setSetupTime] = useState(0);
+  const [typed247, setTyped247] = useState("");
+  const fullText247 = "24/7";
+
+  const { ref: statsRef, inView: statsInView } = useInView({
+    triggerOnce: true,
+    threshold: 0.3, // dispara quando 30% da seção estiver visível
+  });
 
   useEffect(() => {
-    let start = 0;
+    if (statsInView) {
+      // ====== Contador de satisfação ======
+      let start = 0;
+      const endSatisfaction = 98;
+      const duration = 1500;
+      const stepTime = Math.abs(Math.floor(duration / endSatisfaction));
 
-    // contador para 98%
-    const endSatisfaction = 98;
-    const duration = 1500;
-    const stepTime = Math.abs(Math.floor(duration / endSatisfaction));
+      const timer1 = setInterval(() => {
+        start += 1;
+        setSatisfaction(start);
+        if (start >= endSatisfaction) clearInterval(timer1);
+      }, stepTime);
 
-    const timer1 = setInterval(() => {
-      start += 1;
-      setSatisfaction(start);
-      if (start >= endSatisfaction) clearInterval(timer1);
-    }, stepTime);
+      // ====== Contador de setup ======
+      let start2 = 0;
+      const endSetup = 5;
+      const duration2 = 1200;
+      const stepTime2 = Math.abs(Math.floor(duration2 / endSetup));
 
-    // contador para 5 min
-    let start2 = 0;
-    const endSetup = 5;
-    const duration2 = 1200;
+      const timer2 = setInterval(() => {
+        start2 += 1;
+        setSetupTime(start2);
+        if (start2 >= endSetup) clearInterval(timer2);
+      }, stepTime2);
 
-    const stepTime2 = Math.abs(Math.floor(duration2 / endSetup));
+      // ====== Digitação do 24/7 ======
+      setTyped247("");
+      let index = 0;
+      const typeInterval = setInterval(() => {
+        if (index < fullText247.length) {
+          setTyped247(fullText247.slice(0, index + 1));
+          index++;
+        } else {
+          clearInterval(typeInterval);
+        }
+      }, 250);
 
-    const timer2 = setInterval(() => {
-      start2 += 1;
-      setSetupTime(start2);
-      if (start2 >= endSetup) clearInterval(timer2);
-    }, stepTime2);
-
-    return () => {
-      clearInterval(timer1);
-      clearInterval(timer2);
-    };
-  }, []);
+      return () => {
+        clearInterval(timer1);
+        clearInterval(timer2);
+        clearInterval(typeInterval);
+      };
+    }
+  }, [statsInView]);
 
 
   return (
@@ -136,18 +156,28 @@ export default function Home() {
       {/* ===== SEÇÂO 1 ===== */}
       <section className="min-h-screen flex flex-col items-center justify-center text-center space-y-8 max-w-3xl mx-auto px-6 md:px-12">
         {/* Logo */}
-        <img
-          src={logonomegranaia}
-          alt="Logo GranaIA"
-          className="w-280 md:w-320 mx-auto mb-2 transition-transform duration-300 hover:scale-110"
-        />
+       <img
+        src={logonomegranaia}
+        alt="Logo GranaIA"
+        className="w-72 md:w-96 mx-auto mb-2 animate-float"
+      />
 
         {/* Título principal */}
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-gray-900">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-gray-900 text-center">
           Controle seu financeiro <br />
           <span className="text-green-600">
-            direto do {typedText}
-            <span className="border-r-2 border-green-600 ml-1 animate-pulse"></span>
+            {/* No desktop fica direto, mas em telas menores quebra o WhatsApp */}
+            <span className="hidden md:inline">
+              direto do {typedText}
+              <span className="border-r-2 border-green-600 ml-1 animate-pulse"></span>
+            </span>
+
+            {/* Versão mobile/tablet com quebra antes do typedText */}
+            <span className="block md:hidden">
+              direto do <br />
+              {typedText}
+              <span className="border-r-2 border-green-600 ml-1 animate-pulse"></span>
+            </span>
           </span>
         </h1>
 
@@ -173,7 +203,7 @@ export default function Home() {
               window.open("https://granaia.weltonkellyson.com.br/register", "_blank")
             }
             className="bg-gradient-to-r from-green-500 via-green-600 to-green-700 
-                      hover:from-green-600 hover:via-green-700 hover:to-green-800 
+                      bg-[length:200%_200%] animate-gradient-x 
                       transform hover:scale-105 
                       transition-all duration-300 ease-in-out 
                       text-white px-10 py-4 rounded-xl font-semibold 
@@ -292,7 +322,7 @@ export default function Home() {
           <img
             src={cvs}
             alt="Exemplo de conversa no WhatsApp"
-            className="w-[80%] md:w-[75%] lg:w-[65%] rounded-3xl transition-transform duration-300 hover:scale-110"
+            className="w-[80%] md:w-[75%] lg:w-[65%] rounded-3xl transition-transform duration-300 hover:scale-110 animate-float"
           />
         </div>
       </section>
@@ -304,7 +334,7 @@ export default function Home() {
           <img
             src={dash}
             alt="Dashboard financeiro"
-            className="w-[95%] md:w-[95%] lg:w-[95%] rounded-3xl transition-transform duration-300 hover:scale-110"
+            className="w-[95%] md:w-[95%] lg:w-[95%] rounded-3xl transition-transform duration-300 hover:scale-110 animate-float"
           />
         </div>
 
@@ -463,11 +493,11 @@ export default function Home() {
               window.open("https://granaia.weltonkellyson.com.br/register", "_blank")
             }
             className="bg-gradient-to-r from-green-500 via-green-600 to-green-700 
-                      hover:from-green-600 hover:via-green-700 hover:to-green-800 
-                      transform hover:scale-105 
-                      transition-all duration-300 ease-in-out 
-                      text-white px-10 py-4 rounded-xl font-semibold 
-                      shadow-md hover:shadow-lg"
+              bg-[length:200%_200%] animate-gradient-x 
+              transform hover:scale-105 
+              transition-all duration-300 ease-in-out 
+              text-white px-10 py-4 rounded-xl font-semibold 
+              shadow-md hover:shadow-lg"
           >
             Testar GranaIA Starter grátis por 7 dias
           </button>
@@ -606,7 +636,12 @@ export default function Home() {
               <div className="px-6 pb-6 mt-auto">
                 <button
                   onClick={() => window.open(plan.link, "_blank")}
-                  className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+                  className="w-full bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 
+                            bg-[length:200%_200%] animate-gradient-x 
+                            text-white font-semibold py-3 rounded-full 
+                            shadow-md hover:shadow-lg 
+                            transition-all duration-300 ease-in-out 
+                            transform hover:scale-105"
                 >
                   {plan.button}
                 </button>
@@ -643,7 +678,10 @@ export default function Home() {
         </div>
 
         {/* Estatísticas */}
-        <div className="flex flex-col md:flex-row justify-center items-center gap-12 mb-16 text-center">
+        <div
+          ref={statsRef}
+          className="flex flex-col md:flex-row justify-center items-center gap-12 mb-16 text-center"
+        >
           <div>
             <p className="text-4xl font-extrabold text-green-600">
               {satisfaction}%
@@ -659,77 +697,68 @@ export default function Home() {
           </div>
 
           <div>
-            <p className="text-4xl font-extrabold text-green-600">24/7</p>
+            <p className="text-4xl font-extrabold text-green-600">
+              {typed247}
+            </p>
             <p className="text-gray-600 text-base">Disponível no WhatsApp</p>
           </div>
         </div>
 
         {/* Depoimentos */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl w-full">
-          {/* Depoimento 1 */}
-          <div className="bg-white shadow-md rounded-2xl p-8 flex flex-col justify-between hover:shadow-lg transition duration-300">
-            <div>
-              <div className="flex mb-4 text-green-600 text-lg">★★★★★</div>
-              <p className="text-gray-700 italic mb-6">
-                "Antes eu perdia horas organizando planilhas. Agora registro
-                tudo por áudio no WhatsApp em segundos. Revolucionou minha
-                gestão financeira!"
-              </p>
-            </div>
-            <div className="flex items-center gap-4 mt-auto">
-              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-semibold">
-                MS
-              </div>
-              <div>
-                <p className="font-semibold text-gray-900">Marina Silva</p>
-                <p className="text-sm text-gray-500">Consultora Freelancer</p>
-              </div>
-            </div>
-          </div>
+          {[
+            {
+              name: "Marina Silva",
+              role: "Consultora Freelancer",
+              initials: "MS",
+              text: `"Antes eu perdia horas organizando planilhas. Agora registro tudo por áudio no WhatsApp em segundos. Revolucionou minha gestão financeira!"`,
+              delay: 0.2,
+            },
+            {
+              name: "Carlos Mendes",
+              role: "MEI – Serviços de Marketing",
+              initials: "CM",
+              text: `"O GranaIA me deu controle total das contas a pagar e receber. Consigo ver meu fluxo de caixa instantaneamente pelo WhatsApp."`,
+              delay: 0.4,
+            },
+            {
+              name: "Ana Rodrigues",
+              role: "Pequena Empresa de Design",
+              initials: "AR",
+              text: `"Simples, eficiente e barato. Em uma semana já estava organizando todas as finanças sem esforço. Recomendo!"`,
+              delay: 0.6,
+            },
+          ].map((item, index) => {
+            const { ref, inView } = useInView({
+              triggerOnce: true,
+              threshold: 0.2,
+            });
 
-          {/* Depoimento 2 */}
-          <div className="bg-white shadow-md rounded-2xl p-8 flex flex-col justify-between hover:shadow-lg transition duration-300">
-            <div>
-              <div className="flex mb-4 text-green-600 text-lg">★★★★★</div>
-              <p className="text-gray-700 italic mb-6">
-                "O GranaIA me deu controle total das contas a pagar e receber.
-                Consigo ver meu fluxo de caixa instantaneamente pelo WhatsApp."
-              </p>
-            </div>
-            <div className="flex items-center gap-4 mt-auto">
-              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-semibold">
-                CM
-              </div>
-              <div>
-                <p className="font-semibold text-gray-900">Carlos Mendes</p>
-                <p className="text-sm text-gray-500">
-                  MEI – Serviços de Marketing
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Depoimento 3 */}
-          <div className="bg-white shadow-md rounded-2xl p-8 flex flex-col justify-between hover:shadow-lg transition duration-300">
-            <div>
-              <div className="flex mb-4 text-green-600 text-lg">★★★★★</div>
-              <p className="text-gray-700 italic mb-6">
-                "Simples, eficiente e barato. Em uma semana já estava
-                organizando todas as finanças sem esforço. Recomendo!"
-              </p>
-            </div>
-            <div className="flex items-center gap-4 mt-auto">
-              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-semibold">
-                AR
-              </div>
-              <div>
-                <p className="font-semibold text-gray-900">Ana Rodrigues</p>
-                <p className="text-sm text-gray-500">
-                  Pequena Empresa de Design
-                </p>
-              </div>
-            </div>
-          </div>
+            return (
+              <motion.div
+                key={index}
+                ref={ref}
+                initial={{ opacity: 0, y: 40 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: item.delay }}
+                className="bg-white shadow-md rounded-2xl p-8 flex flex-col justify-between hover:shadow-lg transition duration-300"
+              >
+                <div>
+                  <div className="flex mb-4 text-green-600 text-lg">★★★★★</div>
+                  <p className="text-gray-700 italic mb-6">{item.text}</p>
+                </div>
+                <div className="flex items-center gap-4 mt-auto">
+                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-semibold">
+                    {item.initials}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">{item.name}</p>
+                    <p className="text-sm text-gray-500">{item.role}</p>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 
@@ -747,45 +776,56 @@ export default function Home() {
 
         {/* ===== ACORDEÕES ===== */}
         <div className="w-full max-w-3xl space-y-4">
-          {faqs.map((faq, index) => (
-            <div
-              key={index}
-              className={`border border-gray-200 rounded-xl shadow-sm transition-all duration-300 ${
-                openIndex === index ? 'bg-gray-50 shadow-md' : 'bg-white'
-              }`}
-            >
-              <button
-                onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                className="w-full flex justify-between items-center text-left px-6 py-5 font-semibold text-gray-800 hover:bg-gray-50 rounded-xl transition"
+          {faqs.map((faq, index) => {
+            const { ref, inView } = useInView({
+              triggerOnce: true,
+              threshold: 0.2,
+            });
+
+            return (
+              <motion.div
+                key={index}
+                ref={ref}
+                initial={{ opacity: 0, y: 30 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: index * 0.15 }}
+                className={`border border-gray-200 rounded-xl shadow-sm transition-all duration-300 ${
+                  openIndex === index ? "bg-gray-50 shadow-md" : "bg-white"
+                }`}
               >
-                {faq.question}
-
-                {/* Ícone minimalista (SVG setinha) */}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`w-5 h-5 text-gray-500 transform transition-transform duration-300 ${
-                    openIndex === index ? 'rotate-180' : 'rotate-0'
-                  }`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
+                <button
+                  onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                  className="w-full flex justify-between items-center text-left px-6 py-5 font-semibold text-gray-800 hover:bg-gray-50 rounded-xl transition"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
+                  {faq.question}
 
-              {openIndex === index && (
-                <div className="px-6 pb-5 text-gray-600 border-t border-gray-100 text-base leading-relaxed">
-                  {faq.answer}
-                </div>
-              )}
-            </div>
-          ))}
+                  {/* Ícone minimalista (seta) */}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={`w-5 h-5 text-gray-500 transform transition-transform duration-300 ${
+                      openIndex === index ? "rotate-180" : "rotate-0"
+                    }`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                {openIndex === index && (
+                  <div className="px-6 pb-5 text-gray-600 border-t border-gray-100 text-base leading-relaxed">
+                    {faq.answer}
+                  </div>
+                )}
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 
@@ -825,9 +865,13 @@ export default function Home() {
             onClick={() =>
               window.open("https://granaia.weltonkellyson.com.br/register", "_blank")
             }
-            className="bg-white text-green-700 font-semibold px-8 py-3 rounded-full shadow-lg hover:bg-green-50 transition duration-300"
+            className="relative overflow-hidden bg-white text-green-700 font-semibold px-8 py-3 rounded-full shadow-lg transition-all duration-300 hover:scale-105 group"
           >
-            Testar GranaIA grátis agora
+            {/* Efeito de brilho animado */}
+            <span className="absolute inset-0 bg-gradient-to-r from-green-50 via-white to-green-50 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-[1px]"></span>
+
+            {/* Texto do botão */}
+            <span className="relative z-10">Testar GranaIA grátis agora</span>
           </button>
 
           <p className="text-green-100 mt-4 text-sm">

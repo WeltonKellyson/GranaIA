@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
 
@@ -16,6 +17,9 @@ function Router() {
 
       {/* Página de cadastro */}
       <Route path="/register" element={<Register />} />
+
+      {/* Página de redefinição de senha */}
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Página do dashboard - PROTEGIDA */}
       <Route

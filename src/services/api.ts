@@ -294,6 +294,59 @@ class ApiService {
     return null;
   }
 
+  // ============ PASSWORD RESET ============
+
+  async requestPasswordReset(phone: string): Promise<ApiResponse<{ token: string; expires_in_minutes: number }>> {
+    try {
+      const response = await fetch(`${API_URL}/api/v1/auth/request-password-reset`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phone }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(
+          errorData?.detail || errorData?.message || 'Erro ao solicitar recuperação de senha'
+        );
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Erro ao solicitar recuperação:', error);
+      throw error;
+    }
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<ApiResponse<null>> {
+    try {
+      const response = await fetch(`${API_URL}/api/v1/auth/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token,
+          new_password: newPassword
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(
+          errorData?.detail || errorData?.message || 'Erro ao redefinir senha'
+        );
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Erro ao redefinir senha:', error);
+      throw error;
+    }
+  }
+
   // ============ GASTOS ============
 
   async getGastos(params?: {

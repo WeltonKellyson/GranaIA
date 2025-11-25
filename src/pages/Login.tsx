@@ -11,6 +11,8 @@ import {
 } from '@heroicons/react/24/outline';
 import logonomegranaia from '../assets/logonomegranaia1.png';
 import { useAuth } from '../contexts/AuthContext';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -22,6 +24,15 @@ export default function Login() {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Estados para a modal de esqueci senha
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
+  const [forgotPasswordData, setForgotPasswordData] = useState({
+    phone: '',
+    confirmPhone: '',
+  });
+  const [forgotPasswordError, setForgotPasswordError] = useState('');
+  const [isSendingReset, setIsSendingReset] = useState(false);
 
   // Redireciona se já estiver autenticado
   useEffect(() => {
@@ -57,6 +68,66 @@ export default function Login() {
       setError(err.message || 'Email ou senha incorretos. Tente novamente.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotPasswordError('');
+
+    // Validação dos campos
+    if (!forgotPasswordData.phone || !forgotPasswordData.confirmPhone) {
+      setForgotPasswordError('Por favor, preencha ambos os campos de telefone');
+      return;
+    }
+
+    // Valida se os telefones são brasileiros (13 dígitos: 55 + 11 dígitos)
+    const phone = forgotPasswordData.phone.replace(/\D/g, '');
+    const confirmPhone = forgotPasswordData.confirmPhone.replace(/\D/g, '');
+
+    if (!phone.startsWith('55') || phone.length !== 13) {
+      setForgotPasswordError('Por favor, insira um número de telefone brasileiro válido (DDD + 9 dígitos)');
+      return;
+    }
+
+    if (!confirmPhone.startsWith('55') || confirmPhone.length !== 13) {
+      setForgotPasswordError('Por favor, confirme com um número de telefone brasileiro válido');
+      return;
+    }
+
+    // Verifica se os números são iguais
+    if (phone !== confirmPhone) {
+      setForgotPasswordError('Os números de telefone não coincidem');
+      return;
+    }
+
+    setIsSendingReset(true);
+
+    try {
+      // Envia para o webhook
+      const response = await fetch('https://n8n.weltonkellyson.com.br/webhook/eff233a6-b1e1-4bee-8388-4ff297a8cd1f', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phone: phone,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao enviar solicitação');
+      }
+
+      // Sucesso
+      alert('Solicitação de recuperação enviada com sucesso! Você receberá instruções em breve.');
+      setShowForgotPasswordModal(false);
+      setForgotPasswordData({ phone: '', confirmPhone: '' });
+    } catch (err: any) {
+      console.error('Erro ao enviar recuperação:', err);
+      setForgotPasswordError('Erro ao enviar solicitação. Tente novamente.');
+    } finally {
+      setIsSendingReset(false);
     }
   };
 
@@ -158,12 +229,13 @@ export default function Login() {
 
           {/* Links */}
           <div className="text-center mt-3">
-            <a
-              href="#"
+            <button
+              type="button"
+              onClick={() => setShowForgotPasswordModal(true)}
               className="text-sm text-green-600 hover:underline font-medium"
             >
               Esqueci minha senha
-            </a>
+            </button>
           </div>
 
           {/* Box Novo por aqui */}
@@ -237,6 +309,161 @@ export default function Login() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Esqueci Minha Senha */}
+      {showForgotPasswordModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-gray-800">Recuperar Senha</h3>
+              <button
+                onClick={() => {
+                  setShowForgotPasswordModal(false);
+                  setForgotPasswordData({ phone: '', confirmPhone: '' });
+                  setForgotPasswordError('');
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-600 mb-4">
+              Digite seu número de telefone para recuperar sua senha. Você receberá instruções via WhatsApp.
+            </p>
+
+            <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
+              {forgotPasswordError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                  {forgotPasswordError}
+                </div>
+              )}
+
+              {/* Telefone */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Número de Telefone (com DDD) <span className="text-red-500">*</span>
+                </label>
+                <PhoneInput
+                  country={'br'}
+                  value={forgotPasswordData.phone}
+                  onChange={(value) => {
+                    setForgotPasswordData({ ...forgotPasswordData, phone: value });
+                    setForgotPasswordError('');
+                  }}
+                  inputProps={{
+                    name: 'phone',
+                    required: true,
+                  }}
+                  containerClass="w-full"
+                  inputClass="w-full"
+                  buttonClass="border-gray-300"
+                  containerStyle={{
+                    width: '100%',
+                  }}
+                  inputStyle={{
+                    width: '100%',
+                    height: '42px',
+                    fontSize: '14px',
+                    paddingLeft: '48px',
+                    borderRadius: '0.5rem',
+                    border: '1px solid #d1d5db',
+                  }}
+                  buttonStyle={{
+                    borderRadius: '0.5rem 0 0 0.5rem',
+                    border: '1px solid #d1d5db',
+                    backgroundColor: 'white',
+                  }}
+                  dropdownStyle={{
+                    borderRadius: '0.5rem',
+                  }}
+                  preferredCountries={['br', 'us', 'pt']}
+                  enableSearch={true}
+                  searchPlaceholder="Buscar país..."
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Digite 11 dígitos: DDD + número (ex: 11 98765-4321)
+                </p>
+              </div>
+
+              {/* Confirmar Telefone */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Confirmar Número de Telefone <span className="text-red-500">*</span>
+                </label>
+                <PhoneInput
+                  country={'br'}
+                  value={forgotPasswordData.confirmPhone}
+                  onChange={(value) => {
+                    setForgotPasswordData({ ...forgotPasswordData, confirmPhone: value });
+                    setForgotPasswordError('');
+                  }}
+                  inputProps={{
+                    name: 'confirmPhone',
+                    required: true,
+                  }}
+                  containerClass="w-full"
+                  inputClass="w-full"
+                  buttonClass="border-gray-300"
+                  containerStyle={{
+                    width: '100%',
+                  }}
+                  inputStyle={{
+                    width: '100%',
+                    height: '42px',
+                    fontSize: '14px',
+                    paddingLeft: '48px',
+                    borderRadius: '0.5rem',
+                    border: '1px solid #d1d5db',
+                  }}
+                  buttonStyle={{
+                    borderRadius: '0.5rem 0 0 0.5rem',
+                    border: '1px solid #d1d5db',
+                    backgroundColor: 'white',
+                  }}
+                  dropdownStyle={{
+                    borderRadius: '0.5rem',
+                  }}
+                  preferredCountries={['br', 'us', 'pt']}
+                  enableSearch={true}
+                  searchPlaceholder="Buscar país..."
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Digite o mesmo número novamente
+                </p>
+              </div>
+
+              {/* Botões */}
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForgotPasswordModal(false);
+                    setForgotPasswordData({ phone: '', confirmPhone: '' });
+                    setForgotPasswordError('');
+                  }}
+                  className="flex-1 border border-gray-300 text-gray-700 font-semibold py-2 rounded-lg hover:bg-gray-50 transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSendingReset}
+                  className={`flex-1 font-semibold py-2 rounded-lg transition ${
+                    isSendingReset
+                      ? 'bg-gray-400 cursor-not-allowed text-white'
+                      : 'bg-green-600 hover:bg-green-700 text-white'
+                  }`}
+                >
+                  {isSendingReset ? 'Enviando...' : 'Enviar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

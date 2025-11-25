@@ -91,6 +91,9 @@ export default function Home() {
         {/* CTA principal */}
         <div className="flex flex-col items-center space-y-2">
           <button
+            onClick={() =>
+              window.open("https://granaia.weltonkellyson.com.br/register", "_blank")
+            }
             className="bg-gradient-to-r from-green-500 via-green-600 to-green-700 
                       hover:from-green-600 hover:via-green-700 hover:to-green-800 
                       transform hover:scale-105 
@@ -391,6 +394,9 @@ export default function Home() {
             <span className="text-green-600 font-semibold">R$5,99/mês</span>
           </p>
           <button
+            onClick={() =>
+              window.open("https://granaia.weltonkellyson.com.br/register", "_blank")
+            }
             className="bg-gradient-to-r from-green-500 via-green-600 to-green-700 
                       hover:from-green-600 hover:via-green-700 hover:to-green-800 
                       transform hover:scale-105 
@@ -548,7 +554,9 @@ export default function Home() {
         <p className="text-gray-500 text-xs mt-8 text-center">
           7 dias de acesso gratuito ao GranaIA Starter dentro da plataforma • Nenhuma cobrança durante o período de teste •{" "}
           <a
-            href="#"
+            href="https://granaia.weltonkellyson.com.br/register"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-green-600 font-semibold underline hover:text-green-700 transition"
           >
             Clique aqui para testar
@@ -742,7 +750,12 @@ export default function Home() {
             </div>
           </div>
 
-          <button className="bg-white text-green-700 font-semibold px-8 py-3 rounded-full shadow-lg hover:bg-green-50 transition duration-300">
+          <button
+            onClick={() =>
+              window.open("https://granaia.weltonkellyson.com.br/register", "_blank")
+            }
+            className="bg-white text-green-700 font-semibold px-8 py-3 rounded-full shadow-lg hover:bg-green-50 transition duration-300"
+          >
             Testar GranaIA grátis agora
           </button>
 

@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import cvs from '../assets/cvs1.png';
 import dash from '../assets/dash.png';
 import granianomelogo from '../assets/logogranaia1.png';
 import logonomegranaia from '../assets/logonomegranaia1.png';
 import { useNavigate } from 'react-router-dom';
+import { motion } from "framer-motion";
+import { useInView } from "react-intersection-observer";
 
 export default function Home() {
   const [count, setCount] = useState(0);
@@ -48,6 +50,43 @@ export default function Home() {
     },
   ];
 
+  const [typedText, setTypedText] = useState("");
+  const fullText = "WhatsApp";
+
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [loopIndex, setLoopIndex] = useState(0);
+  const [typingSpeed, setTypingSpeed] = useState(120);
+
+  useEffect(() => {
+    const handleTyping = () => {
+      const current = fullText.substring(0, loopIndex);
+
+      if (!isDeleting) {
+        setTypedText(fullText.substring(0, typedText.length + 1));
+        setTypingSpeed(120);
+
+        if (typedText === fullText) {
+          setTimeout(() => setIsDeleting(true), 1000);
+        }
+      } else {
+        setTypedText(fullText.substring(0, typedText.length - 1));
+        setTypingSpeed(60);
+
+        if (typedText === "") {
+          setIsDeleting(false);
+        }
+      }
+
+      setLoopIndex((prev) =>
+        isDeleting ? prev - 1 : prev + 1
+      );
+    };
+
+    const timer = setTimeout(handleTyping, typingSpeed);
+    return () => clearTimeout(timer);
+  }, [typedText, isDeleting]);
+
+
   return (
     <div className="relative bg-[#fafaf7] text-gray-900 scroll-smooth overflow-x-hidden">
       {/* ===== BOTÃO LOGIN FIXO ===== */}
@@ -70,7 +109,10 @@ export default function Home() {
         {/* Título principal */}
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-gray-900">
           Controle seu financeiro <br />
-          <span className="text-green-600">direto do WhatsApp</span>
+          <span className="text-green-600">
+            direto do {typedText}
+            <span className="border-r-2 border-green-600 ml-1 animate-pulse"></span>
+          </span>
         </h1>
 
         {/* Subtítulo em destaque */}
@@ -158,55 +200,54 @@ export default function Home() {
 
           {/* Subtítulo */}
           <p className="text-gray-600 text-lg">
-            Lance suas despesas, receitas e contas usando voz ou texto pelo
+            Lance suas despesas, receitas e contas usando voz, imagem ou texto pelo
             WhatsApp. O GranaIA processa tudo automaticamente e organiza suas
             finanças em segundos.
           </p>
 
           {/* Itens explicativos */}
           <div className="flex flex-col gap-6 mt-6">
-            <div className="flex items-start gap-3">
-              <span className="w-5 h-5 mt-1 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              </span>
-              <div>
-                <h3 className="font-semibold text-lg text-gray-900">
-                  Áudio ou texto, você escolhe
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  Registre transações do jeito mais rápido e prático para você.
-                </p>
-              </div>
-            </div>
+            {[
+              {
+                title: "Áudio, imagem ou texto, você escolhe",
+                desc: "Registre transações do jeito mais rápido e prático para você.",
+              },
+              {
+                title: "Confirmação instantânea",
+                desc: "Receba feedback automático de cada lançamento em segundos.",
+              },
+              {
+                title: "Contas a pagar e receber",
+                desc: "Gerencie tudo que entra e sai do seu caixa diretamente pelo chat.",
+              },
+            ].map((item, index) => {
+              const { ref, inView } = useInView({
+                triggerOnce: true,
+                threshold: 0.2,
+              });
 
-            <div className="flex items-start gap-3">
-              <span className="w-5 h-5 mt-1 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              </span>
-              <div>
-                <h3 className="font-semibold text-lg text-gray-900">
-                  Confirmação instantânea
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  Receba feedback automático de cada lançamento em segundos.
-                </p>
-              </div>
-            </div>
+              return (
+                <motion.div
+                  key={index}
+                  ref={ref}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={inView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.6, delay: index * 0.25 }}
+                  className="flex items-start gap-3"
+                >
+                  <span className="w-5 h-5 mt-1 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  </span>
 
-            <div className="flex items-start gap-3">
-              <span className="w-5 h-5 mt-1 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              </span>
-              <div>
-                <h3 className="font-semibold text-lg text-gray-900">
-                  Contas a pagar e receber
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  Gerencie tudo que entra e sai do seu caixa diretamente pelo
-                  chat.
-                </p>
-              </div>
-            </div>
+                  <div>
+                    <h3 className="font-semibold text-lg text-gray-900">
+                      {item.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm">{item.desc}</p>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
 
@@ -227,7 +268,7 @@ export default function Home() {
           <img
             src={dash}
             alt="Dashboard financeiro"
-            className="w-[100%] md:w-[95%] lg:w-[100%] rounded-3xl transition-transform duration-300 hover:scale-110"
+            className="w-[95%] md:w-[95%] lg:w-[95%] rounded-3xl transition-transform duration-300 hover:scale-110"
           />
         </div>
 
@@ -256,47 +297,52 @@ export default function Home() {
 
           {/* Destaques */}
           <div className="flex flex-col gap-6 mt-6">
-            <div className="flex items-start gap-3">
-              <span className="w-5 h-5 mt-1 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              </span>
-              <div>
-                <h3 className="font-semibold text-lg text-gray-900">
-                  Fluxo de caixa detalhado
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  Visualize entradas, saídas e saldo em tempo real.
-                </p>
-              </div>
-            </div>
+            {[
+              {
+                title: "Fluxo de caixa detalhado",
+                desc: "Visualize entradas, saídas e saldo em tempo real.",
+                delay: 0.2,
+              },
+              {
+                title: "Categorização automática",
+                desc: "Entenda para onde seu dinheiro está indo.",
+                delay: 0.4,
+              },
+              {
+                title: "Relatórios profissionais",
+                desc: "Dados prontos para tomada de decisão e apresentações.",
+                delay: 0.6,
+              },
+            ].map((item, index) => {
+              const { ref, inView } = useInView({
+                triggerOnce: true,
+                threshold: 0.2,
+              });
 
-            <div className="flex items-start gap-3">
-              <span className="w-5 h-5 mt-1 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              </span>
-              <div>
-                <h3 className="font-semibold text-lg text-gray-900">
-                  Categorização automática
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  Entenda para onde seu dinheiro está indo.
-                </p>
-              </div>
-            </div>
+              return (
+                <motion.div
+                  key={index}
+                  ref={ref}
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={inView ? { opacity: 1, x: 0 } : {}}
+                  transition={{ duration: 0.6, delay: item.delay }}
+                  className="flex items-start gap-3"
+                >
+                  {/* Bolinha */}
+                  <span className="w-5 h-5 mt-1 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  </span>
 
-            <div className="flex items-start gap-3">
-              <span className="w-5 h-5 mt-1 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              </span>
-              <div>
-                <h3 className="font-semibold text-lg text-gray-900">
-                  Relatórios profissionais
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  Dados prontos para tomada de decisão e apresentações.
-                </p>
-              </div>
-            </div>
+                  {/* Texto */}
+                  <div>
+                    <h3 className="font-semibold text-lg text-gray-900">
+                      {item.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm">{item.desc}</p>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -316,75 +362,58 @@ export default function Home() {
 
         {/* Cards de Benefícios */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl w-full">
-          {/* Card 1 */}
-          <div className="bg-white shadow-md rounded-2xl p-8 text-center transform transition duration-300 hover:scale-105 hover:shadow-xl">
-            <div className="bg-green-100 w-14 h-14 mx-auto flex items-center justify-center rounded-xl mb-4">
-              <img
-                src="https://img.icons8.com/?size=100&id=8XhS2MrAHUXV&format=png&color=25D366"
-                alt="Ícone de microfone"
-                className="w-8 h-8"
-              />
-            </div>
-            <h3 className="font-semibold text-xl text-gray-900 mb-2">
-              Registro por voz ou texto no WhatsApp
-            </h3>
-            <p className="text-gray-600 text-base">
-              Lance transações em segundos — incluindo contas a pagar e receber.
-            </p>
-          </div>
+          {[
+            {
+              icon: "https://img.icons8.com/?size=100&id=8XhS2MrAHUXV&format=png&color=25D366",
+              title: "Registro por voz ou texto no WhatsApp",
+              desc: "Lance transações em segundos — incluindo contas a pagar e receber.",
+              delay: 0.2,
+            },
+            {
+              icon: "https://img.icons8.com/?size=100&id=ALrL90O362w9&format=png&color=25D366",
+              title: "Fluxo de caixa no bolso",
+              desc: "Consulte saldo, entradas e saídas direto pelo WhatsApp, sem abrir planilhas.",
+              delay: 0.4,
+            },
+            {
+              icon: "https://img.icons8.com/?size=100&id=16421&format=png&color=25D366",
+              title: "Mais tempo para vender e crescer",
+              desc: "Elimine tarefas manuais e foque no crescimento do seu negócio.",
+              delay: 0.6,
+            },
+            {
+              icon: "https://img.icons8.com/?size=100&id=2862&format=png&color=25D366",
+              title: "Segurança bancária",
+              desc: "Criptografia AES-256 garante a proteção dos seus dados financeiros.",
+              delay: 0.8,
+            },
+          ].map((item, index) => {
+            const { ref, inView } = useInView({
+              triggerOnce: true,
+              threshold: 0.2,
+            });
 
-          {/* Card 2 */}
-          <div className="bg-white shadow-md rounded-2xl p-8 text-center transform transition duration-300 hover:scale-105 hover:shadow-xl">
-            <div className="bg-green-100 w-14 h-14 mx-auto flex items-center justify-center rounded-xl mb-4">
-              <img
-                src="https://img.icons8.com/?size=100&id=ALrL90O362w9&format=png&color=25D366"
-                alt="Ícone de gráfico"
-                className="w-8 h-8"
-              />
-            </div>
-            <h3 className="font-semibold text-xl text-gray-900 mb-2">
-              Fluxo de caixa no bolso
-            </h3>
-            <p className="text-gray-600 text-base">
-              Consulte saldo, entradas e saídas direto pelo WhatsApp, sem abrir
-              planilhas.
-            </p>
-          </div>
+            return (
+              <motion.div
+                key={index}
+                ref={ref}
+                initial={{ opacity: 0, y: 30 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: item.delay }}
+                className="bg-white shadow-md rounded-2xl p-8 text-center transform transition duration-300 hover:scale-105 hover:shadow-xl"
+              >
+                <div className="bg-green-100 w-14 h-14 mx-auto flex items-center justify-center rounded-xl mb-4">
+                  <img src={item.icon} alt={item.title} className="w-8 h-8" />
+                </div>
 
-          {/* Card 3 */}
-          <div className="bg-white shadow-md rounded-2xl p-8 text-center transform transition duration-300 hover:scale-105 hover:shadow-xl">
-            <div className="bg-green-100 w-14 h-14 mx-auto flex items-center justify-center rounded-xl mb-4">
-              <img
-                src="https://img.icons8.com/?size=100&id=16421&format=png&color=25D366"
-                alt="Ícone de raio"
-                className="w-8 h-8"
-              />
-            </div>
-            <h3 className="font-semibold text-xl text-gray-900 mb-2">
-              Mais tempo para vender e crescer
-            </h3>
-            <p className="text-gray-600 text-base">
-              Elimine tarefas manuais e foque no crescimento do seu negócio.
-            </p>
-          </div>
+                <h3 className="font-semibold text-xl text-gray-900 mb-2">
+                  {item.title}
+                </h3>
 
-          {/* Card 4 */}
-          <div className="bg-white shadow-md rounded-2xl p-8 text-center transform transition duration-300 hover:scale-105 hover:shadow-xl">
-            <div className="bg-green-100 w-14 h-14 mx-auto flex items-center justify-center rounded-xl mb-4">
-              <img
-                src="https://img.icons8.com/?size=100&id=2862&format=png&color=25D366"
-                alt="Ícone de cadeado"
-                className="w-8 h-8"
-              />
-            </div>
-            <h3 className="font-semibold text-xl text-gray-900 mb-2">
-              Segurança bancária
-            </h3>
-            <p className="text-gray-600 text-base">
-              Criptografia AES-256 garante a proteção dos seus dados
-              financeiros.
-            </p>
-          </div>
+                <p className="text-gray-600 text-base">{item.desc}</p>
+              </motion.div>
+            );
+          })}
         </div>
 
         {/* CTA Secundário */}

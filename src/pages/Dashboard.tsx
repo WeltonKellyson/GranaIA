@@ -422,7 +422,7 @@ export default function Dashboard() {
 
                 {/* Novo item - Suporte */}
                 <a
-                  href="#" // substitua pelo link do grupo de suporte
+                  href="https://chat.whatsapp.com/CicoYlY9JAv3SgpCRIz8Bk"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full flex items-center gap-2 px-4 py-3 text-sm text-green-600 hover:bg-green-50 transition"
@@ -433,7 +433,7 @@ export default function Dashboard() {
 
                 {/* Novo item - GranaIA (bot) */}
                 <a
-                  href="#"
+                  href="https://wa.me/qr/ZHYAJF2VX2MWI1"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full flex items-center gap-2 px-4 py-3 text-sm text-blue-600 hover:bg-blue-50 transition"

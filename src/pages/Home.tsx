@@ -91,6 +91,9 @@ export default function Home() {
         {/* CTA principal */}
         <div className="flex flex-col items-center space-y-2">
           <button
+            onClick={() =>
+              window.open("https://granaia.weltonkellyson.com.br/register", "_blank")
+            }
             className="bg-gradient-to-r from-green-500 via-green-600 to-green-700 
                       hover:from-green-600 hover:via-green-700 hover:to-green-800 
                       transform hover:scale-105 
@@ -212,19 +215,19 @@ export default function Home() {
           <img
             src={cvs}
             alt="Exemplo de conversa no WhatsApp"
-            className="w-[90%] md:w-[85%] lg:w-[75%] rounded-3xl transition-transform duration-300 hover:scale-110"
+            className="w-[80%] md:w-[75%] lg:w-[65%] rounded-3xl transition-transform duration-300 hover:scale-110"
           />
         </div>
       </section>
 
       {/* ===== SEÇÃO 3 - ANÁLISES INTELIGENTES / DASHBOARD ===== */}
-      <section className="h-screen bg-white flex flex-col md:flex-row items-center justify-center px-8 md:px-16 lg:px-24 gap-12">
+      <section className="min-h-screen bg-white flex flex-col md:flex-row items-center justify-center px-8 md:px-16 lg:px-24 gap-12">
         {/* Imagem da Dash (lado esquerdo) */}
         <div className="flex-1 flex justify-center">
           <img
             src={dash}
             alt="Dashboard financeiro"
-            className="w-[90%] md:w-[85%] lg:w-[80%] rounded-3xl shadow-2xl border border-gray-100 object-contain"
+            className="w-[100%] md:w-[95%] lg:w-[100%] rounded-3xl transition-transform duration-300 hover:scale-110"
           />
         </div>
 
@@ -391,6 +394,9 @@ export default function Home() {
             <span className="text-green-600 font-semibold">R$5,99/mês</span>
           </p>
           <button
+            onClick={() =>
+              window.open("https://granaia.weltonkellyson.com.br/register", "_blank")
+            }
             className="bg-gradient-to-r from-green-500 via-green-600 to-green-700 
                       hover:from-green-600 hover:via-green-700 hover:to-green-800 
                       transform hover:scale-105 
@@ -422,6 +428,7 @@ export default function Home() {
             {
               name: 'GranaIA Starter',
               price: 'R$5,99',
+              original: 'R$7,99',
               period: '/mês',
               link: "https://pay.kirvano.com/be9147a1-addd-4d1e-bc6b-ce77886be90d",
               description:
@@ -438,7 +445,8 @@ export default function Home() {
             },
             {
               name: 'GranaIA Premium',
-              price: 'R$9,99',
+              price: 'R$10,99',
+              original: 'R$14,99',
               period: '/mês',
               link: "https://pay.kirvano.com/a7458233-e00c-4747-8c2f-2789512e91da",
               description:
@@ -456,6 +464,7 @@ export default function Home() {
             {
               name: 'GranaIA Pro',
               price: 'R$79,99',
+              original: 'R$106,99',
               period: '/ano',
               link: "https://pay.kirvano.com/579a78ff-13c4-4ba9-80e2-d782b67c8488",
               description:
@@ -491,12 +500,26 @@ export default function Home() {
                 <h3 className="text-lg md:text-xl font-extrabold text-gray-900 mb-2">
                   {plan.name}
                 </h3>
-                <p className="text-green-600 text-3xl md:text-4xl font-extrabold mb-1">
-                  {plan.price}
-                  <span className="text-base font-semibold text-gray-500">
-                    {plan.period}
-                  </span>
-                </p>
+                {/* Preços promocionais */}
+                <div className="mb-3">
+                  {/* Preço original riscado */}
+                  <p className="text-sm text-gray-500 line-through">
+                    {plan.original}
+                  </p>
+
+                  {/* Preço atual */}
+                  <p className="text-green-600 text-3xl md:text-4xl font-extrabold">
+                    {plan.price}
+                    <span className="text-base font-semibold text-gray-500">
+                      {plan.period}
+                    </span>
+                  </p>
+                </div>
+
+                {/* Badge de desconto */}
+                <div className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full w-fit mx-auto mb-4">
+                  25% OFF
+                </div>
 
                 <p className="text-gray-600 text-sm md:text-base font-medium mb-5">
                   {plan.description}
@@ -531,7 +554,9 @@ export default function Home() {
         <p className="text-gray-500 text-xs mt-8 text-center">
           7 dias de acesso gratuito ao GranaIA Starter dentro da plataforma • Nenhuma cobrança durante o período de teste •{" "}
           <a
-            href="#"
+            href="https://granaia.weltonkellyson.com.br/register"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-green-600 font-semibold underline hover:text-green-700 transition"
           >
             Clique aqui para testar
@@ -725,7 +750,12 @@ export default function Home() {
             </div>
           </div>
 
-          <button className="bg-white text-green-700 font-semibold px-8 py-3 rounded-full shadow-lg hover:bg-green-50 transition duration-300">
+          <button
+            onClick={() =>
+              window.open("https://granaia.weltonkellyson.com.br/register", "_blank")
+            }
+            className="bg-white text-green-700 font-semibold px-8 py-3 rounded-full shadow-lg hover:bg-green-50 transition duration-300"
+          >
             Testar GranaIA grátis agora
           </button>
 
@@ -825,8 +855,16 @@ export default function Home() {
 
         {/* ===== Direitos autorais ===== */}
         <div className="bg-[#141414] text-center py-4 text-gray-500 text-xs border-t border-gray-800">
-          © 2025 <span className="text-green-400 font-semibold">GranaIA</span>.
-          Todos os direitos reservados.
+          © 2025{" "}
+          <a
+            href="https://www.instagram.com/we_tech.oficial?igsh=Nng2czAxNnIwbWow&utm_source=qr"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-green-400 font-semibold underline hover:text-green-300 transition"
+          >
+            WeTech
+          </a>
+          . Todos os direitos reservados.
         </div>
       </section>
     </div>

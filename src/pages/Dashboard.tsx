@@ -18,7 +18,6 @@ import {
   ArrowDownCircleIcon,
   ArrowUpCircleIcon,
   BanknotesIcon,
-  ArrowUpTrayIcon,
   UserCircleIcon,
   ArrowRightOnRectangleIcon,
   ChevronDownIcon,
@@ -27,7 +26,6 @@ import {
   TrashIcon,
 } from '@heroicons/react/24/outline';
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
-import * as XLSX from 'xlsx';
 import { useAuth } from '../contexts/AuthContext';
 import {
   apiService,
@@ -40,6 +38,7 @@ import Modal from '../components/Modal';
 import FormGasto from '../components/FormGasto';
 import FormReceita from '../components/FormReceita';
 import PremiumExpiredModal from '../components/PremiumExpiredModal';
+import ExcelExportButton from '../components/ExcelExportButton';
 
 type TransacaoTipo = 'Receita' | 'Despesa';
 
@@ -328,139 +327,6 @@ export default function Dashboard() {
       value: parseFloat(cat.total),
     })) || [];
 
-  // Exportar para Excel formatado
-  const exportToExcel = () => {
-    // Criar novo workbook
-    const wb = XLSX.utils.book_new();
-
-    // ===== ABA 1: RESUMO =====
-    const resumoData = [
-      ['RESUMO FINANCEIRO'],
-      [''],
-      ['Indicador', 'Valor'],
-      ['Total de Receitas', `R$ ${totalReceitas.toFixed(2)}`],
-      ['Total de Despesas', `R$ ${totalDespesas.toFixed(2)}`],
-      ['Saldo Atual', `R$ ${saldo.toFixed(2)}`],
-      [''],
-      ['DESPESAS POR CATEGORIA'],
-      [''],
-      ['Categoria', 'Total', 'Quantidade'],
-      ...(gastoDashboard?.por_categoria.map(cat => [
-        cat.categoria,
-        `R$ ${parseFloat(cat.total).toFixed(2)}`,
-        cat.quantidade
-      ]) || []),
-      [''],
-      ['RECEITAS POR CATEGORIA'],
-      [''],
-      ['Categoria', 'Total', 'Quantidade'],
-      ...(receitaDashboard?.por_categoria.map(cat => [
-        cat.categoria,
-        `R$ ${parseFloat(cat.total).toFixed(2)}`,
-        cat.quantidade
-      ]) || []),
-    ];
-    const wsResumo = XLSX.utils.aoa_to_sheet(resumoData);
-
-    // Definir larguras das colunas
-    wsResumo['!cols'] = [
-      { wch: 25 }, // Coluna A
-      { wch: 20 }, // Coluna B
-      { wch: 15 }, // Coluna C
-    ];
-
-    XLSX.utils.book_append_sheet(wb, wsResumo, 'Resumo');
-
-    // ===== ABA 2: RECEITAS =====
-    const receitasData = [
-      ['RECEITAS'],
-      [''],
-      ['Data', 'Descrição', 'Categoria', 'Origem', 'Valor'],
-      ...receitas
-        .sort((a, b) => new Date(b.data || b.created_at).getTime() - new Date(a.data || a.created_at).getTime())
-        .map(r => [
-          new Date(r.data || r.created_at).toLocaleDateString('pt-BR'),
-          r.descricao,
-          r.categoria,
-          r.origem || '-',
-          parseFloat(r.valor).toFixed(2)
-        ]),
-      [''],
-      ['TOTAL', '', '', '', receitas.reduce((sum, r) => sum + parseFloat(r.valor), 0).toFixed(2)]
-    ];
-    const wsReceitas = XLSX.utils.aoa_to_sheet(receitasData);
-    wsReceitas['!cols'] = [
-      { wch: 12 },
-      { wch: 30 },
-      { wch: 20 },
-      { wch: 20 },
-      { wch: 15 }
-    ];
-    XLSX.utils.book_append_sheet(wb, wsReceitas, 'Receitas');
-
-    // ===== ABA 3: DESPESAS =====
-    const despesasData = [
-      ['DESPESAS'],
-      [''],
-      ['Data', 'Descrição', 'Categoria', 'Valor'],
-      ...gastos
-        .sort((a, b) => new Date(b.data || b.created_at).getTime() - new Date(a.data || a.created_at).getTime())
-        .map(g => [
-          new Date(g.data || g.created_at).toLocaleDateString('pt-BR'),
-          g.descricao,
-          g.categoria,
-          parseFloat(g.valor).toFixed(2)
-        ]),
-      [''],
-      ['TOTAL', '', '', gastos.reduce((sum, g) => sum + parseFloat(g.valor), 0).toFixed(2)]
-    ];
-    const wsDespesas = XLSX.utils.aoa_to_sheet(despesasData);
-    wsDespesas['!cols'] = [
-      { wch: 12 },
-      { wch: 30 },
-      { wch: 20 },
-      { wch: 15 }
-    ];
-    XLSX.utils.book_append_sheet(wb, wsDespesas, 'Despesas');
-
-    // ===== ABA 4: TODAS AS TRANSAÇÕES =====
-    const todasData = [
-      ['TODAS AS TRANSAÇÕES'],
-      [''],
-      ['Data', 'Descrição', 'Tipo', 'Categoria', 'Valor'],
-      ...transacoesFiltradas
-        .sort((a, b) => {
-          if (ordenacao.campo === 'data') {
-            return ordenacao.ordem === 'asc'
-              ? new Date(a.data).getTime() - new Date(b.data).getTime()
-              : new Date(b.data).getTime() - new Date(a.data).getTime();
-          }
-          return ordenacao.ordem === 'asc'
-            ? a.tipo.localeCompare(b.tipo)
-            : b.tipo.localeCompare(a.tipo);
-        })
-        .map(t => [
-          new Date(t.data).toLocaleDateString('pt-BR'),
-          t.descricao,
-          t.tipo,
-          t.categoria,
-          t.valor.toFixed(2)
-        ])
-    ];
-    const wsTodas = XLSX.utils.aoa_to_sheet(todasData);
-    wsTodas['!cols'] = [
-      { wch: 12 },
-      { wch: 30 },
-      { wch: 12 },
-      { wch: 20 },
-      { wch: 15 }
-    ];
-    XLSX.utils.book_append_sheet(wb, wsTodas, 'Todas Transações');
-
-    // Gerar arquivo e fazer download
-    const hoje = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
-    XLSX.writeFile(wb, `Relatorio_Financeiro_${hoje}.xlsx`);
-  };
 
   const alternarOrdenacao = (campo: 'data' | 'tipo') => {
     if (ordenacao.campo === campo) {
@@ -493,13 +359,16 @@ export default function Dashboard() {
         </h1>
 
         <div className="flex items-center gap-4">
-          <button
-            onClick={exportToExcel}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-medium shadow-md transition"
-          >
-            <ArrowUpTrayIcon className="w-5 h-5" />
-            Exportar Relatório Excel
-          </button>
+          <ExcelExportButton
+            gastos={gastos}
+            receitas={receitas}
+            gastoDashboard={gastoDashboard}
+            receitaDashboard={receitaDashboard}
+            totalReceitas={totalReceitas}
+            totalDespesas={totalDespesas}
+            saldo={saldo}
+            transacoesFiltradas={transacoesFiltradas}
+          />
 
           {/* Menu do usuário */}
           <div className="relative">

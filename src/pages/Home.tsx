@@ -189,7 +189,7 @@ export default function Home() {
         {/* Texto descritivo */}
         <p className="text-gray-600 max-w-2xl">
           No <span className="font-semibold text-gray-800">GranaIA</span>, você
-          registra receitas, despesas, contas a pagar e a receber por texto ou
+          registra receitas, despesas, contas a pagar e a receber por texto, imagem ou
           áudio e consulta sua saúde financeira direto pelo WhatsApp.{' '}
           <span className="text-green-600 font-semibold">
             Planos a partir de R$5,99/mês.
@@ -431,7 +431,7 @@ export default function Home() {
           {[
             {
               icon: "https://img.icons8.com/?size=100&id=8XhS2MrAHUXV&format=png&color=25D366",
-              title: "Registro por voz ou texto no WhatsApp",
+              title: "Registro por voz, imagem ou texto no WhatsApp",
               desc: "Lance transações em segundos — incluindo contas a pagar e receber.",
               delay: 0.2,
             },

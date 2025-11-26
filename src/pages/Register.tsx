@@ -224,7 +224,7 @@ const Register: React.FC = () => {
                   searchPlaceholder="Buscar país..."
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Digite 11 dígitos: DDD + número (ex: 11 98765-4321)
+                  Digite 11 dígitos: DDD + número (ex: (11) 987654321)
                 </p>
               </div>
 

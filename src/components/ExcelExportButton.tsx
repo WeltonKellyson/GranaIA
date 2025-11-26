@@ -24,6 +24,11 @@ interface ExcelExportButtonProps {
     valor: number;
     categoria: string;
   }>;
+  filtros?: {
+    mes: string;
+    categoria: string;
+    tipo: string;
+  };
 }
 
 export default function ExcelExportButton({
@@ -35,8 +40,45 @@ export default function ExcelExportButton({
   totalDespesas,
   saldo,
   transacoesFiltradas,
+  filtros,
 }: ExcelExportButtonProps) {
   const exportToExcel = async () => {
+    // Aplicar filtros nas receitas e despesas
+    const receitasFiltradas = receitas.filter((r) => {
+      const data = r.data || r.created_at;
+      const anoMes = data.slice(0, 7);
+
+      const filtroMesOK = filtros?.mes ? anoMes === filtros.mes : true;
+      const filtroCategoriaOK = filtros?.categoria === 'todas' || !filtros?.categoria
+        ? true
+        : r.categoria === filtros.categoria;
+      const filtroTipoOK = filtros?.tipo === 'todos' || filtros?.tipo === 'Receita' || !filtros?.tipo
+        ? true
+        : false;
+
+      return filtroMesOK && filtroCategoriaOK && filtroTipoOK;
+    });
+
+    const gastosFiltrados = gastos.filter((g) => {
+      const data = g.data || g.created_at;
+      const anoMes = data.slice(0, 7);
+
+      const filtroMesOK = filtros?.mes ? anoMes === filtros.mes : true;
+      const filtroCategoriaOK = filtros?.categoria === 'todas' || !filtros?.categoria
+        ? true
+        : g.categoria === filtros.categoria;
+      const filtroTipoOK = filtros?.tipo === 'todos' || filtros?.tipo === 'Despesa' || !filtros?.tipo
+        ? true
+        : false;
+
+      return filtroMesOK && filtroCategoriaOK && filtroTipoOK;
+    });
+
+    // Recalcular totais baseados nos dados filtrados
+    const totalReceitasFiltradas = receitasFiltradas.reduce((sum, r) => sum + parseFloat(r.valor), 0);
+    const totalDespesasFiltradas = gastosFiltrados.reduce((sum, g) => sum + parseFloat(g.valor), 0);
+    const saldoFiltrado = totalReceitasFiltradas - totalDespesasFiltradas;
+
     // Criar workbook
     const workbook = new ExcelJS.Workbook();
     workbook.creator = 'GranaIA';
@@ -75,17 +117,17 @@ export default function ExcelExportButton({
 
     // Dados do resumo
     wsResumo.getCell('A4').value = 'Total de Receitas';
-    wsResumo.getCell('B4').value = `R$ ${totalReceitas.toFixed(2)}`;
+    wsResumo.getCell('B4').value = `R$ ${totalReceitasFiltradas.toFixed(2)}`;
     wsResumo.getCell('B4').font = { color: { argb: 'FF16A34A' }, bold: true };
 
     wsResumo.getCell('A5').value = 'Total de Despesas';
-    wsResumo.getCell('B5').value = `R$ ${totalDespesas.toFixed(2)}`;
+    wsResumo.getCell('B5').value = `R$ ${totalDespesasFiltradas.toFixed(2)}`;
     wsResumo.getCell('B5').font = { color: { argb: 'FFEF4444' }, bold: true };
 
     wsResumo.getCell('A6').value = 'Saldo Atual';
-    wsResumo.getCell('B6').value = `R$ ${saldo.toFixed(2)}`;
+    wsResumo.getCell('B6').value = `R$ ${saldoFiltrado.toFixed(2)}`;
     wsResumo.getCell('B6').font = {
-      color: { argb: saldo >= 0 ? 'FF16A34A' : 'FFEF4444' },
+      color: { argb: saldoFiltrado >= 0 ? 'FF16A34A' : 'FFEF4444' },
       bold: true,
       size: 14,
     };
@@ -251,7 +293,7 @@ export default function ExcelExportButton({
     wsReceitas.getRow(3).height = 25;
 
     // Dados
-    const receitasOrdenadas = [...receitas].sort(
+    const receitasOrdenadas = [...receitasFiltradas].sort(
       (a, b) =>
         new Date(b.data || b.created_at).getTime() - new Date(a.data || a.created_at).getTime()
     );
@@ -296,9 +338,7 @@ export default function ExcelExportButton({
     rowIdx++;
     wsReceitas.getCell(`A${rowIdx}`).value = 'TOTAL';
     wsReceitas.getCell(`A${rowIdx}`).font = { bold: true, size: 12 };
-    wsReceitas.getCell(`E${rowIdx}`).value = `R$ ${receitas
-      .reduce((sum, r) => sum + parseFloat(r.valor), 0)
-      .toFixed(2)}`;
+    wsReceitas.getCell(`E${rowIdx}`).value = `R$ ${totalReceitasFiltradas.toFixed(2)}`;
     wsReceitas.getCell(`E${rowIdx}`).font = { bold: true, size: 12, color: { argb: 'FF16A34A' } };
 
     // Larguras das colunas
@@ -348,7 +388,7 @@ export default function ExcelExportButton({
     wsDespesas.getRow(3).height = 25;
 
     // Dados
-    const despesasOrdenadas = [...gastos].sort(
+    const despesasOrdenadas = [...gastosFiltrados].sort(
       (a, b) =>
         new Date(b.data || b.created_at).getTime() - new Date(a.data || a.created_at).getTime()
     );
@@ -392,9 +432,7 @@ export default function ExcelExportButton({
     rowIdx++;
     wsDespesas.getCell(`A${rowIdx}`).value = 'TOTAL';
     wsDespesas.getCell(`A${rowIdx}`).font = { bold: true, size: 12 };
-    wsDespesas.getCell(`D${rowIdx}`).value = `R$ ${gastos
-      .reduce((sum, g) => sum + parseFloat(g.valor), 0)
-      .toFixed(2)}`;
+    wsDespesas.getCell(`D${rowIdx}`).value = `R$ ${totalDespesasFiltradas.toFixed(2)}`;
     wsDespesas.getCell(`D${rowIdx}`).font = { bold: true, size: 12, color: { argb: 'FFEF4444' } };
 
     // Larguras das colunas

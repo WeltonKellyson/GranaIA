@@ -368,6 +368,7 @@ export default function Dashboard() {
             totalDespesas={totalDespesas}
             saldo={saldo}
             transacoesFiltradas={transacoesFiltradas}
+            filtros={filtros}
           />
 
           {/* Menu do usuário */}

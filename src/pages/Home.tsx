@@ -550,7 +550,6 @@ export default function Home() {
                 'Todos os recursos do plano Starter',
                 'Crie, edite e exclua gastos e receitas pelo WhatsApp',
                 'Solicite relatórios diretamente pelo WhatsApp',
-                'Receba alertas e lembretes financeiros automáticos',
                 'Suporte dedicado via WhatsApp',
               ],
               button: 'Assinar Premium',

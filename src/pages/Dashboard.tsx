@@ -340,7 +340,8 @@ export default function Dashboard() {
   const saldo = totalReceitas - totalDespesas;
 
   // Dados para gráficos - com base nas transações FILTRADAS
-  const cores = ['#22c55e', '#16a34a', '#059669', '#047857', '#064e3b'];
+  const coresReceitas = ['#22c55e', '#16a34a', '#059669', '#047857', '#065f46', '#064e3b'];
+  const coresDespesas = ['#ef4444', '#dc2626', '#b91c1c', '#991b1b', '#7f1d1d', '#6b1414'];
 
   // Agrupar despesas por categoria das transações filtradas
   const categoriasGastos = (() => {
@@ -348,6 +349,25 @@ export default function Dashboard() {
 
     transacoesFiltradas
       .filter((t) => t.tipo === 'Despesa')
+      .forEach((t) => {
+        if (!categoriaMap[t.categoria]) {
+          categoriaMap[t.categoria] = 0;
+        }
+        categoriaMap[t.categoria] += t.valor;
+      });
+
+    return Object.entries(categoriaMap).map(([name, value]) => ({
+      name,
+      value,
+    }));
+  })();
+
+  // Agrupar receitas por categoria das transações filtradas
+  const categoriasReceitas = (() => {
+    const categoriaMap: Record<string, number> = {};
+
+    transacoesFiltradas
+      .filter((t) => t.tipo === 'Receita')
       .forEach((t) => {
         if (!categoriaMap[t.categoria]) {
           categoriaMap[t.categoria] = 0;
@@ -708,37 +728,84 @@ export default function Dashboard() {
         </section>
       )}
 
-      {/* ===== GRÁFICOS ===== */}
-      {categoriasGastos.length > 0 && (
-        <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">
-            Distribuição de Despesas por Categoria
-          </h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={categoriasGastos}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={(entry) => `${entry.name}: ${formatarMoeda(entry.value)}`}
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {categoriasGastos.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={cores[index % cores.length]}
+      {/* ===== GRÁFICOS DE PIZZA ===== */}
+      {(categoriasGastos.length > 0 || categoriasReceitas.length > 0) && (
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Gráfico de Despesas */}
+          {categoriasGastos.length > 0 && (
+            <div
+              className={`bg-white rounded-2xl shadow-md p-6 border border-gray-100 transition-all duration-500 ease-in-out ${
+                categoriasReceitas.length === 0 ? 'lg:col-span-2' : ''
+              }`}
+            >
+              <h2 className="text-xl font-bold text-gray-900 mb-6">
+                Distribuição de Despesas por Categoria
+              </h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={categoriasGastos}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={(entry) => `${entry.name}: ${formatarMoeda(entry.value)}`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {categoriasGastos.map((entry, index) => (
+                      <Cell
+                        key={`cell-despesa-${index}`}
+                        fill={coresDespesas[index % coresDespesas.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value: number) => formatarMoeda(value)}
                   />
-                ))}
-              </Pie>
-              <Tooltip
-                formatter={(value: number) => formatarMoeda(value)}
-              />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* Gráfico de Receitas */}
+          {categoriasReceitas.length > 0 && (
+            <div
+              className={`bg-white rounded-2xl shadow-md p-6 border border-gray-100 transition-all duration-500 ease-in-out ${
+                categoriasGastos.length === 0 ? 'lg:col-span-2' : ''
+              }`}
+            >
+              <h2 className="text-xl font-bold text-gray-900 mb-6">
+                Distribuição de Receitas por Categoria
+              </h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={categoriasReceitas}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={(entry) => `${entry.name}: ${formatarMoeda(entry.value)}`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {categoriasReceitas.map((entry, index) => (
+                      <Cell
+                        key={`cell-receita-${index}`}
+                        fill={coresReceitas[index % coresReceitas.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value: number) => formatarMoeda(value)}
+                  />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </section>
       )}
 

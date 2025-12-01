@@ -10,6 +10,7 @@ interface FormReceitaProps {
 const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [valorDisplay, setValorDisplay] = useState('');
 
   const [formData, setFormData] = useState({
     descricao: receita?.descricao || '',
@@ -19,15 +20,26 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
     data: receita?.data ? receita.data.split('T')[0] : new Date().toISOString().split('T')[0],
   });
 
+  // Formatar valor para exibição
+  const formatarValorDisplay = (valor: number): string => {
+    if (valor === 0) return '';
+    const valorStr = valor.toFixed(2).replace('.', ',');
+    const [inteiro, decimal] = valorStr.split(',');
+    const inteiroFormatado = inteiro.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `${inteiroFormatado},${decimal}`;
+  };
+
   useEffect(() => {
     if (receita) {
+      const valorNumerico = parseFloat(receita.valor);
       setFormData({
         descricao: receita.descricao,
-        valor: parseFloat(receita.valor),
+        valor: valorNumerico,
         categoria: receita.categoria,
         origem: receita.origem || '',
         data: receita.data ? receita.data.split('T')[0] : new Date().toISOString().split('T')[0],
       });
+      setValorDisplay(formatarValorDisplay(valorNumerico));
     }
   }, [receita]);
 
@@ -35,7 +47,45 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'valor' ? parseFloat(value) || 0 : value,
+      [name]: value,
+    }));
+    setError('');
+  };
+
+  const handleValorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let input = e.target.value;
+
+    // Remove tudo exceto números e vírgula
+    input = input.replace(/[^\d,]/g, '');
+
+    // Garante apenas uma vírgula
+    const parts = input.split(',');
+    if (parts.length > 2) {
+      input = parts[0] + ',' + parts.slice(1).join('');
+    }
+
+    // Limita a 2 casas decimais após a vírgula
+    if (parts.length === 2 && parts[1].length > 2) {
+      input = parts[0] + ',' + parts[1].slice(0, 2);
+    }
+
+    // Formata com separador de milhar na parte inteira
+    if (input) {
+      const [inteiro, decimal] = input.split(',');
+      const inteiroFormatado = inteiro.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      input = decimal !== undefined ? `${inteiroFormatado},${decimal}` : inteiroFormatado;
+    }
+
+    setValorDisplay(input);
+
+    // Converte para número para salvar no formData
+    const valorNumerico = parseFloat(
+      input.replace(/\./g, '').replace(',', '.')
+    ) || 0;
+
+    setFormData((prev) => ({
+      ...prev,
+      valor: valorNumerico,
     }));
     setError('');
   };
@@ -130,15 +180,13 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
           Valor (R$) <span className="text-red-500">*</span>
         </label>
         <input
-          type="number"
+          type="text"
           id="valor"
           name="valor"
-          value={formData.valor}
-          onChange={handleChange}
-          step="0.01"
-          min="0.01"
+          value={valorDisplay}
+          onChange={handleValorChange}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-          placeholder="0.00"
+          placeholder="0,00"
           required
         />
       </div>

@@ -42,6 +42,14 @@ import ExcelExportButton from '../components/ExcelExportButton';
 
 type TransacaoTipo = 'Receita' | 'Despesa';
 
+// Função para formatar valores em Real brasileiro
+const formatarMoeda = (valor: number): string => {
+  return valor.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
+};
+
 interface Transacao {
   id: string;
   data: string;
@@ -84,6 +92,9 @@ export default function Dashboard() {
     categoria: 'todas',
     tipo: 'todos',
   });
+
+  // Estado da pesquisa (separado dos filtros)
+  const [pesquisaDescricao, setPesquisaDescricao] = useState('');
 
   // Estados da tabela
   const [paginaAtual, setPaginaAtual] = useState(1);
@@ -257,7 +268,11 @@ export default function Dashboard() {
     const filtroTipoOK =
       filtros.tipo === 'todos' ? true : t.tipo === filtros.tipo;
 
-    return filtroMesOK && filtroCategoriaOK && filtroTipoOK;
+    const filtroDescricaoOK = pesquisaDescricao
+      ? t.descricao.toLowerCase().includes(pesquisaDescricao.toLowerCase())
+      : true;
+
+    return filtroMesOK && filtroCategoriaOK && filtroTipoOK && filtroDescricaoOK;
   });
 
   // === AGRUPAMENTO POR MÊS PARA O GRÁFICO DE LINHA ===
@@ -313,19 +328,71 @@ export default function Dashboard() {
     indiceInicial + itensPorPagina,
   );
 
-  // Calcular resumo
-  const totalReceitas = parseFloat(receitaDashboard?.total_geral || '0');
-  const totalDespesas = parseFloat(gastoDashboard?.total_geral || '0');
+  // Calcular resumo com base nas transações FILTRADAS
+  const totalReceitas = transacoesFiltradas
+    .filter((t) => t.tipo === 'Receita')
+    .reduce((acc, t) => acc + t.valor, 0);
+
+  const totalDespesas = transacoesFiltradas
+    .filter((t) => t.tipo === 'Despesa')
+    .reduce((acc, t) => acc + t.valor, 0);
+
   const saldo = totalReceitas - totalDespesas;
 
-  // Dados para gráficos
+  // Dados para gráficos - com base nas transações FILTRADAS
   const cores = ['#22c55e', '#16a34a', '#059669', '#047857', '#064e3b'];
 
-  const categoriasGastos =
-    gastoDashboard?.por_categoria.map((cat) => ({
-      name: cat.categoria,
-      value: parseFloat(cat.total),
-    })) || [];
+  // Agrupar despesas por categoria das transações filtradas
+  const categoriasGastos = (() => {
+    const categoriaMap: Record<string, number> = {};
+
+    transacoesFiltradas
+      .filter((t) => t.tipo === 'Despesa')
+      .forEach((t) => {
+        if (!categoriaMap[t.categoria]) {
+          categoriaMap[t.categoria] = 0;
+        }
+        categoriaMap[t.categoria] += t.valor;
+      });
+
+    return Object.entries(categoriaMap).map(([name, value]) => ({
+      name,
+      value,
+    }));
+  })();
+
+  // Lista completa de categorias do sistema
+  const todasCategorias = [
+    'Alimentação',
+    'Transporte',
+    'Moradia',
+    'Lazer',
+    'Saúde',
+    'Educação',
+    'Compras',
+    'Viagem',
+    'Assinaturas',
+    'Salário',
+    'Freelance',
+    'Investimentos',
+    'Bonificação',
+    'Presente',
+    'Aluguel',
+    'Venda',
+    'Outros',
+  ];
+
+  // Contar transações por categoria (sem filtros aplicados, usa todas as transações)
+  const contagemPorCategoria = (() => {
+    const contagem: Record<string, number> = {};
+    todasTransacoes.forEach((t) => {
+      if (!contagem[t.categoria]) {
+        contagem[t.categoria] = 0;
+      }
+      contagem[t.categoria]++;
+    });
+    return contagem;
+  })();
 
 
   const alternarOrdenacao = (campo: 'data' | 'tipo') => {
@@ -484,7 +551,7 @@ export default function Dashboard() {
                 saldo >= 0 ? 'text-green-600' : 'text-red-600'
               }`}
             >
-              R$ {saldo.toFixed(2)}
+              {formatarMoeda(saldo)}
             </h3>
           </div>
         </div>
@@ -495,7 +562,7 @@ export default function Dashboard() {
           <div>
             <p className="text-sm text-gray-500">Receitas</p>
             <h3 className="text-2xl font-bold text-gray-900">
-              R$ {totalReceitas.toFixed(2)}
+              {formatarMoeda(totalReceitas)}
             </h3>
           </div>
         </div>
@@ -506,7 +573,7 @@ export default function Dashboard() {
           <div>
             <p className="text-sm text-gray-500">Despesas</p>
             <h3 className="text-2xl font-bold text-gray-900">
-              R$ {totalDespesas.toFixed(2)}
+              {formatarMoeda(totalDespesas)}
             </h3>
           </div>
         </div>
@@ -551,16 +618,15 @@ export default function Dashboard() {
             >
               <option value="todas">Todas</option>
 
-              {/* Pega categorias reais vindas do backend */}
-              {Array.from(
-                new Set(
-                  todasTransacoes.map((t) => t.categoria).filter(Boolean),
-                ),
-              ).map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
+              {/* Lista todas as categorias com contagem */}
+              {todasCategorias.map((cat) => {
+                const quantidade = contagemPorCategoria[cat] || 0;
+                return (
+                  <option key={cat} value={cat}>
+                    {cat} {quantidade > 0 ? `(${quantidade})` : ''}
+                  </option>
+                );
+              })}
             </select>
           </div>
 
@@ -617,7 +683,7 @@ export default function Dashboard() {
               <YAxis />
 
               <Tooltip
-                formatter={(value: number) => `R$ ${value.toFixed(2)}`}
+                formatter={(value: number) => formatarMoeda(value)}
               />
 
               <Legend />
@@ -655,7 +721,7 @@ export default function Dashboard() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={(entry) => `${entry.name}: R$ ${entry.value.toFixed(2)}`}
+                label={(entry) => `${entry.name}: ${formatarMoeda(entry.value)}`}
                 outerRadius={100}
                 fill="#8884d8"
                 dataKey="value"
@@ -668,7 +734,7 @@ export default function Dashboard() {
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value: number) => `R$ ${value.toFixed(2)}`}
+                formatter={(value: number) => formatarMoeda(value)}
               />
               <Legend />
             </PieChart>
@@ -678,9 +744,33 @@ export default function Dashboard() {
 
       {/* ===== TABELA DE TRANSAÇÕES ===== */}
       <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">
-          Movimentações Recentes
-        </h2>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+          <h2 className="text-xl font-bold text-gray-900">
+            Movimentações Recentes
+          </h2>
+
+          {/* Campo de Pesquisa */}
+          <div className="w-full md:w-80 relative">
+            <input
+              type="text"
+              value={pesquisaDescricao}
+              onChange={(e) => setPesquisaDescricao(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white
+                text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent transition
+                placeholder-gray-400"
+              placeholder="🔍 Pesquisar por descrição..."
+            />
+            {pesquisaDescricao && (
+              <button
+                onClick={() => setPesquisaDescricao('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                title="Limpar pesquisa"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
 
         {/* Tabela */}
         <div className="overflow-x-auto">
@@ -751,7 +841,7 @@ export default function Dashboard() {
                         t.tipo === 'Receita' ? 'text-green-600' : 'text-red-600'
                       }`}
                     >
-                      R$ {t.valor.toFixed(2)}
+                      {formatarMoeda(t.valor)}
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center justify-center gap-2">

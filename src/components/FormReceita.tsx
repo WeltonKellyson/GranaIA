@@ -93,13 +93,39 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.descricao || !formData.valor || !formData.categoria) {
-      setError('Por favor, preencha todos os campos obrigatórios');
+    // Validações mais robustas
+    if (!formData.descricao || formData.descricao.trim().length === 0) {
+      setError('Por favor, informe uma descrição válida');
       return;
     }
 
-    if (formData.valor <= 0) {
+    if (formData.descricao.trim().length < 3) {
+      setError('A descrição deve ter pelo menos 3 caracteres');
+      return;
+    }
+
+    if (formData.descricao.trim().length > 200) {
+      setError('A descrição deve ter no máximo 200 caracteres');
+      return;
+    }
+
+    if (!formData.valor || formData.valor <= 0) {
       setError('O valor deve ser maior que zero');
+      return;
+    }
+
+    if (formData.valor > 999999999) {
+      setError('O valor é muito alto. Máximo permitido: R$ 999.999.999,00');
+      return;
+    }
+
+    if (!formData.categoria) {
+      setError('Por favor, selecione uma categoria');
+      return;
+    }
+
+    if (formData.origem && formData.origem.trim().length > 100) {
+      setError('A origem deve ter no máximo 100 caracteres');
       return;
     }
 
@@ -110,20 +136,20 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
       if (receita) {
         // Atualizar receita existente
         const updateData: ReceitaUpdate = {
-          descricao: formData.descricao,
+          descricao: formData.descricao.trim(),
           valor: formData.valor,
           categoria: formData.categoria,
-          origem: formData.origem || null,
+          origem: formData.origem?.trim() || null,
           data: formData.data || null,
         };
         await apiService.updateReceita(receita.id, updateData);
       } else {
         // Criar nova receita
         const createData: ReceitaCreate = {
-          descricao: formData.descricao,
+          descricao: formData.descricao.trim(),
           valor: formData.valor,
           categoria: formData.categoria,
-          origem: formData.origem || null,
+          origem: formData.origem?.trim() || null,
           data: formData.data || null,
         };
         await apiService.createReceita(createData);
@@ -132,7 +158,29 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
       onSuccess();
     } catch (err: any) {
       console.error('Erro ao salvar receita:', err);
-      setError(err.message || 'Erro ao salvar receita');
+
+      // Tratamento de erros mais específico
+      let errorMessage = 'Erro ao salvar receita. Tente novamente.';
+
+      if (err.response) {
+        // Erro da API
+        if (err.response.status === 401) {
+          errorMessage = 'Sessão expirada. Por favor, faça login novamente.';
+        } else if (err.response.status === 403) {
+          errorMessage = 'Você não tem permissão para realizar esta ação.';
+        } else if (err.response.status === 404) {
+          errorMessage = 'Receita não encontrada.';
+        } else if (err.response.status === 500) {
+          errorMessage = 'Erro no servidor. Tente novamente mais tarde.';
+        } else if (err.response.data?.message) {
+          errorMessage = err.response.data.message;
+        }
+      } else if (err.request) {
+        // Erro de rede
+        errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -152,8 +200,22 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-          {error}
+        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg text-sm flex items-start gap-3 animate-shake">
+          <svg
+            className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fillRule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <div className="flex-1">
+            <p className="font-medium">Erro</p>
+            <p className="text-xs mt-1">{error}</p>
+          </div>
         </div>
       )}
 

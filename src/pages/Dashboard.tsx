@@ -39,8 +39,14 @@ import FormGasto from '../components/FormGasto';
 import FormReceita from '../components/FormReceita';
 import PremiumExpiredModal from '../components/PremiumExpiredModal';
 import ExcelExportButton from '../components/ExcelExportButton';
+import Toast from '../components/Toast';
 
 type TransacaoTipo = 'Receita' | 'Despesa';
+
+interface ToastMessage {
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
 
 // Função para formatar valores em Real brasileiro
 const formatarMoeda = (valor: number): string => {
@@ -64,6 +70,7 @@ export default function Dashboard() {
   const { user, userProfile, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
 
   // Verifica se o premium está ativo
   const isPremiumActive = userProfile?.is_premium_active ?? false;
@@ -186,9 +193,10 @@ export default function Dashboard() {
     try {
       await apiService.deleteGasto(id);
       await loadData();
+      setToast({ message: 'Gasto deletado com sucesso!', type: 'success' });
     } catch (error) {
       console.error('Erro ao deletar gasto:', error);
-      alert('Erro ao deletar gasto');
+      setToast({ message: 'Erro ao deletar gasto. Tente novamente.', type: 'error' });
     }
   };
 
@@ -198,9 +206,10 @@ export default function Dashboard() {
     try {
       await apiService.deleteReceita(id);
       await loadData();
+      setToast({ message: 'Receita deletada com sucesso!', type: 'success' });
     } catch (error) {
       console.error('Erro ao deletar receita:', error);
-      alert('Erro ao deletar receita');
+      setToast({ message: 'Erro ao deletar receita. Tente novamente.', type: 'error' });
     }
   };
 
@@ -216,14 +225,24 @@ export default function Dashboard() {
 
   const handleGastoSuccess = async () => {
     setShowGastoModal(false);
+    const isEditing = editingGasto !== null;
     setEditingGasto(null);
     await loadData();
+    setToast({
+      message: isEditing ? 'Gasto atualizado com sucesso!' : 'Gasto criado com sucesso!',
+      type: 'success',
+    });
   };
 
   const handleReceitaSuccess = async () => {
     setShowReceitaModal(false);
+    const isEditing = editingReceita !== null;
     setEditingReceita(null);
     await loadData();
+    setToast({
+      message: isEditing ? 'Receita atualizada com sucesso!' : 'Receita criada com sucesso!',
+      type: 'success',
+    });
   };
 
   const handleGastoCancel = () => {
@@ -429,9 +448,38 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando dados...</p>
+        <div className="text-center max-w-md mx-auto px-6">
+          {/* Spinner animado */}
+          <div className="relative mb-6">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-green-600 mx-auto"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-8 h-8 bg-green-100 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Mensagem principal */}
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">
+            Carregando seu Dashboard
+          </h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Estamos preparando suas informações financeiras...
+          </p>
+
+          {/* Indicadores de progresso */}
+          <div className="space-y-2 text-left">
+            <div className="flex items-center gap-3 text-sm text-gray-500">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span>Carregando receitas e despesas</span>
+            </div>
+            <div className="flex items-center gap-3 text-sm text-gray-500">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse delay-75"></div>
+              <span>Processando categorias</span>
+            </div>
+            <div className="flex items-center gap-3 text-sm text-gray-500">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse delay-150"></div>
+              <span>Gerando gráficos</span>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -1050,6 +1098,15 @@ export default function Dashboard() {
         onClose={() => setShowPremiumModal(false)}
         premiumUntil={userProfile?.premium_until}
       />
+
+      {/* Toast de Notificação */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

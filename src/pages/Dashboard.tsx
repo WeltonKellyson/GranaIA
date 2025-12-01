@@ -40,6 +40,9 @@ import FormReceita from '../components/FormReceita';
 import PremiumExpiredModal from '../components/PremiumExpiredModal';
 import ExcelExportButton from '../components/ExcelExportButton';
 import Toast from '../components/Toast';
+import MetasGastos from '../components/MetasGastos';
+import EmptyState from '../components/EmptyState';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 type TransacaoTipo = 'Receita' | 'Despesa';
 
@@ -98,10 +101,24 @@ export default function Dashboard() {
     mes: '',
     categoria: 'todas',
     tipo: 'todos',
+    periodo: 'todos', // todos, ultimos30, ultimos60, ultimos90, anoAtual, mesAtual
   });
 
   // Estado da pesquisa (separado dos filtros)
   const [pesquisaDescricao, setPesquisaDescricao] = useState('');
+
+  // Estado de comparação entre períodos
+  const [mostrarComparacao, setMostrarComparacao] = useState(false);
+
+  // Estado para mostrar atalhos
+  const [mostrarAtalhos, setMostrarAtalhos] = useState(false);
+
+  // Estado para confirmação de exclusão
+  const [confirmDelete, setConfirmDelete] = useState<{
+    isOpen: boolean;
+    id: string;
+    tipo: 'gasto' | 'receita';
+  }>({ isOpen: false, id: '', tipo: 'gasto' });
 
   // Estados da tabela
   const [paginaAtual, setPaginaAtual] = useState(1);
@@ -187,30 +204,105 @@ export default function Dashboard() {
     }
   }, [isPremiumActive, userProfile]);
 
-  const handleDeleteGasto = async (id: string) => {
-    if (!confirm('Tem certeza que deseja deletar este gasto?')) return;
+  // Atalhos de teclado
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Ignorar se estiver digitando em um input/textarea
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        return;
+      }
 
-    try {
-      await apiService.deleteGasto(id);
-      await loadData();
-      setToast({ message: 'Gasto deletado com sucesso!', type: 'success' });
-    } catch (error) {
-      console.error('Erro ao deletar gasto:', error);
-      setToast({ message: 'Erro ao deletar gasto. Tente novamente.', type: 'error' });
-    }
+      // Ctrl/Cmd + D = Nova Despesa
+      if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+        e.preventDefault();
+        if (isPremiumActive) {
+          setEditingGasto(null);
+          setShowGastoModal(true);
+        }
+      }
+
+      // Ctrl/Cmd + R = Nova Receita
+      if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+        e.preventDefault();
+        if (isPremiumActive) {
+          setEditingReceita(null);
+          setShowReceitaModal(true);
+        }
+      }
+
+      // Ctrl/Cmd + L = Limpar Filtros
+      if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+        e.preventDefault();
+        setFiltros({
+          mes: '',
+          categoria: 'todas',
+          tipo: 'todos',
+          periodo: 'todos',
+        });
+        setPesquisaDescricao('');
+      }
+
+      // Ctrl/Cmd + F = Focar na pesquisa
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        const searchInput = document.querySelector('input[placeholder*="Pesquisar"]') as HTMLInputElement;
+        if (searchInput) {
+          searchInput.focus();
+        }
+      }
+
+      // ESC = Fechar modais
+      if (e.key === 'Escape') {
+        if (showGastoModal) {
+          setShowGastoModal(false);
+          setEditingGasto(null);
+        }
+        if (showReceitaModal) {
+          setShowReceitaModal(false);
+          setEditingReceita(null);
+        }
+        if (showUserMenu) {
+          setShowUserMenu(false);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [isPremiumActive, showGastoModal, showReceitaModal, showUserMenu]);
+
+  const handleDeleteGasto = async (id: string) => {
+    setConfirmDelete({ isOpen: true, id, tipo: 'gasto' });
   };
 
   const handleDeleteReceita = async (id: string) => {
-    if (!confirm('Tem certeza que deseja deletar esta receita?')) return;
+    setConfirmDelete({ isOpen: true, id, tipo: 'receita' });
+  };
 
+  const confirmarDelete = async () => {
     try {
-      await apiService.deleteReceita(id);
+      if (confirmDelete.tipo === 'gasto') {
+        await apiService.deleteGasto(confirmDelete.id);
+        setToast({ message: 'Gasto deletado com sucesso!', type: 'success' });
+      } else {
+        await apiService.deleteReceita(confirmDelete.id);
+        setToast({ message: 'Receita deletada com sucesso!', type: 'success' });
+      }
       await loadData();
-      setToast({ message: 'Receita deletada com sucesso!', type: 'success' });
     } catch (error) {
-      console.error('Erro ao deletar receita:', error);
-      setToast({ message: 'Erro ao deletar receita. Tente novamente.', type: 'error' });
+      console.error('Erro ao deletar:', error);
+      setToast({
+        message: `Erro ao deletar ${confirmDelete.tipo}. Tente novamente.`,
+        type: 'error',
+      });
+    } finally {
+      setConfirmDelete({ isOpen: false, id: '', tipo: 'gasto' });
     }
+  };
+
+  const cancelarDelete = () => {
+    setConfirmDelete({ isOpen: false, id: '', tipo: 'gasto' });
   };
 
   const handleEditGasto = (gasto: GastoResponse) => {
@@ -277,9 +369,41 @@ export default function Dashboard() {
 
   // === APLICAR FILTROS ===
   const transacoesFiltradas = todasTransacoes.filter((t) => {
+    const dataTransacao = new Date(t.data);
+    const hoje = new Date();
     const anoMes = t.data.slice(0, 7); // pega "2025-03" por exemplo
 
+    // Filtro de mês específico (se selecionado, tem prioridade sobre período)
     const filtroMesOK = filtros.mes ? anoMes === filtros.mes : true;
+
+    // Filtro de período customizado
+    let filtroPeriodoOK = true;
+    if (!filtros.mes && filtros.periodo !== 'todos') {
+      const diffTime = hoje.getTime() - dataTransacao.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      switch (filtros.periodo) {
+        case 'ultimos30':
+          filtroPeriodoOK = diffDays <= 30;
+          break;
+        case 'ultimos60':
+          filtroPeriodoOK = diffDays <= 60;
+          break;
+        case 'ultimos90':
+          filtroPeriodoOK = diffDays <= 90;
+          break;
+        case 'anoAtual':
+          filtroPeriodoOK = dataTransacao.getFullYear() === hoje.getFullYear();
+          break;
+        case 'mesAtual':
+          filtroPeriodoOK =
+            dataTransacao.getFullYear() === hoje.getFullYear() &&
+            dataTransacao.getMonth() === hoje.getMonth();
+          break;
+        default:
+          filtroPeriodoOK = true;
+      }
+    }
 
     const filtroCategoriaOK =
       filtros.categoria === 'todas' ? true : t.categoria === filtros.categoria;
@@ -291,7 +415,7 @@ export default function Dashboard() {
       ? t.descricao.toLowerCase().includes(pesquisaDescricao.toLowerCase())
       : true;
 
-    return filtroMesOK && filtroCategoriaOK && filtroTipoOK && filtroDescricaoOK;
+    return filtroMesOK && filtroPeriodoOK && filtroCategoriaOK && filtroTipoOK && filtroDescricaoOK;
   });
 
   // === AGRUPAMENTO POR MÊS PARA O GRÁFICO DE LINHA ===
@@ -357,6 +481,59 @@ export default function Dashboard() {
     .reduce((acc, t) => acc + t.valor, 0);
 
   const saldo = totalReceitas - totalDespesas;
+
+  // === CÁLCULO DE TENDÊNCIAS (Mês Atual vs Mês Anterior) ===
+  const calcularTendencias = () => {
+    const hoje = new Date();
+    const mesAtual = hoje.getMonth();
+    const anoAtual = hoje.getFullYear();
+
+    // Transações do mês atual
+    const transacoesMesAtual = todasTransacoes.filter((t) => {
+      const data = new Date(t.data);
+      return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
+    });
+
+    // Transações do mês anterior
+    const mesAnterior = mesAtual === 0 ? 11 : mesAtual - 1;
+    const anoMesAnterior = mesAtual === 0 ? anoAtual - 1 : anoAtual;
+    const transacoesMesAnterior = todasTransacoes.filter((t) => {
+      const data = new Date(t.data);
+      return data.getMonth() === mesAnterior && data.getFullYear() === anoMesAnterior;
+    });
+
+    const receitasMesAtual = transacoesMesAtual
+      .filter((t) => t.tipo === 'Receita')
+      .reduce((acc, t) => acc + t.valor, 0);
+
+    const receitasMesAnterior = transacoesMesAnterior
+      .filter((t) => t.tipo === 'Receita')
+      .reduce((acc, t) => acc + t.valor, 0);
+
+    const despesasMesAtual = transacoesMesAtual
+      .filter((t) => t.tipo === 'Despesa')
+      .reduce((acc, t) => acc + t.valor, 0);
+
+    const despesasMesAnterior = transacoesMesAnterior
+      .filter((t) => t.tipo === 'Despesa')
+      .reduce((acc, t) => acc + t.valor, 0);
+
+    // Calcular percentual de variação
+    const variacaoReceitas = receitasMesAnterior > 0
+      ? ((receitasMesAtual - receitasMesAnterior) / receitasMesAnterior) * 100
+      : receitasMesAtual > 0 ? 100 : 0;
+
+    const variacaoDespesas = despesasMesAnterior > 0
+      ? ((despesasMesAtual - despesasMesAnterior) / despesasMesAnterior) * 100
+      : despesasMesAtual > 0 ? 100 : 0;
+
+    return {
+      variacaoReceitas,
+      variacaoDespesas,
+    };
+  };
+
+  const { variacaoReceitas, variacaoDespesas } = calcularTendencias();
 
   // Dados para gráficos - com base nas transações FILTRADAS
   const coresReceitas = ['#22c55e', '#16a34a', '#059669', '#047857', '#065f46', '#064e3b'];
@@ -489,9 +666,20 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-100 text-gray-800 p-6 md:p-10 space-y-10 overflow-x-hidden">
       {/* ===== CABEÇALHO ===== */}
       <header className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-        <h1 className="text-3xl font-extrabold text-gray-900">
-          Dashboard <span className="text-green-600">Financeiro</span>
-        </h1>
+        <div>
+          <h1 className="text-3xl font-extrabold text-gray-900">
+            Dashboard <span className="text-green-600">Financeiro</span>
+          </h1>
+          <button
+            onClick={() => setMostrarAtalhos(!mostrarAtalhos)}
+            className="text-xs text-gray-500 hover:text-gray-700 mt-1 flex items-center gap-1"
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {mostrarAtalhos ? 'Ocultar' : 'Ver'} atalhos de teclado
+          </button>
+        </div>
 
         <div className="flex items-center gap-4">
           <ExcelExportButton
@@ -565,6 +753,38 @@ export default function Dashboard() {
         </div>
       </header>
 
+      {/* ===== ATALHOS DE TECLADO ===== */}
+      {mostrarAtalhos && (
+        <section className="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4">
+          <h3 className="text-sm font-semibold text-blue-800 mb-3">Atalhos de Teclado</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs text-blue-900">
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-white rounded border border-blue-300 font-mono">Ctrl+D</kbd>
+              <span>Nova Despesa</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-white rounded border border-blue-300 font-mono">Ctrl+R</kbd>
+              <span>Nova Receita</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-white rounded border border-blue-300 font-mono">Ctrl+L</kbd>
+              <span>Limpar Filtros</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-white rounded border border-blue-300 font-mono">Ctrl+F</kbd>
+              <span>Buscar</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-white rounded border border-blue-300 font-mono">ESC</kbd>
+              <span>Fechar Modais</span>
+            </div>
+          </div>
+          <p className="text-xs text-blue-700 mt-3 italic">
+            💡 Use <kbd className="px-1 bg-white rounded border border-blue-300 font-mono text-xs">Cmd</kbd> no Mac ao invés de Ctrl
+          </p>
+        </section>
+      )}
+
       {/* ===== BOTÕES DE AÇÃO ===== */}
       <section className="flex flex-wrap gap-3 justify-center md:justify-start">
         <button
@@ -625,43 +845,198 @@ export default function Dashboard() {
         </div>
 
         {/* Receitas */}
-        <div className="bg-white shadow-md rounded-xl p-6 flex items-center gap-4 border border-gray-100">
-          <ArrowUpCircleIcon className="w-10 h-10 text-green-600" />
-          <div>
-            <p className="text-sm text-gray-500">Receitas</p>
-            <h3 className="text-2xl font-bold text-gray-900">
-              {formatarMoeda(totalReceitas)}
-            </h3>
+        <div className="bg-white shadow-md rounded-xl p-6 border border-gray-100">
+          <div className="flex items-center gap-4 mb-2">
+            <ArrowUpCircleIcon className="w-10 h-10 text-green-600" />
+            <div className="flex-1">
+              <p className="text-sm text-gray-500">Receitas</p>
+              <h3 className="text-2xl font-bold text-gray-900">
+                {formatarMoeda(totalReceitas)}
+              </h3>
+            </div>
           </div>
+          {/* Indicador de Tendência */}
+          {variacaoReceitas !== 0 && (
+            <div className={`flex items-center gap-1 text-sm mt-2 ${
+              variacaoReceitas > 0 ? 'text-green-600' : 'text-red-600'
+            }`}>
+              {variacaoReceitas > 0 ? (
+                <ArrowUpIcon className="w-4 h-4" />
+              ) : (
+                <ArrowDownIcon className="w-4 h-4" />
+              )}
+              <span className="font-medium">
+                {Math.abs(variacaoReceitas).toFixed(1)}%
+              </span>
+              <span className="text-gray-500 text-xs ml-1">vs mês anterior</span>
+            </div>
+          )}
         </div>
 
         {/* Despesas */}
-        <div className="bg-white shadow-md rounded-xl p-6 flex items-center gap-4 border border-gray-100">
-          <ArrowDownCircleIcon className="w-10 h-10 text-red-500" />
-          <div>
-            <p className="text-sm text-gray-500">Despesas</p>
-            <h3 className="text-2xl font-bold text-gray-900">
-              {formatarMoeda(totalDespesas)}
-            </h3>
+        <div className="bg-white shadow-md rounded-xl p-6 border border-gray-100">
+          <div className="flex items-center gap-4 mb-2">
+            <ArrowDownCircleIcon className="w-10 h-10 text-red-500" />
+            <div className="flex-1">
+              <p className="text-sm text-gray-500">Despesas</p>
+              <h3 className="text-2xl font-bold text-gray-900">
+                {formatarMoeda(totalDespesas)}
+              </h3>
+            </div>
           </div>
+          {/* Indicador de Tendência */}
+          {variacaoDespesas !== 0 && (
+            <div className={`flex items-center gap-1 text-sm mt-2 ${
+              variacaoDespesas > 0 ? 'text-red-600' : 'text-green-600'
+            }`}>
+              {variacaoDespesas > 0 ? (
+                <ArrowUpIcon className="w-4 h-4" />
+              ) : (
+                <ArrowDownIcon className="w-4 h-4" />
+              )}
+              <span className="font-medium">
+                {Math.abs(variacaoDespesas).toFixed(1)}%
+              </span>
+              <span className="text-gray-500 text-xs ml-1">vs mês anterior</span>
+            </div>
+          )}
         </div>
+      </section>
+
+      {/* ===== COMPARAÇÃO ENTRE PERÍODOS ===== */}
+      <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-800">
+            Comparação de Períodos
+          </h2>
+          <button
+            onClick={() => setMostrarComparacao(!mostrarComparacao)}
+            className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 transition"
+          >
+            {mostrarComparacao ? 'Ocultar' : 'Mostrar'} Comparação
+          </button>
+        </div>
+
+        {mostrarComparacao && (() => {
+          const hoje = new Date();
+          const mesAtual = hoje.getMonth();
+          const anoAtual = hoje.getFullYear();
+          const mesAnterior = mesAtual === 0 ? 11 : mesAtual - 1;
+          const anoMesAnterior = mesAtual === 0 ? anoAtual - 1 : anoAtual;
+
+          // Dados mês atual
+          const dadosMesAtual = todasTransacoes.filter((t) => {
+            const data = new Date(t.data);
+            return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
+          });
+
+          // Dados mês anterior
+          const dadosMesAnterior = todasTransacoes.filter((t) => {
+            const data = new Date(t.data);
+            return data.getMonth() === mesAnterior && data.getFullYear() === anoMesAnterior;
+          });
+
+          const calcularResumo = (transacoes: Transacao[]) => ({
+            receitas: transacoes.filter(t => t.tipo === 'Receita').reduce((acc, t) => acc + t.valor, 0),
+            despesas: transacoes.filter(t => t.tipo === 'Despesa').reduce((acc, t) => acc + t.valor, 0),
+            saldo: transacoes.filter(t => t.tipo === 'Receita').reduce((acc, t) => acc + t.valor, 0) -
+                   transacoes.filter(t => t.tipo === 'Despesa').reduce((acc, t) => acc + t.valor, 0),
+          });
+
+          const resumoAtual = calcularResumo(dadosMesAtual);
+          const resumoAnterior = calcularResumo(dadosMesAnterior);
+
+          const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+          return (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+              {/* Mês Anterior */}
+              <div className="border border-gray-200 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-700 mb-3">
+                  {meses[mesAnterior]} {anoMesAnterior}
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Receitas:</span>
+                    <span className="font-medium text-green-600">{formatarMoeda(resumoAnterior.receitas)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Despesas:</span>
+                    <span className="font-medium text-red-600">{formatarMoeda(resumoAnterior.despesas)}</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t">
+                    <span className="text-gray-700 font-medium">Saldo:</span>
+                    <span className={`font-bold ${resumoAnterior.saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {formatarMoeda(resumoAnterior.saldo)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mês Atual */}
+              <div className="border-2 border-green-500 rounded-lg p-4 bg-green-50">
+                <h3 className="font-semibold text-gray-700 mb-3">
+                  {meses[mesAtual]} {anoAtual} <span className="text-xs text-green-600">(Atual)</span>
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Receitas:</span>
+                    <span className="font-medium text-green-600">{formatarMoeda(resumoAtual.receitas)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Despesas:</span>
+                    <span className="font-medium text-red-600">{formatarMoeda(resumoAtual.despesas)}</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t border-green-300">
+                    <span className="text-gray-700 font-medium">Saldo:</span>
+                    <span className={`font-bold ${resumoAtual.saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {formatarMoeda(resumoAtual.saldo)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </section>
 
       {/* ===== FILTROS ===== */}
       <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Filtros</h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Filtro de Mês/Data */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Filtro de Período */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mês / Data
+              Período
+            </label>
+            <select
+              value={filtros?.periodo || 'todos'}
+              onChange={(e) =>
+                setFiltros((prev: any) => ({ ...prev, periodo: e.target.value, mes: '' }))
+              }
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white
+        text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+            >
+              <option value="todos">Todos os períodos</option>
+              <option value="mesAtual">Mês atual</option>
+              <option value="ultimos30">Últimos 30 dias</option>
+              <option value="ultimos60">Últimos 60 dias</option>
+              <option value="ultimos90">Últimos 90 dias</option>
+              <option value="anoAtual">Ano atual</option>
+            </select>
+          </div>
+
+          {/* Filtro de Mês/Data Específico */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Mês Específico
             </label>
             <input
               type="month"
               value={filtros?.mes || ''}
               onChange={(e) =>
-                setFiltros((prev: any) => ({ ...prev, mes: e.target.value }))
+                setFiltros((prev: any) => ({ ...prev, mes: e.target.value, periodo: 'todos' }))
               }
               className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white
         text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
@@ -726,6 +1101,7 @@ export default function Dashboard() {
                 mes: '',
                 categoria: 'todas',
                 tipo: 'todos',
+                periodo: 'todos',
               })
             }
             className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
@@ -735,6 +1111,25 @@ export default function Dashboard() {
           </button>
         </div>
       </section>
+
+      {/* ===== ESTADO VAZIO GERAL ===== */}
+      {todasTransacoes.length === 0 && (
+        <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+          <EmptyState
+            title="Nenhuma transação cadastrada"
+            message="Comece adicionando suas primeiras receitas e despesas para visualizar seu dashboard financeiro completo com gráficos, tendências e análises."
+            icon={
+              <svg className="w-24 h-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            }
+            action={{
+              label: 'Adicionar primeira transação',
+              onClick: () => setShowGastoModal(true),
+            }}
+          />
+        </section>
+      )}
 
       {/* ===== GRÁFICO: FLUXO DE CAIXA MENSAL ===== */}
       {fluxoMensal.length > 0 && (
@@ -857,6 +1252,12 @@ export default function Dashboard() {
         </section>
       )}
 
+      {/* ===== METAS DE GASTOS ===== */}
+      <MetasGastos
+        gastosPorCategoria={categoriasGastos}
+        mesReferencia={new Date().toISOString().slice(0, 7)}
+      />
+
       {/* ===== TABELA DE TRANSAÇÕES ===== */}
       <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
@@ -925,8 +1326,18 @@ export default function Dashboard() {
             <tbody>
               {transacoesPaginadas.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-gray-500">
-                    Nenhuma transação encontrada
+                  <td colSpan={6} className="py-12">
+                    <EmptyState
+                      title="Nenhuma transação encontrada"
+                      message={pesquisaDescricao
+                        ? `Não encontramos transações com "${pesquisaDescricao}". Tente ajustar sua pesquisa ou filtros.`
+                        : "Não há transações para os filtros selecionados. Tente ajustar os filtros ou adicionar novas transações."}
+                      icon={
+                        <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      }
+                    />
                   </td>
                 </tr>
               ) : (
@@ -1107,6 +1518,18 @@ export default function Dashboard() {
           onClose={() => setToast(null)}
         />
       )}
+
+      {/* Dialog de Confirmação de Exclusão */}
+      <ConfirmDialog
+        isOpen={confirmDelete.isOpen}
+        title={`Deletar ${confirmDelete.tipo === 'gasto' ? 'Gasto' : 'Receita'}?`}
+        message={`Tem certeza que deseja deletar est${confirmDelete.tipo === 'gasto' ? 'e gasto' : 'a receita'}? Esta ação não pode ser desfeita.`}
+        confirmLabel="Sim, deletar"
+        cancelLabel="Cancelar"
+        onConfirm={confirmarDelete}
+        onCancel={cancelarDelete}
+        type="danger"
+      />
     </div>
   );
 }

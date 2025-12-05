@@ -68,6 +68,13 @@ interface Transacao {
   categoria: string;
 }
 
+interface Filtros {
+  mes: string;
+  categoria: string;
+  tipo: string;
+  periodo: string;
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user, userProfile, logout } = useAuth();
@@ -97,7 +104,7 @@ export default function Dashboard() {
   );
 
   // Estado dos filtros
-  const [filtros, setFiltros] = useState({
+  const [filtros, setFiltros] = useState<Filtros>({
     mes: '',
     categoria: 'todas',
     tipo: 'todos',
@@ -137,19 +144,13 @@ export default function Dashboard() {
   };
 
   const loadData = async () => {
-    console.log('userProfile:', userProfile);
-    console.log('remotejid:', userProfile?.remotejid);
-    console.log('isPremiumActive:', isPremiumActive);
-
     if (!userProfile?.remotejid) {
-      console.warn('Sem remotejid, não é possível carregar dados');
       setLoading(false);
       return;
     }
 
     // Se o premium não está ativo, não carrega os dados
     if (!isPremiumActive) {
-      console.warn('Premium expirado, não carregando dados');
       setLoading(false);
       setShowPremiumModal(true);
       return;
@@ -157,13 +158,11 @@ export default function Dashboard() {
 
     setLoading(true);
     try {
-      console.log('Buscando gastos com remotejid:', userProfile.remotejid);
       // Buscar gastos
       const gastosResponse = await apiService.getGastos({
         usuario: userProfile.remotejid,
         page_size: 100,
       });
-      console.log('Gastos recebidos:', gastosResponse);
       setGastos(gastosResponse.data);
 
       // Buscar receitas
@@ -185,7 +184,10 @@ export default function Dashboard() {
       });
       setReceitaDashboard(receitaDash.data);
     } catch (error) {
-      console.error('Erro ao carregar dados:', error);
+      setToast({
+        message: 'Erro ao carregar dados. Tente novamente.',
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }
@@ -199,7 +201,6 @@ export default function Dashboard() {
   // Monitora mudanças no status do premium
   useEffect(() => {
     if (userProfile && !isPremiumActive) {
-      console.log('Premium expirado detectado');
       setShowPremiumModal(true);
     }
   }, [isPremiumActive, userProfile]);
@@ -291,7 +292,6 @@ export default function Dashboard() {
       }
       await loadData();
     } catch (error) {
-      console.error('Erro ao deletar:', error);
       setToast({
         message: `Erro ao deletar ${confirmDelete.tipo}. Tente novamente.`,
         type: 'error',
@@ -1013,7 +1013,7 @@ export default function Dashboard() {
             <select
               value={filtros?.periodo || 'todos'}
               onChange={(e) =>
-                setFiltros((prev: any) => ({ ...prev, periodo: e.target.value, mes: '' }))
+                setFiltros((prev) => ({ ...prev, periodo: e.target.value, mes: '' }))
               }
               className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white
         text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
@@ -1036,7 +1036,7 @@ export default function Dashboard() {
               type="month"
               value={filtros?.mes || ''}
               onChange={(e) =>
-                setFiltros((prev: any) => ({ ...prev, mes: e.target.value, periodo: 'todos' }))
+                setFiltros((prev) => ({ ...prev, mes: e.target.value, periodo: 'todos' }))
               }
               className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white
         text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
@@ -1051,7 +1051,7 @@ export default function Dashboard() {
             <select
               value={filtros?.categoria || 'todas'}
               onChange={(e) =>
-                setFiltros((prev: any) => ({
+                setFiltros((prev) => ({
                   ...prev,
                   categoria: e.target.value,
                 }))
@@ -1081,7 +1081,7 @@ export default function Dashboard() {
             <select
               value={filtros?.tipo || 'todos'}
               onChange={(e) =>
-                setFiltros((prev: any) => ({ ...prev, tipo: e.target.value }))
+                setFiltros((prev) => ({ ...prev, tipo: e.target.value }))
               }
               className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white
         text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent transition"

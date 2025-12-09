@@ -4,11 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-
+  darkMode: 'class', // Habilita dark mode com classe
   theme: {
     extend: {
       keyframes: {
@@ -25,10 +21,11 @@ export default {
         '0%, 100%': { backgroundPosition: '0% 50%' },
         '50%': { backgroundPosition: '100% 50%' },
       },
-       backgroundSize: {
+      backgroundSize: {
         '200%': '200%',
       },
     },
   },
+  plugins: [],
 };
 

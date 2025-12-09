@@ -24,9 +24,16 @@ import {
   PlusIcon,
   PencilSquareIcon,
   TrashIcon,
+  TableCellsIcon,
+  CalendarIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  SunIcon,
+  MoonIcon,
 } from '@heroicons/react/24/outline';
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import {
   apiService,
   GastoResponse,
@@ -78,6 +85,7 @@ interface Filtros {
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user, userProfile, logout } = useAuth();
+  const { theme, toggleTheme, isDark } = useTheme();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [toast, setToast] = useState<ToastMessage | null>(null);
@@ -126,6 +134,12 @@ export default function Dashboard() {
     id: string;
     tipo: 'gasto' | 'receita';
   }>({ isOpen: false, id: '', tipo: 'gasto' });
+
+  // Estados do calendário
+  const [visualizacao, setVisualizacao] = useState<'tabela' | 'calendario'>('tabela');
+  const [diaSelecionado, setDiaSelecionado] = useState<string | null>(null);
+  const [mesCalendario, setMesCalendario] = useState<Date>(new Date());
+  const [seletorMesAberto, setSeletorMesAberto] = useState(false);
 
   // Estados da tabela
   const [paginaAtual, setPaginaAtual] = useState(1);
@@ -266,12 +280,15 @@ export default function Dashboard() {
         if (showUserMenu) {
           setShowUserMenu(false);
         }
+        if (seletorMesAberto) {
+          setSeletorMesAberto(false);
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [isPremiumActive, showGastoModal, showReceitaModal, showUserMenu]);
+  }, [isPremiumActive, showGastoModal, showReceitaModal, showUserMenu, seletorMesAberto]);
 
   const handleDeleteGasto = async (id: string) => {
     setConfirmDelete({ isOpen: true, id, tipo: 'gasto' });
@@ -622,6 +639,114 @@ export default function Dashboard() {
     }
   };
 
+  // === FUNÇÕES DO CALENDÁRIO ===
+
+  // Agrupar transações por dia
+  const transacoesPorDia = (() => {
+    const mapa: Record<string, Transacao[]> = {};
+
+    transacoesFiltradas.forEach((t) => {
+      const dataStr = t.data.split('T')[0]; // "YYYY-MM-DD"
+      if (!mapa[dataStr]) {
+        mapa[dataStr] = [];
+      }
+      mapa[dataStr].push(t);
+    });
+
+    return mapa;
+  })();
+
+  // Gerar dias do calendário
+  const gerarDiasCalendario = () => {
+    const ano = mesCalendario.getFullYear();
+    const mes = mesCalendario.getMonth();
+
+    const primeiroDia = new Date(ano, mes, 1);
+    const ultimoDia = new Date(ano, mes + 1, 0);
+
+    const diasAnteriores = primeiroDia.getDay(); // 0 = domingo
+    const diasNoMes = ultimoDia.getDate();
+
+    const dias: Array<{
+      data: string;
+      dia: number;
+      mesAtual: boolean;
+      transacoes: Transacao[];
+      totalReceitas: number;
+      totalDespesas: number;
+    }> = [];
+
+    // Dias do mês anterior
+    const ultimoDiaMesAnterior = new Date(ano, mes, 0).getDate();
+    for (let i = diasAnteriores - 1; i >= 0; i--) {
+      const dia = ultimoDiaMesAnterior - i;
+      const mesAnterior = mes === 0 ? 11 : mes - 1;
+      const anoAnterior = mes === 0 ? ano - 1 : ano;
+      const dataStr = `${anoAnterior}-${String(mesAnterior + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+
+      const transacoesDia = transacoesPorDia[dataStr] || [];
+      const totalReceitas = transacoesDia.filter(t => t.tipo === 'Receita').reduce((acc, t) => acc + t.valor, 0);
+      const totalDespesas = transacoesDia.filter(t => t.tipo === 'Despesa').reduce((acc, t) => acc + t.valor, 0);
+
+      dias.push({
+        data: dataStr,
+        dia,
+        mesAtual: false,
+        transacoes: transacoesDia,
+        totalReceitas,
+        totalDespesas,
+      });
+    }
+
+    // Dias do mês atual
+    for (let dia = 1; dia <= diasNoMes; dia++) {
+      const dataStr = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+
+      const transacoesDia = transacoesPorDia[dataStr] || [];
+      const totalReceitas = transacoesDia.filter(t => t.tipo === 'Receita').reduce((acc, t) => acc + t.valor, 0);
+      const totalDespesas = transacoesDia.filter(t => t.tipo === 'Despesa').reduce((acc, t) => acc + t.valor, 0);
+
+      dias.push({
+        data: dataStr,
+        dia,
+        mesAtual: true,
+        transacoes: transacoesDia,
+        totalReceitas,
+        totalDespesas,
+      });
+    }
+
+    // Dias do próximo mês (para completar a grade)
+    const diasRestantes = 42 - dias.length; // 6 semanas × 7 dias
+    for (let dia = 1; dia <= diasRestantes; dia++) {
+      const proximoMes = mes === 11 ? 0 : mes + 1;
+      const proximoAno = mes === 11 ? ano + 1 : ano;
+      const dataStr = `${proximoAno}-${String(proximoMes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+
+      const transacoesDia = transacoesPorDia[dataStr] || [];
+      const totalReceitas = transacoesDia.filter(t => t.tipo === 'Receita').reduce((acc, t) => acc + t.valor, 0);
+      const totalDespesas = transacoesDia.filter(t => t.tipo === 'Despesa').reduce((acc, t) => acc + t.valor, 0);
+
+      dias.push({
+        data: dataStr,
+        dia,
+        mesAtual: false,
+        transacoes: transacoesDia,
+        totalReceitas,
+        totalDespesas,
+      });
+    }
+
+    return dias;
+  };
+
+  const diasCalendario = gerarDiasCalendario();
+
+  // Transações do dia selecionado
+  const transacoesDiaSelecionado = diaSelecionado
+    ? (transacoesPorDia[diaSelecionado] || [])
+    : [];
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -663,16 +788,16 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-800 p-6 md:p-10 space-y-10 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-6 md:p-10 space-y-10 overflow-x-hidden">
       {/* ===== CABEÇALHO ===== */}
       <header className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-900">
-            Dashboard <span className="text-green-600">Financeiro</span>
+          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
+            Dashboard <span className="text-green-600 dark:text-green-400">Financeiro</span>
           </h1>
           <button
             onClick={() => setMostrarAtalhos(!mostrarAtalhos)}
-            className="text-xs text-gray-500 hover:text-gray-700 mt-1 flex items-center gap-1"
+            className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mt-1 flex items-center gap-1"
           >
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -694,27 +819,40 @@ export default function Dashboard() {
             filtros={filtros}
           />
 
+          {/* Botão de toggle do tema */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg shadow-sm transition"
+            title={isDark ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
+          >
+            {isDark ? (
+              <SunIcon className="w-5 h-5 text-yellow-500" />
+            ) : (
+              <MoonIcon className="w-5 h-5 text-gray-600" />
+            )}
+          </button>
+
           {/* Menu do usuário */}
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 px-4 py-2 rounded-lg font-medium shadow-sm transition"
+              className="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 px-4 py-2 rounded-lg font-medium shadow-sm transition"
             >
-              <UserCircleIcon className="w-5 h-5 text-gray-600" />
-              <span className="hidden md:inline text-gray-700">
+              <UserCircleIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              <span className="hidden md:inline text-gray-700 dark:text-gray-200">
                 {user?.name}
               </span>
-              <ChevronDownIcon className="w-4 h-4 text-gray-600" />
+              <ChevronDownIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
             </button>
 
             {/* Dropdown */}
             {showUserMenu && (
-              <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                <div className="px-4 py-3 border-b border-gray-200">
-                  <p className="text-sm font-medium text-gray-900">
+              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
+                <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
                     {user?.name}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">{user?.email}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{user?.email}</p>
                 </div>
 
                 {/* Novo item - Suporte */}
@@ -830,13 +968,13 @@ export default function Dashboard() {
       {/* ===== CARDS DE RESUMO ===== */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Saldo */}
-        <div className="bg-white shadow-md rounded-xl p-6 flex items-center gap-4 border border-gray-100">
-          <BanknotesIcon className="w-10 h-10 text-green-600" />
+        <div className="bg-white dark:bg-gray-800 shadow-md rounded-xl p-6 flex items-center gap-4 border border-gray-100 dark:border-gray-700">
+          <BanknotesIcon className="w-10 h-10 text-green-600 dark:text-green-400" />
           <div>
-            <p className="text-sm text-gray-500">Saldo Atual</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Saldo Atual</p>
             <h3
               className={`text-2xl font-bold ${
-                saldo >= 0 ? 'text-green-600' : 'text-red-600'
+                saldo >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
               }`}
             >
               {formatarMoeda(saldo)}
@@ -845,12 +983,12 @@ export default function Dashboard() {
         </div>
 
         {/* Receitas */}
-        <div className="bg-white shadow-md rounded-xl p-6 border border-gray-100">
+        <div className="bg-white dark:bg-gray-800 shadow-md rounded-xl p-6 border border-gray-100 dark:border-gray-700">
           <div className="flex items-center gap-4 mb-2">
-            <ArrowUpCircleIcon className="w-10 h-10 text-green-600" />
+            <ArrowUpCircleIcon className="w-10 h-10 text-green-600 dark:text-green-400" />
             <div className="flex-1">
-              <p className="text-sm text-gray-500">Receitas</p>
-              <h3 className="text-2xl font-bold text-gray-900">
+              <p className="text-sm text-gray-500 dark:text-gray-400">Receitas</p>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
                 {formatarMoeda(totalReceitas)}
               </h3>
             </div>
@@ -858,7 +996,7 @@ export default function Dashboard() {
           {/* Indicador de Tendência */}
           {variacaoReceitas !== 0 && (
             <div className={`flex items-center gap-1 text-sm mt-2 ${
-              variacaoReceitas > 0 ? 'text-green-600' : 'text-red-600'
+              variacaoReceitas > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
             }`}>
               {variacaoReceitas > 0 ? (
                 <ArrowUpIcon className="w-4 h-4" />
@@ -868,13 +1006,13 @@ export default function Dashboard() {
               <span className="font-medium">
                 {Math.abs(variacaoReceitas).toFixed(1)}%
               </span>
-              <span className="text-gray-500 text-xs ml-1">vs mês anterior</span>
+              <span className="text-gray-500 dark:text-gray-400 text-xs ml-1">vs mês anterior</span>
             </div>
           )}
         </div>
 
         {/* Despesas */}
-        <div className="bg-white shadow-md rounded-xl p-6 border border-gray-100">
+        <div className="bg-white dark:bg-gray-800 shadow-md rounded-xl p-6 border border-gray-100 dark:border-gray-700">
           <div className="flex items-center gap-4 mb-2">
             <ArrowDownCircleIcon className="w-10 h-10 text-red-500" />
             <div className="flex-1">
@@ -1261,9 +1399,37 @@ export default function Dashboard() {
       {/* ===== TABELA DE TRANSAÇÕES ===== */}
       <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-          <h2 className="text-xl font-bold text-gray-900">
-            Movimentações Recentes
-          </h2>
+          <div className="flex items-center gap-4">
+            <h2 className="text-xl font-bold text-gray-900">
+              Movimentações Recentes
+            </h2>
+
+            {/* Botões de alternância Tabela/Calendário */}
+            <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setVisualizacao('tabela')}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition ${
+                  visualizacao === 'tabela'
+                    ? 'bg-white text-green-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <TableCellsIcon className="w-4 h-4" />
+                <span className="text-sm font-medium">Tabela</span>
+              </button>
+              <button
+                onClick={() => setVisualizacao('calendario')}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition ${
+                  visualizacao === 'calendario'
+                    ? 'bg-white text-green-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <CalendarIcon className="w-4 h-4" />
+                <span className="text-sm font-medium">Calendário</span>
+              </button>
+            </div>
+          </div>
 
           {/* Campo de Pesquisa */}
           <div className="w-full md:w-80 relative">
@@ -1288,178 +1454,476 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Tabela */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-100 text-gray-700">
-              <tr>
-                <th
-                  className="py-3 px-4 text-left cursor-pointer hover:bg-gray-200"
-                  onClick={() => alternarOrdenacao('data')}
-                >
-                  Data{' '}
-                  {ordenacao.campo === 'data' &&
-                    (ordenacao.ordem === 'asc' ? (
-                      <ArrowUpIcon className="inline w-4 h-4" />
-                    ) : (
-                      <ArrowDownIcon className="inline w-4 h-4" />
-                    ))}
-                </th>
-                <th className="py-3 px-4 text-left">Descrição</th>
-                <th className="py-3 px-4 text-left">Categoria</th>
-                <th
-                  className="py-3 px-4 text-left cursor-pointer hover:bg-gray-200"
-                  onClick={() => alternarOrdenacao('tipo')}
-                >
-                  Tipo{' '}
-                  {ordenacao.campo === 'tipo' &&
-                    (ordenacao.ordem === 'asc' ? (
-                      <ArrowUpIcon className="inline w-4 h-4" />
-                    ) : (
-                      <ArrowDownIcon className="inline w-4 h-4" />
-                    ))}
-                </th>
-                <th className="py-3 px-4 text-right">Valor</th>
-                <th className="py-3 px-4 text-center">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transacoesPaginadas.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="py-12">
-                    <EmptyState
-                      title="Nenhuma transação encontrada"
-                      message={pesquisaDescricao
-                        ? `Não encontramos transações com "${pesquisaDescricao}". Tente ajustar sua pesquisa ou filtros.`
-                        : "Não há transações para os filtros selecionados. Tente ajustar os filtros ou adicionar novas transações."}
-                      icon={
-                        <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                      }
-                    />
-                  </td>
-                </tr>
-              ) : (
-                transacoesPaginadas.map((t) => (
-                  <tr
-                    key={t.id}
-                    className="border-b border-gray-100 hover:bg-gray-50"
-                  >
-                    <td className="py-3 px-4">
-                      {new Date(t.data).toLocaleDateString('pt-BR')}
-                    </td>
-                    <td className="py-3 px-4">{t.descricao}</td>
-                    <td className="py-3 px-4">{t.categoria}</td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`inline-block px-2 py-1 rounded-full text-xs ${
-                          t.tipo === 'Receita'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-700'
-                        }`}
+        {/* Visualização condicional: Tabela ou Calendário */}
+        {visualizacao === 'tabela' ? (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-100 text-gray-700">
+                  <tr>
+                    <th
+                      className="py-3 px-4 text-left cursor-pointer hover:bg-gray-200"
+                      onClick={() => alternarOrdenacao('data')}
+                    >
+                      Data{' '}
+                      {ordenacao.campo === 'data' &&
+                        (ordenacao.ordem === 'asc' ? (
+                          <ArrowUpIcon className="inline w-4 h-4" />
+                        ) : (
+                          <ArrowDownIcon className="inline w-4 h-4" />
+                        ))}
+                    </th>
+                    <th className="py-3 px-4 text-left">Descrição</th>
+                    <th className="py-3 px-4 text-left">Categoria</th>
+                    <th
+                      className="py-3 px-4 text-left cursor-pointer hover:bg-gray-200"
+                      onClick={() => alternarOrdenacao('tipo')}
+                    >
+                      Tipo{' '}
+                      {ordenacao.campo === 'tipo' &&
+                        (ordenacao.ordem === 'asc' ? (
+                          <ArrowUpIcon className="inline w-4 h-4" />
+                        ) : (
+                          <ArrowDownIcon className="inline w-4 h-4" />
+                        ))}
+                    </th>
+                    <th className="py-3 px-4 text-right">Valor</th>
+                    <th className="py-3 px-4 text-center">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transacoesPaginadas.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-12">
+                        <EmptyState
+                          title="Nenhuma transação encontrada"
+                          message={pesquisaDescricao
+                            ? `Não encontramos transações com "${pesquisaDescricao}". Tente ajustar sua pesquisa ou filtros.`
+                            : "Não há transações para os filtros selecionados. Tente ajustar os filtros ou adicionar novas transações."}
+                          icon={
+                            <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                          }
+                        />
+                      </td>
+                    </tr>
+                  ) : (
+                    transacoesPaginadas.map((t) => (
+                      <tr
+                        key={t.id}
+                        className="border-b border-gray-100 hover:bg-gray-50"
                       >
-                        {t.tipo}
-                      </span>
-                    </td>
-                    <td
-                      className={`py-3 px-4 text-right font-medium ${
-                        t.tipo === 'Receita' ? 'text-green-600' : 'text-red-600'
+                        <td className="py-3 px-4">
+                          {new Date(t.data).toLocaleDateString('pt-BR')}
+                        </td>
+                        <td className="py-3 px-4">{t.descricao}</td>
+                        <td className="py-3 px-4">{t.categoria}</td>
+                        <td className="py-3 px-4">
+                          <span
+                            className={`inline-block px-2 py-1 rounded-full text-xs ${
+                              t.tipo === 'Receita'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-red-100 text-red-700'
+                            }`}
+                          >
+                            {t.tipo}
+                          </span>
+                        </td>
+                        <td
+                          className={`py-3 px-4 text-right font-medium ${
+                            t.tipo === 'Receita' ? 'text-green-600' : 'text-red-600'
+                          }`}
+                        >
+                          {formatarMoeda(t.valor)}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => {
+                                if (t.tipo === 'Despesa') {
+                                  const gasto = gastos.find((g) => g.id === t.id);
+                                  if (gasto) handleEditGasto(gasto);
+                                } else {
+                                  const receita = receitas.find((r) => r.id === t.id);
+                                  if (receita) handleEditReceita(receita);
+                                }
+                              }}
+                              className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-full shadow-sm hover:shadow-md transition-all duration-200"
+                              title="Editar"
+                            >
+                              <PencilSquareIcon className="w-4 h-4" />
+                            </button>
+
+                            {/* Botão Deletar */}
+                            <button
+                              onClick={() => {
+                                if (t.tipo === 'Despesa') {
+                                  handleDeleteGasto(t.id);
+                                } else {
+                                  handleDeleteReceita(t.id);
+                                }
+                              }}
+                              className="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-full shadow-sm hover:shadow-md transition-all duration-200"
+                              title="Deletar"
+                            >
+                              <TrashIcon className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* ===== PAGINAÇÃO ===== */}
+            {totalPaginas > 1 && (
+              <div className="flex justify-between items-center mt-4 text-sm text-gray-700">
+                {/* Texto "mostrando X–Y" */}
+                <span>
+                  Mostrando {indiceInicial + 1}–
+                  {Math.min(
+                    indiceInicial + itensPorPagina,
+                    transacoesOrdenadas.length,
+                  )}{' '}
+                  de {transacoesOrdenadas.length}
+                </span>
+
+                {/* Botões */}
+                <div className="flex gap-2">
+                  {/* Botão Anterior */}
+                  <button
+                    onClick={() => setPaginaAtual((prev) => Math.max(prev - 1, 1))}
+                    disabled={paginaAtual === 1}
+                    className="px-3 py-1 border rounded-lg bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:text-gray-400 transition"
+                  >
+                    Anterior
+                  </button>
+
+                  {/* Botões numerados */}
+                  {Array.from({ length: totalPaginas }, (_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setPaginaAtual(i + 1)}
+                      className={`px-3 py-1 border rounded-lg font-medium transition ${
+                        paginaAtual === i + 1
+                          ? 'bg-green-600 text-white border-green-600'
+                          : 'bg-white text-gray-700 hover:bg-gray-100'
                       }`}
                     >
-                      {formatarMoeda(t.valor)}
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                        onClick={() => {
-                          if (t.tipo === 'Despesa') {
-                            const gasto = gastos.find((g) => g.id === t.id);
-                            if (gasto) handleEditGasto(gasto);
-                          } else {
-                            const receita = receitas.find((r) => r.id === t.id);
-                            if (receita) handleEditReceita(receita);
-                          }
-                        }}
-                        className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-full shadow-sm hover:shadow-md transition-all duration-200"
-                        title="Editar"
-                      >
-                        <PencilSquareIcon className="w-4 h-4" />
-                      </button>
+                      {i + 1}
+                    </button>
+                  ))}
 
-                      {/* Botão Deletar */}
+                  {/* Botão Próximo */}
+                  <button
+                    onClick={() =>
+                      setPaginaAtual((prev) => Math.min(prev + 1, totalPaginas))
+                    }
+                    disabled={paginaAtual === totalPaginas}
+                    className="px-3 py-1 border rounded-lg bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:text-gray-400 transition"
+                  >
+                    Próximo
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div>
+            {/* Navegação do calendário */}
+            <div className="flex items-center justify-between mb-6">
+              <button
+                onClick={() => {
+                  const novoMes = new Date(mesCalendario);
+                  novoMes.setMonth(novoMes.getMonth() - 1);
+                  setMesCalendario(novoMes);
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition"
+              >
+                <ChevronLeftIcon className="w-5 h-5 text-gray-600" />
+              </button>
+
+              {/* Título do mês (clicável) com seletor */}
+              <div className="relative">
+                <button
+                  onClick={() => setSeletorMesAberto(!seletorMesAberto)}
+                  className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-lg transition"
+                >
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {mesCalendario.toLocaleDateString('pt-BR', {
+                      month: 'long',
+                      year: 'numeric',
+                    }).replace(/^\w/, (c) => c.toUpperCase())}
+                  </h3>
+                  <ChevronDownIcon className={`w-4 h-4 text-gray-600 transition-transform ${seletorMesAberto ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Dropdown de seleção rápida de mês/ano */}
+                {seletorMesAberto && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-20 p-4 w-80">
+                    {/* Seletor de Ano */}
+                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
                       <button
                         onClick={() => {
-                          if (t.tipo === 'Despesa') {
-                            handleDeleteGasto(t.id);
-                          } else {
-                            handleDeleteReceita(t.id);
-                          }
+                          const novoMes = new Date(mesCalendario);
+                          novoMes.setFullYear(novoMes.getFullYear() - 1);
+                          setMesCalendario(novoMes);
                         }}
-                        className="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-full shadow-sm hover:shadow-md transition-all duration-200"
-                        title="Deletar"
+                        className="p-1 hover:bg-gray-100 rounded transition"
                       >
-                        <TrashIcon className="w-4 h-4" />
+                        <ChevronLeftIcon className="w-4 h-4 text-gray-600" />
                       </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
 
-        {/* ===== PAGINAÇÃO ===== */}
-        {totalPaginas > 1 && (
-          <div className="flex justify-between items-center mt-4 text-sm text-gray-700">
-            {/* Texto "mostrando X–Y" */}
-            <span>
-              Mostrando {indiceInicial + 1}–
-              {Math.min(
-                indiceInicial + itensPorPagina,
-                transacoesOrdenadas.length,
-              )}{' '}
-              de {transacoesOrdenadas.length}
-            </span>
+                      <span className="text-sm font-semibold text-gray-900">
+                        {mesCalendario.getFullYear()}
+                      </span>
 
-            {/* Botões */}
-            <div className="flex gap-2">
-              {/* Botão Anterior */}
+                      <button
+                        onClick={() => {
+                          const novoMes = new Date(mesCalendario);
+                          novoMes.setFullYear(novoMes.getFullYear() + 1);
+                          setMesCalendario(novoMes);
+                        }}
+                        className="p-1 hover:bg-gray-100 rounded transition"
+                      >
+                        <ChevronRightIcon className="w-4 h-4 text-gray-600" />
+                      </button>
+                    </div>
+
+                    {/* Grid de Meses */}
+                    <div className="grid grid-cols-3 gap-2">
+                      {['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'].map((mes, index) => {
+                        const ehMesAtual = mesCalendario.getMonth() === index;
+                        const hoje = new Date();
+                        const ehMesHoje = hoje.getMonth() === index && hoje.getFullYear() === mesCalendario.getFullYear();
+
+                        return (
+                          <button
+                            key={mes}
+                            onClick={() => {
+                              const novoMes = new Date(mesCalendario);
+                              novoMes.setMonth(index);
+                              setMesCalendario(novoMes);
+                              setSeletorMesAberto(false);
+                            }}
+                            className={`
+                              px-3 py-2 rounded-lg text-sm font-medium transition-all
+                              ${ehMesAtual
+                                ? 'bg-green-600 text-white shadow-md'
+                                : ehMesHoje
+                                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }
+                            `}
+                          >
+                            {mes}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Botão "Hoje" */}
+                    <button
+                      onClick={() => {
+                        setMesCalendario(new Date());
+                        setSeletorMesAberto(false);
+                      }}
+                      className="w-full mt-3 pt-3 border-t border-gray-200 text-sm font-medium text-green-600 hover:text-green-700 transition"
+                    >
+                      Ir para hoje
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <button
-                onClick={() => setPaginaAtual((prev) => Math.max(prev - 1, 1))}
-                disabled={paginaAtual === 1}
-                className="px-3 py-1 border rounded-lg bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:text-gray-400 transition"
+                onClick={() => {
+                  const novoMes = new Date(mesCalendario);
+                  novoMes.setMonth(novoMes.getMonth() + 1);
+                  setMesCalendario(novoMes);
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition"
               >
-                Anterior
-              </button>
-
-              {/* Botões numerados */}
-              {Array.from({ length: totalPaginas }, (_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPaginaAtual(i + 1)}
-                  className={`px-3 py-1 border rounded-lg font-medium transition ${
-                    paginaAtual === i + 1
-                      ? 'bg-green-600 text-white border-green-600'
-                      : 'bg-white text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-
-              {/* Botão Próximo */}
-              <button
-                onClick={() =>
-                  setPaginaAtual((prev) => Math.min(prev + 1, totalPaginas))
-                }
-                disabled={paginaAtual === totalPaginas}
-                className="px-3 py-1 border rounded-lg bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:text-gray-400 transition"
-              >
-                Próximo
+                <ChevronRightIcon className="w-5 h-5 text-gray-600" />
               </button>
             </div>
+
+            {/* Grade do calendário */}
+            <div className="grid grid-cols-7 gap-2">
+              {/* Cabeçalho dos dias da semana */}
+              {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((dia) => (
+                <div
+                  key={dia}
+                  className="text-center text-sm font-semibold text-gray-600 py-2"
+                >
+                  {dia}
+                </div>
+              ))}
+
+              {/* Dias do calendário */}
+              {diasCalendario.map((diaInfo, index) => {
+                const temTransacoes = diaInfo.transacoes.length > 0;
+                const hoje = new Date().toISOString().split('T')[0];
+                const ehHoje = diaInfo.data === hoje;
+
+                return (
+                  <div
+                    key={index}
+                    onClick={() => {
+                      if (temTransacoes) {
+                        setDiaSelecionado(diaInfo.data);
+                      }
+                    }}
+                    className={`
+                      min-h-[100px] p-2 rounded-lg border transition-all
+                      ${!diaInfo.mesAtual ? 'bg-gray-50 text-gray-400' : 'bg-white text-gray-900'}
+                      ${temTransacoes ? 'cursor-pointer hover:shadow-md' : 'cursor-default'}
+                      ${ehHoje ? 'ring-2 ring-blue-500' : 'border-gray-200'}
+                      ${diaSelecionado === diaInfo.data ? 'ring-2 ring-green-500 shadow-md' : ''}
+                    `}
+                  >
+                    <div className="text-sm font-medium mb-1">
+                      {diaInfo.dia}
+                      {ehHoje && (
+                        <span className="ml-1 text-xs text-blue-600 font-semibold">Hoje</span>
+                      )}
+                    </div>
+
+                    {temTransacoes && (
+                      <div className="space-y-1 text-xs">
+                        {diaInfo.totalReceitas > 0 && (
+                          <div className="bg-green-100 text-green-700 px-2 py-1 rounded font-medium">
+                            +{formatarMoeda(diaInfo.totalReceitas)}
+                          </div>
+                        )}
+                        {diaInfo.totalDespesas > 0 && (
+                          <div className="bg-red-100 text-red-700 px-2 py-1 rounded font-medium">
+                            -{formatarMoeda(diaInfo.totalDespesas)}
+                          </div>
+                        )}
+                        <div className="text-gray-500 text-center pt-1">
+                          {diaInfo.transacoes.length} {diaInfo.transacoes.length === 1 ? 'transação' : 'transações'}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Detalhes do dia selecionado */}
+            {diaSelecionado && transacoesDiaSelecionado.length > 0 && (
+              <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="text-lg font-semibold text-gray-900">
+                    Transações de{' '}
+                    {new Date(diaSelecionado + 'T00:00:00').toLocaleDateString('pt-BR', {
+                      day: '2-digit',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </h4>
+                  <button
+                    onClick={() => setDiaSelecionado(null)}
+                    className="text-gray-500 hover:text-gray-700 transition"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* Resumo do dia */}
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="bg-green-100 p-3 rounded-lg">
+                    <p className="text-sm text-green-700 mb-1">Receitas</p>
+                    <p className="text-lg font-bold text-green-700">
+                      {formatarMoeda(
+                        transacoesDiaSelecionado
+                          .filter((t) => t.tipo === 'Receita')
+                          .reduce((acc, t) => acc + t.valor, 0)
+                      )}
+                    </p>
+                  </div>
+                  <div className="bg-red-100 p-3 rounded-lg">
+                    <p className="text-sm text-red-700 mb-1">Despesas</p>
+                    <p className="text-lg font-bold text-red-700">
+                      {formatarMoeda(
+                        transacoesDiaSelecionado
+                          .filter((t) => t.tipo === 'Despesa')
+                          .reduce((acc, t) => acc + t.valor, 0)
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Lista de transações */}
+                <div className="space-y-2">
+                  {transacoesDiaSelecionado.map((t) => (
+                    <div
+                      key={t.id}
+                      className="bg-white p-3 rounded-lg border border-gray-200 flex justify-between items-start"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span
+                            className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                              t.tipo === 'Receita'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-red-100 text-red-700'
+                            }`}
+                          >
+                            {t.tipo}
+                          </span>
+                          <span className="text-sm text-gray-500">{t.categoria}</span>
+                        </div>
+                        <p className="text-sm font-medium text-gray-900">{t.descricao}</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={`text-lg font-bold ${
+                            t.tipo === 'Receita' ? 'text-green-600' : 'text-red-600'
+                          }`}
+                        >
+                          {formatarMoeda(t.valor)}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => {
+                              if (t.tipo === 'Despesa') {
+                                const gasto = gastos.find((g) => g.id === t.id);
+                                if (gasto) handleEditGasto(gasto);
+                              } else {
+                                const receita = receitas.find((r) => r.id === t.id);
+                                if (receita) handleEditReceita(receita);
+                              }
+                            }}
+                            className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-full shadow-sm hover:shadow-md transition-all duration-200"
+                            title="Editar"
+                          >
+                            <PencilSquareIcon className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (t.tipo === 'Despesa') {
+                                handleDeleteGasto(t.id);
+                              } else {
+                                handleDeleteReceita(t.id);
+                              }
+                            }}
+                            className="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-full shadow-sm hover:shadow-md transition-all duration-200"
+                            title="Deletar"
+                          >
+                            <TrashIcon className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </section>

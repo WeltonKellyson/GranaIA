@@ -9,7 +9,7 @@ interface ConfirmDialogProps {
   cancelLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
-  type?: 'danger' | 'warning' | 'info';
+  type?: 'danger' | 'warning' | 'info' | 'success';
 }
 
 const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
@@ -39,6 +39,11 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       bg: 'bg-blue-50 dark:bg-blue-900/20',
       icon: 'text-blue-600 dark:text-blue-400',
       button: 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600',
+    },
+    success: {
+      bg: 'bg-green-50 dark:bg-green-900/20',
+      icon: 'text-green-600 dark:text-green-400',
+      button: 'bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600',
     },
   };
 

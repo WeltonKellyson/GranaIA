@@ -132,6 +132,156 @@ export interface ReceitaDashboard {
   periodo_fim: string | null;
 }
 
+// Tipos para Gasto Futuro (Cartão de Crédito)
+export interface ParcelaResponse {
+  id: string;
+  gasto_futuro_id: string;
+  numero_parcela: number;
+  total_parcelas: number;
+  valor_parcela: string;
+  data_vencimento: string;
+  data_pagamento: string | null;
+  status: 'pendente' | 'pago' | 'atrasado';
+  gasto_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GastoFuturoCreate {
+  descricao: string;
+  valor_total: number | string;
+  categoria: string;
+  data_compra?: string | null;
+  data_vencimento?: string | null;
+  cartao_credito_id?: string | null;
+  numero_parcelas?: number;
+  valor_parcela?: number | string | null;
+  metodo_pagamento?: 'credito' | 'debito_futuro' | 'parcelado';
+  observacoes?: string | null;
+}
+
+export interface GastoFuturoUpdate {
+  descricao?: string | null;
+  valor_total?: number | string | null;
+  categoria?: string | null;
+  data_compra?: string | null;
+  data_vencimento?: string | null;
+  numero_parcelas?: number | null;
+  valor_parcela?: number | string | null;
+  status?: 'ativo' | 'pago' | 'cancelado' | null;
+  metodo_pagamento?: 'credito' | 'debito_futuro' | 'parcelado' | null;
+  observacoes?: string | null;
+}
+
+export interface GastoFuturoResponse {
+  id: string;
+  usuario: string;
+  descricao: string;
+  valor_total: string;
+  categoria: string;
+  data_compra: string;
+  data_vencimento: string;
+  data_pagamento: string | null;
+  cartao_credito_id: string | null;
+  numero_parcelas: number;
+  valor_parcela: string | null;
+  status: 'ativo' | 'pago' | 'cancelado';
+  metodo_pagamento: 'credito' | 'debito_futuro' | 'parcelado';
+  observacoes: string | null;
+  gasto_id: string | null;
+  parcelas: ParcelaResponse[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GastoFuturoResumo {
+  total_valor: string;
+  quantidade_total: number;
+  quantidade_vencidos: number;
+  valor_vencido: string;
+  quantidade_mes_atual: number;
+  valor_mes_atual: string;
+}
+
+export interface GastoFuturoProximosVencimentos {
+  id: string;
+  descricao: string;
+  valor_total: string;
+  data_vencimento: string;
+  dias_para_vencimento: number;
+  status: string;
+}
+
+export interface GastoFuturoDashboard {
+  resumo: GastoFuturoResumo;
+  proximos_vencimentos: GastoFuturoProximosVencimentos[];
+}
+
+export interface MarcarComoPagoRequest {
+  data_pagamento?: string | null;
+  criar_gasto?: boolean;
+}
+
+// Tipos para Cartão de Crédito
+export interface CartaoCreditoCreate {
+  nome_cartao: string;
+  nome_titular: string;
+  dia_vencimento: number;
+  limite?: number | null;
+  cor?: string | null;
+  ativo?: boolean;
+  observacoes?: string | null;
+}
+
+export interface CartaoCreditoUpdate {
+  nome_cartao?: string | null;
+  nome_titular?: string | null;
+  dia_vencimento?: number | null;
+  limite?: number | null;
+  cor?: string | null;
+  ativo?: boolean | null;
+  observacoes?: string | null;
+}
+
+export interface CartaoCreditoResponse {
+  id: string;
+  usuario: string;
+  nome_cartao: string;
+  nome_titular: string;
+  dia_vencimento: number;
+  limite: string | null;
+  cor: string | null;
+  ativo: boolean;
+  observacoes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CartaoCreditoComGastos extends CartaoCreditoResponse {
+  total_gastos_ativos: number;
+  valor_total_pendente: string;
+  proxima_fatura: string | null;
+}
+
+export interface FaturaMensal {
+  cartao_id: string;
+  nome_cartao: string;
+  mes_referencia: string;
+  dia_vencimento: number;
+  total_compras: number;
+  total_parcelas: number;
+  valor_pendente: string;
+  valor_pago: string;
+  valor_atrasado: string;
+  valor_total_fatura: string;
+}
+
+export interface PagarFaturaRequest {
+  mes_referencia: string;
+  data_pagamento?: string | null;
+  criar_gasto?: boolean;
+}
+
 class ApiService {
   // Event emitter para logout automático
   private onUnauthorizedCallbacks: Array<() => void> = [];
@@ -559,6 +709,270 @@ class ApiService {
       return await response.json();
     } catch (error) {
       console.error('Erro ao buscar dashboard de receitas:', error);
+      throw error;
+    }
+  }
+
+  // ============ GASTOS FUTUROS (CARTÃO DE CRÉDITO) ============
+
+  async getGastosFuturos(params?: {
+    usuario?: string;
+    status?: string;
+    categoria?: string;
+    data_vencimento_inicio?: string;
+    data_vencimento_fim?: string;
+    page?: number;
+    page_size?: number;
+  }): Promise<PaginatedResponse<GastoFuturoResponse>> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.usuario) queryParams.append('usuario', params.usuario);
+      if (params?.status) queryParams.append('status', params.status);
+      if (params?.categoria) queryParams.append('categoria', params.categoria);
+      if (params?.data_vencimento_inicio) queryParams.append('data_vencimento_inicio', params.data_vencimento_inicio);
+      if (params?.data_vencimento_fim) queryParams.append('data_vencimento_fim', params.data_vencimento_fim);
+      if (params?.page) queryParams.append('page', params.page.toString());
+      if (params?.page_size) queryParams.append('page_size', params.page_size.toString());
+
+      const url = `${API_URL}/api/v1/gastos-futuros${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.getAuthHeader(),
+      });
+
+      await this.handleResponse(response, 'Erro ao buscar gastos futuros');
+      return await response.json();
+    } catch (error) {
+      console.error('Erro ao buscar gastos futuros:', error);
+      throw error;
+    }
+  }
+
+  async createGastoFuturo(data: GastoFuturoCreate): Promise<ApiResponse<GastoFuturoResponse>> {
+    try {
+      const response = await fetch(`${API_URL}/api/v1/gastos-futuros`, {
+        method: 'POST',
+        headers: this.getAuthHeader(),
+        body: JSON.stringify(data),
+      });
+
+      await this.handleResponse(response, 'Erro ao criar gasto futuro');
+      return await response.json();
+    } catch (error) {
+      console.error('Erro ao criar gasto futuro:', error);
+      throw error;
+    }
+  }
+
+  async updateGastoFuturo(id: string, data: GastoFuturoUpdate): Promise<ApiResponse<GastoFuturoResponse>> {
+    try {
+      const response = await fetch(`${API_URL}/api/v1/gastos-futuros/${id}`, {
+        method: 'PUT',
+        headers: this.getAuthHeader(),
+        body: JSON.stringify(data),
+      });
+
+      await this.handleResponse(response, 'Erro ao atualizar gasto futuro');
+      return await response.json();
+    } catch (error) {
+      console.error('Erro ao atualizar gasto futuro:', error);
+      throw error;
+    }
+  }
+
+  async deleteGastoFuturo(id: string): Promise<void> {
+    try {
+      const response = await fetch(`${API_URL}/api/v1/gastos-futuros/${id}`, {
+        method: 'DELETE',
+        headers: this.getAuthHeader(),
+      });
+
+      await this.handleResponse(response, 'Erro ao deletar gasto futuro');
+    } catch (error) {
+      console.error('Erro ao deletar gasto futuro:', error);
+      throw error;
+    }
+  }
+
+  async getGastosFuturosDashboard(): Promise<ApiResponse<GastoFuturoDashboard>> {
+    try {
+      const url = `${API_URL}/api/v1/gastos-futuros/dashboard`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.getAuthHeader(),
+      });
+
+      await this.handleResponse(response, 'Erro ao buscar dashboard de gastos futuros');
+      return await response.json();
+    } catch (error) {
+      console.error('Erro ao buscar dashboard de gastos futuros:', error);
+      throw error;
+    }
+  }
+
+  async marcarGastoFuturoComoPago(id: string, data: MarcarComoPagoRequest): Promise<ApiResponse<GastoFuturoResponse>> {
+    try {
+      const response = await fetch(`${API_URL}/api/v1/gastos-futuros/${id}/pagar`, {
+        method: 'POST',
+        headers: this.getAuthHeader(),
+        body: JSON.stringify(data),
+      });
+
+      await this.handleResponse(response, 'Erro ao marcar gasto futuro como pago');
+      return await response.json();
+    } catch (error) {
+      console.error('Erro ao marcar gasto futuro como pago:', error);
+      throw error;
+    }
+  }
+
+  async marcarParcelaComoPaga(parcelaId: string, data: MarcarComoPagoRequest): Promise<ApiResponse<ParcelaResponse>> {
+    try {
+      const response = await fetch(`${API_URL}/api/v1/gastos-futuros/parcelas/${parcelaId}/pagar`, {
+        method: 'POST',
+        headers: this.getAuthHeader(),
+        body: JSON.stringify(data),
+      });
+
+      await this.handleResponse(response, 'Erro ao marcar parcela como paga');
+      return await response.json();
+    } catch (error) {
+      console.error('Erro ao marcar parcela como paga:', error);
+      throw error;
+    }
+  }
+
+  // ============ CARTÕES DE CRÉDITO ============
+
+  async getCartoesCredito(params?: {
+    usuario?: string;
+    ativo?: boolean;
+    page?: number;
+    page_size?: number;
+  }): Promise<PaginatedResponse<CartaoCreditoResponse>> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.usuario) queryParams.append('usuario', params.usuario);
+      if (params?.ativo !== undefined) queryParams.append('ativo', params.ativo.toString());
+      if (params?.page) queryParams.append('page', params.page.toString());
+      if (params?.page_size) queryParams.append('page_size', params.page_size.toString());
+
+      const url = `${API_URL}/api/v1/cartoes-credito${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.getAuthHeader(),
+      });
+
+      await this.handleResponse(response, 'Erro ao buscar cartões de crédito');
+      return await response.json();
+    } catch (error) {
+      console.error('Erro ao buscar cartões de crédito:', error);
+      throw error;
+    }
+  }
+
+  async getCartaoCredito(id: string): Promise<ApiResponse<CartaoCreditoComGastos>> {
+    try {
+      const response = await fetch(`${API_URL}/api/v1/cartoes-credito/${id}`, {
+        method: 'GET',
+        headers: this.getAuthHeader(),
+      });
+
+      await this.handleResponse(response, 'Erro ao buscar cartão de crédito');
+      return await response.json();
+    } catch (error) {
+      console.error('Erro ao buscar cartão de crédito:', error);
+      throw error;
+    }
+  }
+
+  async createCartaoCredito(data: CartaoCreditoCreate): Promise<ApiResponse<CartaoCreditoResponse>> {
+    try {
+      const response = await fetch(`${API_URL}/api/v1/cartoes-credito`, {
+        method: 'POST',
+        headers: this.getAuthHeader(),
+        body: JSON.stringify(data),
+      });
+
+      await this.handleResponse(response, 'Erro ao criar cartão de crédito');
+      return await response.json();
+    } catch (error) {
+      console.error('Erro ao criar cartão de crédito:', error);
+      throw error;
+    }
+  }
+
+  async updateCartaoCredito(id: string, data: CartaoCreditoUpdate): Promise<ApiResponse<CartaoCreditoResponse>> {
+    try {
+      const response = await fetch(`${API_URL}/api/v1/cartoes-credito/${id}`, {
+        method: 'PUT',
+        headers: this.getAuthHeader(),
+        body: JSON.stringify(data),
+      });
+
+      await this.handleResponse(response, 'Erro ao atualizar cartão de crédito');
+      return await response.json();
+    } catch (error) {
+      console.error('Erro ao atualizar cartão de crédito:', error);
+      throw error;
+    }
+  }
+
+  async deleteCartaoCredito(id: string): Promise<void> {
+    try {
+      const response = await fetch(`${API_URL}/api/v1/cartoes-credito/${id}`, {
+        method: 'DELETE',
+        headers: this.getAuthHeader(),
+      });
+
+      await this.handleResponse(response, 'Erro ao deletar cartão de crédito');
+    } catch (error) {
+      console.error('Erro ao deletar cartão de crédito:', error);
+      throw error;
+    }
+  }
+
+  async getFaturasMensais(
+    cartaoId: string,
+    params?: {
+      mes_inicio?: string;
+      mes_fim?: string;
+    }
+  ): Promise<ApiResponse<FaturaMensal[]>> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.mes_inicio) queryParams.append('mes_inicio', params.mes_inicio);
+      if (params?.mes_fim) queryParams.append('mes_fim', params.mes_fim);
+
+      const url = `${API_URL}/api/v1/cartoes-credito/${cartaoId}/faturas${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.getAuthHeader(),
+      });
+
+      await this.handleResponse(response, 'Erro ao buscar faturas mensais');
+      return await response.json();
+    } catch (error) {
+      console.error('Erro ao buscar faturas mensais:', error);
+      throw error;
+    }
+  }
+
+  async pagarFaturaMensal(
+    cartaoId: string,
+    data: PagarFaturaRequest
+  ): Promise<ApiResponse<{ parcelas_pagas: number; valor_total: string; gasto_id: string | null }>> {
+    try {
+      const response = await fetch(`${API_URL}/api/v1/cartoes-credito/${cartaoId}/pagar-fatura`, {
+        method: 'POST',
+        headers: this.getAuthHeader(),
+        body: JSON.stringify(data),
+      });
+
+      await this.handleResponse(response, 'Erro ao pagar fatura mensal');
+      return await response.json();
+    } catch (error) {
+      console.error('Erro ao pagar fatura mensal:', error);
       throw error;
     }
   }

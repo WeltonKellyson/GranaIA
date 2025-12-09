@@ -10,6 +10,7 @@ import {
   TableCellsIcon,
   CalendarIcon,
   ArrowUpCircleIcon,
+  CreditCardIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -19,16 +20,20 @@ import {
   ReceitaResponse,
   GastoDashboard,
   ReceitaDashboard,
+  GastoFuturoResponse,
+  GastoFuturoDashboard,
 } from '../services/api';
 import Modal from '../components/Modal';
 import FormGasto from '../components/FormGasto';
 import FormReceita from '../components/FormReceita';
+import FormGastoFuturo from '../components/FormGastoFuturo';
 import PremiumExpiredModal from '../components/PremiumExpiredModal';
 import ExcelExportButton from '../components/ExcelExportButton';
 import Toast from '../components/Toast';
-import MetasGastos from '../components/MetasGastos';
+// import MetasGastos from '../components/MetasGastos'; // TODO: Implementar módulo de metas
 import EmptyState from '../components/EmptyState';
 import ConfirmDialog from '../components/ConfirmDialog';
+import ModalCartoesCredito from '../components/ModalCartoesCredito';
 
 // Novos componentes refatorados
 import CardsResumo from '../components/CardsResumo';
@@ -37,6 +42,7 @@ import ComparacaoPeriodos from '../components/ComparacaoPeriodos';
 import GraficosFinanceiros from '../components/GraficosFinanceiros';
 import TabelaTransacoes from '../components/TabelaTransacoes';
 import CalendarioTransacoes from '../components/CalendarioTransacoes';
+import CardGastosFuturos from '../components/CardGastosFuturos';
 
 type TransacaoTipo = 'Receita' | 'Despesa';
 
@@ -88,15 +94,21 @@ export default function Dashboard() {
   );
   const [receitaDashboard, setReceitaDashboard] =
     useState<ReceitaDashboard | null>(null);
+  const [gastosFuturos, setGastosFuturos] = useState<GastoFuturoResponse[]>([]);
+  const [gastoFuturoDashboard, setGastoFuturoDashboard] =
+    useState<GastoFuturoDashboard | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Estados dos modais
   const [showGastoModal, setShowGastoModal] = useState(false);
   const [showReceitaModal, setShowReceitaModal] = useState(false);
+  const [showGastoFuturoModal, setShowGastoFuturoModal] = useState(false);
+  const [showCartoesCreditoModal, setShowCartoesCreditoModal] = useState(false);
   const [editingGasto, setEditingGasto] = useState<GastoResponse | null>(null);
   const [editingReceita, setEditingReceita] = useState<ReceitaResponse | null>(
     null,
   );
+  const [editingGastoFuturo, setEditingGastoFuturo] = useState<GastoFuturoResponse | null>(null);
 
   // Estado dos filtros
   const [filtros, setFiltros] = useState<Filtros>({
@@ -170,6 +182,17 @@ export default function Dashboard() {
         usuario: userProfile.remotejid,
       });
       setReceitaDashboard(receitaDash.data);
+
+      // Buscar gastos futuros
+      const gastosFuturosResponse = await apiService.getGastosFuturos({
+        usuario: userProfile.remotejid,
+        page_size: 100,
+      });
+      setGastosFuturos(gastosFuturosResponse.data);
+
+      // Buscar dashboard de gastos futuros
+      const gastoFuturoDash = await apiService.getGastosFuturosDashboard();
+      setGastoFuturoDashboard(gastoFuturoDash.data);
     } catch (error) {
       setToast({
         message: 'Erro ao carregar dados. Tente novamente.',
@@ -334,6 +357,77 @@ export default function Dashboard() {
     setEditingReceita(null);
   };
 
+  // Handlers para Gastos Futuros
+  const handleEditGastoFuturo = (gastoFuturo: GastoFuturoResponse) => {
+    setEditingGastoFuturo(gastoFuturo);
+    setShowGastoFuturoModal(true);
+  };
+
+  const handleGastoFuturoSuccess = async () => {
+    setShowGastoFuturoModal(false);
+    const isEditing = editingGastoFuturo !== null;
+    setEditingGastoFuturo(null);
+    await loadData();
+    setToast({
+      message: isEditing ? 'Gasto futuro atualizado com sucesso!' : 'Gasto futuro criado com sucesso!',
+      type: 'success',
+    });
+  };
+
+  const handleGastoFuturoCancel = () => {
+    setShowGastoFuturoModal(false);
+    setEditingGastoFuturo(null);
+  };
+
+  const handleDeleteGastoFuturo = async (id: string) => {
+    try {
+      await apiService.deleteGastoFuturo(id);
+      setToast({ message: 'Gasto futuro deletado com sucesso!', type: 'success' });
+      await loadData();
+    } catch (error) {
+      setToast({
+        message: 'Erro ao deletar gasto futuro. Tente novamente.',
+        type: 'error',
+      });
+    }
+  };
+
+  const handleMarcarGastoFuturoComoPago = async (id: string) => {
+    try {
+      await apiService.marcarGastoFuturoComoPago(id, {
+        criar_gasto: true,
+      });
+      setToast({
+        message: 'Gasto futuro marcado como pago e gasto normal criado!',
+        type: 'success',
+      });
+      await loadData();
+    } catch (error) {
+      setToast({
+        message: 'Erro ao marcar gasto futuro como pago. Tente novamente.',
+        type: 'error',
+      });
+    }
+  };
+
+  const handleMarcarParcelaComoPaga = async (parcelaId: string) => {
+    try {
+      await apiService.marcarParcelaComoPaga(parcelaId, {
+        criar_gasto: true,
+      });
+      setToast({
+        message: 'Parcela marcada como paga e gasto normal criado!',
+        type: 'success',
+      });
+      await loadData();
+    } catch (error) {
+      setToast({
+        message: 'Erro ao marcar parcela como paga. Tente novamente.',
+        type: 'error',
+      });
+    }
+  };
+
   // Combinar gastos e receitas em transações
   const todasTransacoes: Transacao[] = [
     ...gastos.map((g) => ({
@@ -470,24 +564,25 @@ export default function Dashboard() {
 
   const { variacaoReceitas, variacaoDespesas } = calcularTendencias();
 
+  // TODO: Descomentar quando implementar o módulo de metas de gastos
   // Agrupar despesas por categoria (para MetasGastos)
-  const categoriasGastos = (() => {
-    const categoriaMap: Record<string, number> = {};
+  // const categoriasGastos = (() => {
+  //   const categoriaMap: Record<string, number> = {};
 
-    transacoesFiltradas
-      .filter((t) => t.tipo === 'Despesa')
-      .forEach((t) => {
-        if (!categoriaMap[t.categoria]) {
-          categoriaMap[t.categoria] = 0;
-        }
-        categoriaMap[t.categoria] += t.valor;
-      });
+  //   transacoesFiltradas
+  //     .filter((t) => t.tipo === 'Despesa')
+  //     .forEach((t) => {
+  //       if (!categoriaMap[t.categoria]) {
+  //         categoriaMap[t.categoria] = 0;
+  //       }
+  //       categoriaMap[t.categoria] += t.valor;
+  //     });
 
-    return Object.entries(categoriaMap).map(([name, value]) => ({
-      name,
-      value,
-    }));
-  })();
+  //   return Object.entries(categoriaMap).map(([name, value]) => ({
+  //     name,
+  //     value,
+  //   }));
+  // })();
 
   // Lista completa de categorias do sistema
   const todasCategorias = [
@@ -740,6 +835,43 @@ export default function Dashboard() {
           <PlusIcon className="w-5 h-5" />
           Nova Receita
         </button>
+        <button
+          onClick={() => {
+            if (!isPremiumActive) {
+              setShowPremiumModal(true);
+              return;
+            }
+            setEditingGastoFuturo(null);
+            setShowGastoFuturoModal(true);
+          }}
+          disabled={!isPremiumActive}
+          className={`flex items-center gap-2 px-5 py-2 rounded-lg font-medium shadow-md transition ${
+            isPremiumActive
+              ? 'bg-blue-600 hover:bg-blue-700 text-white'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          <PlusIcon className="w-5 h-5" />
+          Novo Gasto Futuro
+        </button>
+        <button
+          onClick={() => {
+            if (!isPremiumActive) {
+              setShowPremiumModal(true);
+              return;
+            }
+            setShowCartoesCreditoModal(true);
+          }}
+          disabled={!isPremiumActive}
+          className={`flex items-center gap-2 px-5 py-2 rounded-lg font-medium shadow-md transition ${
+            isPremiumActive
+              ? 'bg-purple-600 hover:bg-purple-700 text-white'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          <CreditCardIcon className="w-5 h-5" />
+          Meus Cartões
+        </button>
       </section>
 
       {/* ===== CARDS DE RESUMO ===== */}
@@ -784,11 +916,24 @@ export default function Dashboard() {
       {/* ===== GRÁFICOS ===== */}
       <GraficosFinanceiros transacoesFiltradas={transacoesFiltradas} />
 
+      {/* ===== GASTOS FUTUROS ===== */}
+      <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
+        <CardGastosFuturos
+          gastosFuturos={gastosFuturos}
+          dashboard={gastoFuturoDashboard}
+          onEdit={handleEditGastoFuturo}
+          onDelete={handleDeleteGastoFuturo}
+          onMarcarComoPago={handleMarcarGastoFuturoComoPago}
+          onMarcarParcelaComoPaga={handleMarcarParcelaComoPaga}
+        />
+      </section>
+
       {/* ===== METAS DE GASTOS ===== */}
-      <MetasGastos
+      {/* TODO: Implementar módulo de metas de gastos */}
+      {/* <MetasGastos
         gastosPorCategoria={categoriasGastos}
         mesReferencia={new Date().toISOString().slice(0, 7)}
-      />
+      /> */}
 
       {/* ===== TABELA/CALENDÁRIO DE TRANSAÇÕES ===== */}
       <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
@@ -911,6 +1056,28 @@ export default function Dashboard() {
           onCancel={handleReceitaCancel}
         />
       </Modal>
+
+      <Modal
+        isOpen={showGastoFuturoModal}
+        onClose={handleGastoFuturoCancel}
+        title={editingGastoFuturo ? 'Editar Gasto Futuro' : 'Novo Gasto Futuro'}
+      >
+        <FormGastoFuturo
+          gastoFuturo={editingGastoFuturo}
+          onSuccess={handleGastoFuturoSuccess}
+          onCancel={handleGastoFuturoCancel}
+          onManageCartoes={() => {
+            setShowGastoFuturoModal(false);
+            setShowCartoesCreditoModal(true);
+          }}
+        />
+      </Modal>
+
+      {/* Modal de Cartões de Crédito */}
+      <ModalCartoesCredito
+        isOpen={showCartoesCreditoModal}
+        onClose={() => setShowCartoesCreditoModal(false)}
+      />
 
       {/* Modal de Premium Expirado */}
       <PremiumExpiredModal

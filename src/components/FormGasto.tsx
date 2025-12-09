@@ -193,9 +193,9 @@ const FormGasto: React.FC<FormGastoProps> = ({ gasto, onSuccess, onCancel }) => 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg text-sm flex items-start gap-3 animate-shake">
+        <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 dark:border-red-400 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg text-sm flex items-start gap-3 animate-shake">
           <svg
-            className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"
+            className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0 mt-0.5"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -214,8 +214,8 @@ const FormGasto: React.FC<FormGastoProps> = ({ gasto, onSuccess, onCancel }) => 
 
       {/* Descrição */}
       <div>
-        <label htmlFor="descricao" className="block text-sm font-medium text-gray-700 mb-1">
-          Descrição <span className="text-red-500">*</span>
+        <label htmlFor="descricao" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Descrição <span className="text-red-500 dark:text-red-400">*</span>
         </label>
         <input
           type="text"
@@ -223,7 +223,7 @@ const FormGasto: React.FC<FormGastoProps> = ({ gasto, onSuccess, onCancel }) => 
           name="descricao"
           value={formData.descricao}
           onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 placeholder-gray-400 dark:placeholder-gray-500"
           placeholder="Ex: Conta de luz"
           required
         />
@@ -231,8 +231,8 @@ const FormGasto: React.FC<FormGastoProps> = ({ gasto, onSuccess, onCancel }) => 
 
       {/* Valor */}
       <div>
-        <label htmlFor="valor" className="block text-sm font-medium text-gray-700 mb-1">
-          Valor (R$) <span className="text-red-500">*</span>
+        <label htmlFor="valor" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Valor (R$) <span className="text-red-500 dark:text-red-400">*</span>
         </label>
         <input
           type="text"
@@ -240,7 +240,7 @@ const FormGasto: React.FC<FormGastoProps> = ({ gasto, onSuccess, onCancel }) => 
           name="valor"
           value={valorDisplay}
           onChange={handleValorChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 placeholder-gray-400 dark:placeholder-gray-500"
           placeholder="0,00"
           required
         />
@@ -248,15 +248,15 @@ const FormGasto: React.FC<FormGastoProps> = ({ gasto, onSuccess, onCancel }) => 
 
       {/* Categoria */}
       <div>
-        <label htmlFor="categoria" className="block text-sm font-medium text-gray-700 mb-1">
-          Categoria <span className="text-red-500">*</span>
+        <label htmlFor="categoria" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Categoria <span className="text-red-500 dark:text-red-400">*</span>
         </label>
         <select
           id="categoria"
           name="categoria"
           value={formData.categoria}
           onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
           required
         >
           <option value="">Selecione uma categoria</option>
@@ -270,7 +270,7 @@ const FormGasto: React.FC<FormGastoProps> = ({ gasto, onSuccess, onCancel }) => 
 
       {/* Data */}
       <div>
-        <label htmlFor="data" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="data" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Data
         </label>
         <input
@@ -279,7 +279,7 @@ const FormGasto: React.FC<FormGastoProps> = ({ gasto, onSuccess, onCancel }) => 
           name="data"
           value={formData.data}
           onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
         />
       </div>
 
@@ -288,7 +288,7 @@ const FormGasto: React.FC<FormGastoProps> = ({ gasto, onSuccess, onCancel }) => 
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition"
           disabled={loading}
         >
           Cancelar
@@ -298,8 +298,8 @@ const FormGasto: React.FC<FormGastoProps> = ({ gasto, onSuccess, onCancel }) => 
           disabled={loading}
           className={`flex-1 px-4 py-2 rounded-lg text-white transition ${
             loading
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-green-600 hover:bg-green-700'
+              ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+              : 'bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600'
           }`}
         >
           {loading ? 'Salvando...' : gasto ? 'Atualizar' : 'Criar'}

@@ -17,21 +17,21 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration = 3000 }
   }, [duration, onClose]);
 
   const bgColor = {
-    success: 'bg-green-50 border-green-500',
-    error: 'bg-red-50 border-red-500',
-    info: 'bg-blue-50 border-blue-500',
+    success: 'bg-green-50 dark:bg-green-900/20 border-green-500 dark:border-green-400',
+    error: 'bg-red-50 dark:bg-red-900/20 border-red-500 dark:border-red-400',
+    info: 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 dark:border-blue-400',
   }[type];
 
   const textColor = {
-    success: 'text-green-700',
-    error: 'text-red-700',
-    info: 'text-blue-700',
+    success: 'text-green-700 dark:text-green-300',
+    error: 'text-red-700 dark:text-red-300',
+    info: 'text-blue-700 dark:text-blue-300',
   }[type];
 
   const iconColor = {
-    success: 'text-green-500',
-    error: 'text-red-500',
-    info: 'text-blue-500',
+    success: 'text-green-500 dark:text-green-400',
+    error: 'text-red-500 dark:text-red-400',
+    info: 'text-blue-500 dark:text-blue-400',
   }[type];
 
   const Icon = () => {

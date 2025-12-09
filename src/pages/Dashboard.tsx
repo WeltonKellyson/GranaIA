@@ -1,37 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Legend,
-} from 'recharts';
-
-import {
-  ArrowDownCircleIcon,
-  ArrowUpCircleIcon,
-  BanknotesIcon,
   UserCircleIcon,
   ArrowRightOnRectangleIcon,
   ChevronDownIcon,
   PlusIcon,
-  PencilSquareIcon,
-  TrashIcon,
-  TableCellsIcon,
-  CalendarIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   SunIcon,
   MoonIcon,
+  TableCellsIcon,
+  CalendarIcon,
+  ArrowUpCircleIcon,
 } from '@heroicons/react/24/outline';
-import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import {
@@ -50,6 +29,14 @@ import Toast from '../components/Toast';
 import MetasGastos from '../components/MetasGastos';
 import EmptyState from '../components/EmptyState';
 import ConfirmDialog from '../components/ConfirmDialog';
+
+// Novos componentes refatorados
+import CardsResumo from '../components/CardsResumo';
+import FiltrosTransacoes from '../components/FiltrosTransacoes';
+import ComparacaoPeriodos from '../components/ComparacaoPeriodos';
+import GraficosFinanceiros from '../components/GraficosFinanceiros';
+import TabelaTransacoes from '../components/TabelaTransacoes';
+import CalendarioTransacoes from '../components/CalendarioTransacoes';
 
 type TransacaoTipo = 'Receita' | 'Despesa';
 
@@ -135,22 +122,8 @@ export default function Dashboard() {
     tipo: 'gasto' | 'receita';
   }>({ isOpen: false, id: '', tipo: 'gasto' });
 
-  // Estados do calendário
+  // Estado de visualização (tabela ou calendário)
   const [visualizacao, setVisualizacao] = useState<'tabela' | 'calendario'>('tabela');
-  const [diaSelecionado, setDiaSelecionado] = useState<string | null>(null);
-  const [mesCalendario, setMesCalendario] = useState<Date>(new Date());
-  const [seletorMesAberto, setSeletorMesAberto] = useState(false);
-
-  // Estados da tabela
-  const [paginaAtual, setPaginaAtual] = useState(1);
-  const itensPorPagina = 10;
-  const [ordenacao, setOrdenacao] = useState<{
-    campo: 'data' | 'tipo';
-    ordem: 'asc' | 'desc';
-  }>({
-    campo: 'data',
-    ordem: 'desc',
-  });
 
   const handleLogout = () => {
     logout();
@@ -280,15 +253,12 @@ export default function Dashboard() {
         if (showUserMenu) {
           setShowUserMenu(false);
         }
-        if (seletorMesAberto) {
-          setSeletorMesAberto(false);
-        }
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [isPremiumActive, showGastoModal, showReceitaModal, showUserMenu, seletorMesAberto]);
+  }, [isPremiumActive, showGastoModal, showReceitaModal, showUserMenu]);
 
   const handleDeleteGasto = async (id: string) => {
     setConfirmDelete({ isOpen: true, id, tipo: 'gasto' });
@@ -435,58 +405,6 @@ export default function Dashboard() {
     return filtroMesOK && filtroPeriodoOK && filtroCategoriaOK && filtroTipoOK && filtroDescricaoOK;
   });
 
-  // === AGRUPAMENTO POR MÊS PARA O GRÁFICO DE LINHA ===
-  const fluxoMensal = (() => {
-    const mapa: Record<string, { receitas: number; despesas: number }> = {};
-
-    transacoesFiltradas.forEach((t) => {
-      const data = new Date(t.data);
-      if (isNaN(data.getTime())) return;
-
-      // Nome do mês em PT-BR abreviado
-      const mes = data
-        .toLocaleString('pt-BR', { month: 'short' })
-        .replace('.', '');
-
-      if (!mapa[mes]) {
-        mapa[mes] = { receitas: 0, despesas: 0 };
-      }
-
-      if (t.tipo === 'Receita') {
-        mapa[mes].receitas += t.valor;
-      } else {
-        mapa[mes].despesas += t.valor;
-      }
-    });
-
-    // Converter o mapa em array
-    return Object.entries(mapa).map(([mes, valores]) => ({
-      mes: mes.charAt(0).toUpperCase() + mes.slice(1), // Jan, Fev, Mar…
-      receitas: valores.receitas,
-      despesas: valores.despesas,
-    }));
-  })();
-
-  // Ordenar transações
-  const transacoesOrdenadas = [...transacoesFiltradas].sort((a, b) => {
-    if (ordenacao.campo === 'data') {
-      const dataA = new Date(a.data).getTime();
-      const dataB = new Date(b.data).getTime();
-      return ordenacao.ordem === 'asc' ? dataA - dataB : dataB - dataA;
-    } else {
-      return ordenacao.ordem === 'asc'
-        ? a.tipo.localeCompare(b.tipo)
-        : b.tipo.localeCompare(a.tipo);
-    }
-  });
-
-  // Paginação
-  const totalPaginas = Math.ceil(transacoesOrdenadas.length / itensPorPagina);
-  const indiceInicial = (paginaAtual - 1) * itensPorPagina;
-  const transacoesPaginadas = transacoesOrdenadas.slice(
-    indiceInicial,
-    indiceInicial + itensPorPagina,
-  );
 
   // Calcular resumo com base nas transações FILTRADAS
   const totalReceitas = transacoesFiltradas
@@ -552,35 +470,12 @@ export default function Dashboard() {
 
   const { variacaoReceitas, variacaoDespesas } = calcularTendencias();
 
-  // Dados para gráficos - com base nas transações FILTRADAS
-  const coresReceitas = ['#22c55e', '#16a34a', '#059669', '#047857', '#065f46', '#064e3b'];
-  const coresDespesas = ['#ef4444', '#dc2626', '#b91c1c', '#991b1b', '#7f1d1d', '#6b1414'];
-
-  // Agrupar despesas por categoria das transações filtradas
+  // Agrupar despesas por categoria (para MetasGastos)
   const categoriasGastos = (() => {
     const categoriaMap: Record<string, number> = {};
 
     transacoesFiltradas
       .filter((t) => t.tipo === 'Despesa')
-      .forEach((t) => {
-        if (!categoriaMap[t.categoria]) {
-          categoriaMap[t.categoria] = 0;
-        }
-        categoriaMap[t.categoria] += t.valor;
-      });
-
-    return Object.entries(categoriaMap).map(([name, value]) => ({
-      name,
-      value,
-    }));
-  })();
-
-  // Agrupar receitas por categoria das transações filtradas
-  const categoriasReceitas = (() => {
-    const categoriaMap: Record<string, number> = {};
-
-    transacoesFiltradas
-      .filter((t) => t.tipo === 'Receita')
       .forEach((t) => {
         if (!categoriaMap[t.categoria]) {
           categoriaMap[t.categoria] = 0;
@@ -628,124 +523,6 @@ export default function Dashboard() {
   })();
 
 
-  const alternarOrdenacao = (campo: 'data' | 'tipo') => {
-    if (ordenacao.campo === campo) {
-      setOrdenacao({
-        campo,
-        ordem: ordenacao.ordem === 'asc' ? 'desc' : 'asc',
-      });
-    } else {
-      setOrdenacao({ campo, ordem: 'desc' });
-    }
-  };
-
-  // === FUNÇÕES DO CALENDÁRIO ===
-
-  // Agrupar transações por dia
-  const transacoesPorDia = (() => {
-    const mapa: Record<string, Transacao[]> = {};
-
-    transacoesFiltradas.forEach((t) => {
-      const dataStr = t.data.split('T')[0]; // "YYYY-MM-DD"
-      if (!mapa[dataStr]) {
-        mapa[dataStr] = [];
-      }
-      mapa[dataStr].push(t);
-    });
-
-    return mapa;
-  })();
-
-  // Gerar dias do calendário
-  const gerarDiasCalendario = () => {
-    const ano = mesCalendario.getFullYear();
-    const mes = mesCalendario.getMonth();
-
-    const primeiroDia = new Date(ano, mes, 1);
-    const ultimoDia = new Date(ano, mes + 1, 0);
-
-    const diasAnteriores = primeiroDia.getDay(); // 0 = domingo
-    const diasNoMes = ultimoDia.getDate();
-
-    const dias: Array<{
-      data: string;
-      dia: number;
-      mesAtual: boolean;
-      transacoes: Transacao[];
-      totalReceitas: number;
-      totalDespesas: number;
-    }> = [];
-
-    // Dias do mês anterior
-    const ultimoDiaMesAnterior = new Date(ano, mes, 0).getDate();
-    for (let i = diasAnteriores - 1; i >= 0; i--) {
-      const dia = ultimoDiaMesAnterior - i;
-      const mesAnterior = mes === 0 ? 11 : mes - 1;
-      const anoAnterior = mes === 0 ? ano - 1 : ano;
-      const dataStr = `${anoAnterior}-${String(mesAnterior + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-
-      const transacoesDia = transacoesPorDia[dataStr] || [];
-      const totalReceitas = transacoesDia.filter(t => t.tipo === 'Receita').reduce((acc, t) => acc + t.valor, 0);
-      const totalDespesas = transacoesDia.filter(t => t.tipo === 'Despesa').reduce((acc, t) => acc + t.valor, 0);
-
-      dias.push({
-        data: dataStr,
-        dia,
-        mesAtual: false,
-        transacoes: transacoesDia,
-        totalReceitas,
-        totalDespesas,
-      });
-    }
-
-    // Dias do mês atual
-    for (let dia = 1; dia <= diasNoMes; dia++) {
-      const dataStr = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-
-      const transacoesDia = transacoesPorDia[dataStr] || [];
-      const totalReceitas = transacoesDia.filter(t => t.tipo === 'Receita').reduce((acc, t) => acc + t.valor, 0);
-      const totalDespesas = transacoesDia.filter(t => t.tipo === 'Despesa').reduce((acc, t) => acc + t.valor, 0);
-
-      dias.push({
-        data: dataStr,
-        dia,
-        mesAtual: true,
-        transacoes: transacoesDia,
-        totalReceitas,
-        totalDespesas,
-      });
-    }
-
-    // Dias do próximo mês (para completar a grade)
-    const diasRestantes = 42 - dias.length; // 6 semanas × 7 dias
-    for (let dia = 1; dia <= diasRestantes; dia++) {
-      const proximoMes = mes === 11 ? 0 : mes + 1;
-      const proximoAno = mes === 11 ? ano + 1 : ano;
-      const dataStr = `${proximoAno}-${String(proximoMes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-
-      const transacoesDia = transacoesPorDia[dataStr] || [];
-      const totalReceitas = transacoesDia.filter(t => t.tipo === 'Receita').reduce((acc, t) => acc + t.valor, 0);
-      const totalDespesas = transacoesDia.filter(t => t.tipo === 'Despesa').reduce((acc, t) => acc + t.valor, 0);
-
-      dias.push({
-        data: dataStr,
-        dia,
-        mesAtual: false,
-        transacoes: transacoesDia,
-        totalReceitas,
-        totalDespesas,
-      });
-    }
-
-    return dias;
-  };
-
-  const diasCalendario = gerarDiasCalendario();
-
-  // Transações do dia selecionado
-  const transacoesDiaSelecionado = diaSelecionado
-    ? (transacoesPorDia[diaSelecionado] || [])
-    : [];
 
   if (loading) {
     return (
@@ -966,293 +743,28 @@ export default function Dashboard() {
       </section>
 
       {/* ===== CARDS DE RESUMO ===== */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Saldo */}
-        <div className="bg-white dark:bg-gray-800 shadow-md rounded-xl p-6 flex items-center gap-4 border border-gray-100 dark:border-gray-700">
-          <BanknotesIcon className="w-10 h-10 text-green-600 dark:text-green-400" />
-          <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Saldo Atual</p>
-            <h3
-              className={`text-2xl font-bold ${
-                saldo >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-              }`}
-            >
-              {formatarMoeda(saldo)}
-            </h3>
-          </div>
-        </div>
-
-        {/* Receitas */}
-        <div className="bg-white dark:bg-gray-800 shadow-md rounded-xl p-6 border border-gray-100 dark:border-gray-700">
-          <div className="flex items-center gap-4 mb-2">
-            <ArrowUpCircleIcon className="w-10 h-10 text-green-600 dark:text-green-400" />
-            <div className="flex-1">
-              <p className="text-sm text-gray-500 dark:text-gray-400">Receitas</p>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {formatarMoeda(totalReceitas)}
-              </h3>
-            </div>
-          </div>
-          {/* Indicador de Tendência */}
-          {variacaoReceitas !== 0 && (
-            <div className={`flex items-center gap-1 text-sm mt-2 ${
-              variacaoReceitas > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-            }`}>
-              {variacaoReceitas > 0 ? (
-                <ArrowUpIcon className="w-4 h-4" />
-              ) : (
-                <ArrowDownIcon className="w-4 h-4" />
-              )}
-              <span className="font-medium">
-                {Math.abs(variacaoReceitas).toFixed(1)}%
-              </span>
-              <span className="text-gray-500 dark:text-gray-400 text-xs ml-1">vs mês anterior</span>
-            </div>
-          )}
-        </div>
-
-        {/* Despesas */}
-        <div className="bg-white dark:bg-gray-800 shadow-md rounded-xl p-6 border border-gray-100 dark:border-gray-700">
-          <div className="flex items-center gap-4 mb-2">
-            <ArrowDownCircleIcon className="w-10 h-10 text-red-500" />
-            <div className="flex-1">
-              <p className="text-sm text-gray-500">Despesas</p>
-              <h3 className="text-2xl font-bold text-gray-900">
-                {formatarMoeda(totalDespesas)}
-              </h3>
-            </div>
-          </div>
-          {/* Indicador de Tendência */}
-          {variacaoDespesas !== 0 && (
-            <div className={`flex items-center gap-1 text-sm mt-2 ${
-              variacaoDespesas > 0 ? 'text-red-600' : 'text-green-600'
-            }`}>
-              {variacaoDespesas > 0 ? (
-                <ArrowUpIcon className="w-4 h-4" />
-              ) : (
-                <ArrowDownIcon className="w-4 h-4" />
-              )}
-              <span className="font-medium">
-                {Math.abs(variacaoDespesas).toFixed(1)}%
-              </span>
-              <span className="text-gray-500 text-xs ml-1">vs mês anterior</span>
-            </div>
-          )}
-        </div>
-      </section>
+      <CardsResumo
+        saldo={saldo}
+        totalReceitas={totalReceitas}
+        totalDespesas={totalDespesas}
+        variacaoReceitas={variacaoReceitas}
+        variacaoDespesas={variacaoDespesas}
+      />
 
       {/* ===== COMPARAÇÃO ENTRE PERÍODOS ===== */}
-      <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">
-            Comparação de Períodos
-          </h2>
-          <button
-            onClick={() => setMostrarComparacao(!mostrarComparacao)}
-            className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 transition"
-          >
-            {mostrarComparacao ? 'Ocultar' : 'Mostrar'} Comparação
-          </button>
-        </div>
-
-        {mostrarComparacao && (() => {
-          const hoje = new Date();
-          const mesAtual = hoje.getMonth();
-          const anoAtual = hoje.getFullYear();
-          const mesAnterior = mesAtual === 0 ? 11 : mesAtual - 1;
-          const anoMesAnterior = mesAtual === 0 ? anoAtual - 1 : anoAtual;
-
-          // Dados mês atual
-          const dadosMesAtual = todasTransacoes.filter((t) => {
-            const data = new Date(t.data);
-            return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
-          });
-
-          // Dados mês anterior
-          const dadosMesAnterior = todasTransacoes.filter((t) => {
-            const data = new Date(t.data);
-            return data.getMonth() === mesAnterior && data.getFullYear() === anoMesAnterior;
-          });
-
-          const calcularResumo = (transacoes: Transacao[]) => ({
-            receitas: transacoes.filter(t => t.tipo === 'Receita').reduce((acc, t) => acc + t.valor, 0),
-            despesas: transacoes.filter(t => t.tipo === 'Despesa').reduce((acc, t) => acc + t.valor, 0),
-            saldo: transacoes.filter(t => t.tipo === 'Receita').reduce((acc, t) => acc + t.valor, 0) -
-                   transacoes.filter(t => t.tipo === 'Despesa').reduce((acc, t) => acc + t.valor, 0),
-          });
-
-          const resumoAtual = calcularResumo(dadosMesAtual);
-          const resumoAnterior = calcularResumo(dadosMesAnterior);
-
-          const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-
-          return (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-              {/* Mês Anterior */}
-              <div className="border border-gray-200 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-700 mb-3">
-                  {meses[mesAnterior]} {anoMesAnterior}
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Receitas:</span>
-                    <span className="font-medium text-green-600">{formatarMoeda(resumoAnterior.receitas)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Despesas:</span>
-                    <span className="font-medium text-red-600">{formatarMoeda(resumoAnterior.despesas)}</span>
-                  </div>
-                  <div className="flex justify-between pt-2 border-t">
-                    <span className="text-gray-700 font-medium">Saldo:</span>
-                    <span className={`font-bold ${resumoAnterior.saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {formatarMoeda(resumoAnterior.saldo)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Mês Atual */}
-              <div className="border-2 border-green-500 rounded-lg p-4 bg-green-50">
-                <h3 className="font-semibold text-gray-700 mb-3">
-                  {meses[mesAtual]} {anoAtual} <span className="text-xs text-green-600">(Atual)</span>
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Receitas:</span>
-                    <span className="font-medium text-green-600">{formatarMoeda(resumoAtual.receitas)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Despesas:</span>
-                    <span className="font-medium text-red-600">{formatarMoeda(resumoAtual.despesas)}</span>
-                  </div>
-                  <div className="flex justify-between pt-2 border-t border-green-300">
-                    <span className="text-gray-700 font-medium">Saldo:</span>
-                    <span className={`font-bold ${resumoAtual.saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {formatarMoeda(resumoAtual.saldo)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })()}
-      </section>
+      <ComparacaoPeriodos todasTransacoes={todasTransacoes} />
 
       {/* ===== FILTROS ===== */}
-      <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Filtros</h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Filtro de Período */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Período
-            </label>
-            <select
-              value={filtros?.periodo || 'todos'}
-              onChange={(e) =>
-                setFiltros((prev) => ({ ...prev, periodo: e.target.value, mes: '' }))
-              }
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white
-        text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-            >
-              <option value="todos">Todos os períodos</option>
-              <option value="mesAtual">Mês atual</option>
-              <option value="ultimos30">Últimos 30 dias</option>
-              <option value="ultimos60">Últimos 60 dias</option>
-              <option value="ultimos90">Últimos 90 dias</option>
-              <option value="anoAtual">Ano atual</option>
-            </select>
-          </div>
-
-          {/* Filtro de Mês/Data Específico */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mês Específico
-            </label>
-            <input
-              type="month"
-              value={filtros?.mes || ''}
-              onChange={(e) =>
-                setFiltros((prev) => ({ ...prev, mes: e.target.value, periodo: 'todos' }))
-              }
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white
-        text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-            />
-          </div>
-
-          {/* Filtro de Categoria */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Categoria
-            </label>
-            <select
-              value={filtros?.categoria || 'todas'}
-              onChange={(e) =>
-                setFiltros((prev) => ({
-                  ...prev,
-                  categoria: e.target.value,
-                }))
-              }
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white
-        text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-            >
-              <option value="todas">Todas</option>
-
-              {/* Lista todas as categorias com contagem */}
-              {todasCategorias.map((cat) => {
-                const quantidade = contagemPorCategoria[cat] || 0;
-                return (
-                  <option key={cat} value={cat}>
-                    {cat} {quantidade > 0 ? `(${quantidade})` : ''}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-
-          {/* Filtro de Tipo */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tipo
-            </label>
-            <select
-              value={filtros?.tipo || 'todos'}
-              onChange={(e) =>
-                setFiltros((prev) => ({ ...prev, tipo: e.target.value }))
-              }
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white
-        text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-            >
-              <option value="todos">Todos</option>
-              <option value="Receita">Receita</option>
-              <option value="Despesa">Despesa</option>
-            </select>
-          </div>
-        </div>
-
-        {/* BOTÃO LIMPAR FILTROS */}
-        <div className="flex justify-end mt-4">
-          <button
-            onClick={() =>
-              setFiltros({
-                mes: '',
-                categoria: 'todas',
-                tipo: 'todos',
-                periodo: 'todos',
-              })
-            }
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
-      border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 transition"
-          >
-            Limpar Filtros
-          </button>
-        </div>
-      </section>
+      <FiltrosTransacoes
+        filtros={filtros}
+        setFiltros={setFiltros}
+        todasCategorias={todasCategorias}
+        contagemPorCategoria={contagemPorCategoria}
+      />
 
       {/* ===== ESTADO VAZIO GERAL ===== */}
       {todasTransacoes.length === 0 && (
-        <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+        <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
           <EmptyState
             title="Nenhuma transação cadastrada"
             message="Comece adicionando suas primeiras receitas e despesas para visualizar seu dashboard financeiro completo com gráficos, tendências e análises."
@@ -1269,126 +781,8 @@ export default function Dashboard() {
         </section>
       )}
 
-      {/* ===== GRÁFICO: FLUXO DE CAIXA MENSAL ===== */}
-      {fluxoMensal.length > 0 && (
-        <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">
-            Fluxo de Caixa Mensal
-          </h2>
-
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={fluxoMensal}>
-              <CartesianGrid strokeDasharray="3 3" />
-
-              <XAxis dataKey="mes" />
-              <YAxis />
-
-              <Tooltip
-                formatter={(value: number) => formatarMoeda(value)}
-              />
-
-              <Legend />
-
-              <Line
-                type="monotone"
-                dataKey="receitas"
-                stroke="#16a34a"
-                strokeWidth={3}
-                name="Receitas"
-              />
-
-              <Line
-                type="monotone"
-                dataKey="despesas"
-                stroke="#ef4444"
-                strokeWidth={3}
-                name="Despesas"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </section>
-      )}
-
-      {/* ===== GRÁFICOS DE PIZZA ===== */}
-      {(categoriasGastos.length > 0 || categoriasReceitas.length > 0) && (
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Gráfico de Despesas */}
-          {categoriasGastos.length > 0 && (
-            <div
-              className={`bg-white rounded-2xl shadow-md p-6 border border-gray-100 transition-all duration-500 ease-in-out ${
-                categoriasReceitas.length === 0 ? 'lg:col-span-2' : ''
-              }`}
-            >
-              <h2 className="text-xl font-bold text-gray-900 mb-6">
-                Distribuição de Despesas por Categoria
-              </h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={categoriasGastos}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={(entry) => `${entry.name}: ${formatarMoeda(entry.value)}`}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {categoriasGastos.map((entry, index) => (
-                      <Cell
-                        key={`cell-despesa-${index}`}
-                        fill={coresDespesas[index % coresDespesas.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value: number) => formatarMoeda(value)}
-                  />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-
-          {/* Gráfico de Receitas */}
-          {categoriasReceitas.length > 0 && (
-            <div
-              className={`bg-white rounded-2xl shadow-md p-6 border border-gray-100 transition-all duration-500 ease-in-out ${
-                categoriasGastos.length === 0 ? 'lg:col-span-2' : ''
-              }`}
-            >
-              <h2 className="text-xl font-bold text-gray-900 mb-6">
-                Distribuição de Receitas por Categoria
-              </h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={categoriasReceitas}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={(entry) => `${entry.name}: ${formatarMoeda(entry.value)}`}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {categoriasReceitas.map((entry, index) => (
-                      <Cell
-                        key={`cell-receita-${index}`}
-                        fill={coresReceitas[index % coresReceitas.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value: number) => formatarMoeda(value)}
-                  />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-        </section>
-      )}
+      {/* ===== GRÁFICOS ===== */}
+      <GraficosFinanceiros transacoesFiltradas={transacoesFiltradas} />
 
       {/* ===== METAS DE GASTOS ===== */}
       <MetasGastos
@@ -1396,22 +790,22 @@ export default function Dashboard() {
         mesReferencia={new Date().toISOString().slice(0, 7)}
       />
 
-      {/* ===== TABELA DE TRANSAÇÕES ===== */}
-      <section className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+      {/* ===== TABELA/CALENDÁRIO DE TRANSAÇÕES ===== */}
+      <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <div className="flex items-center gap-4">
-            <h2 className="text-xl font-bold text-gray-900">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
               Movimentações Recentes
             </h2>
 
             {/* Botões de alternância Tabela/Calendário */}
-            <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
               <button
                 onClick={() => setVisualizacao('tabela')}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition ${
                   visualizacao === 'tabela'
-                    ? 'bg-white text-green-600 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white dark:bg-gray-600 text-green-600 dark:text-green-400 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 <TableCellsIcon className="w-4 h-4" />
@@ -1421,8 +815,8 @@ export default function Dashboard() {
                 onClick={() => setVisualizacao('calendario')}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition ${
                   visualizacao === 'calendario'
-                    ? 'bg-white text-green-600 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white dark:bg-gray-600 text-green-600 dark:text-green-400 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 <CalendarIcon className="w-4 h-4" />
@@ -1437,15 +831,15 @@ export default function Dashboard() {
               type="text"
               value={pesquisaDescricao}
               onChange={(e) => setPesquisaDescricao(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white
-                text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent transition
-                placeholder-gray-400"
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700
+                text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition
+                placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="🔍 Pesquisar por descrição..."
             />
             {pesquisaDescricao && (
               <button
                 onClick={() => setPesquisaDescricao('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition"
                 title="Limpar pesquisa"
               >
                 ✕
@@ -1456,475 +850,26 @@ export default function Dashboard() {
 
         {/* Visualização condicional: Tabela ou Calendário */}
         {visualizacao === 'tabela' ? (
-          <>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-100 text-gray-700">
-                  <tr>
-                    <th
-                      className="py-3 px-4 text-left cursor-pointer hover:bg-gray-200"
-                      onClick={() => alternarOrdenacao('data')}
-                    >
-                      Data{' '}
-                      {ordenacao.campo === 'data' &&
-                        (ordenacao.ordem === 'asc' ? (
-                          <ArrowUpIcon className="inline w-4 h-4" />
-                        ) : (
-                          <ArrowDownIcon className="inline w-4 h-4" />
-                        ))}
-                    </th>
-                    <th className="py-3 px-4 text-left">Descrição</th>
-                    <th className="py-3 px-4 text-left">Categoria</th>
-                    <th
-                      className="py-3 px-4 text-left cursor-pointer hover:bg-gray-200"
-                      onClick={() => alternarOrdenacao('tipo')}
-                    >
-                      Tipo{' '}
-                      {ordenacao.campo === 'tipo' &&
-                        (ordenacao.ordem === 'asc' ? (
-                          <ArrowUpIcon className="inline w-4 h-4" />
-                        ) : (
-                          <ArrowDownIcon className="inline w-4 h-4" />
-                        ))}
-                    </th>
-                    <th className="py-3 px-4 text-right">Valor</th>
-                    <th className="py-3 px-4 text-center">Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {transacoesPaginadas.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="py-12">
-                        <EmptyState
-                          title="Nenhuma transação encontrada"
-                          message={pesquisaDescricao
-                            ? `Não encontramos transações com "${pesquisaDescricao}". Tente ajustar sua pesquisa ou filtros.`
-                            : "Não há transações para os filtros selecionados. Tente ajustar os filtros ou adicionar novas transações."}
-                          icon={
-                            <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                          }
-                        />
-                      </td>
-                    </tr>
-                  ) : (
-                    transacoesPaginadas.map((t) => (
-                      <tr
-                        key={t.id}
-                        className="border-b border-gray-100 hover:bg-gray-50"
-                      >
-                        <td className="py-3 px-4">
-                          {new Date(t.data).toLocaleDateString('pt-BR')}
-                        </td>
-                        <td className="py-3 px-4">{t.descricao}</td>
-                        <td className="py-3 px-4">{t.categoria}</td>
-                        <td className="py-3 px-4">
-                          <span
-                            className={`inline-block px-2 py-1 rounded-full text-xs ${
-                              t.tipo === 'Receita'
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-red-100 text-red-700'
-                            }`}
-                          >
-                            {t.tipo}
-                          </span>
-                        </td>
-                        <td
-                          className={`py-3 px-4 text-right font-medium ${
-                            t.tipo === 'Receita' ? 'text-green-600' : 'text-red-600'
-                          }`}
-                        >
-                          {formatarMoeda(t.valor)}
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center justify-center gap-2">
-                            <button
-                              onClick={() => {
-                                if (t.tipo === 'Despesa') {
-                                  const gasto = gastos.find((g) => g.id === t.id);
-                                  if (gasto) handleEditGasto(gasto);
-                                } else {
-                                  const receita = receitas.find((r) => r.id === t.id);
-                                  if (receita) handleEditReceita(receita);
-                                }
-                              }}
-                              className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-full shadow-sm hover:shadow-md transition-all duration-200"
-                              title="Editar"
-                            >
-                              <PencilSquareIcon className="w-4 h-4" />
-                            </button>
-
-                            {/* Botão Deletar */}
-                            <button
-                              onClick={() => {
-                                if (t.tipo === 'Despesa') {
-                                  handleDeleteGasto(t.id);
-                                } else {
-                                  handleDeleteReceita(t.id);
-                                }
-                              }}
-                              className="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-full shadow-sm hover:shadow-md transition-all duration-200"
-                              title="Deletar"
-                            >
-                              <TrashIcon className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* ===== PAGINAÇÃO ===== */}
-            {totalPaginas > 1 && (
-              <div className="flex justify-between items-center mt-4 text-sm text-gray-700">
-                {/* Texto "mostrando X–Y" */}
-                <span>
-                  Mostrando {indiceInicial + 1}–
-                  {Math.min(
-                    indiceInicial + itensPorPagina,
-                    transacoesOrdenadas.length,
-                  )}{' '}
-                  de {transacoesOrdenadas.length}
-                </span>
-
-                {/* Botões */}
-                <div className="flex gap-2">
-                  {/* Botão Anterior */}
-                  <button
-                    onClick={() => setPaginaAtual((prev) => Math.max(prev - 1, 1))}
-                    disabled={paginaAtual === 1}
-                    className="px-3 py-1 border rounded-lg bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:text-gray-400 transition"
-                  >
-                    Anterior
-                  </button>
-
-                  {/* Botões numerados */}
-                  {Array.from({ length: totalPaginas }, (_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setPaginaAtual(i + 1)}
-                      className={`px-3 py-1 border rounded-lg font-medium transition ${
-                        paginaAtual === i + 1
-                          ? 'bg-green-600 text-white border-green-600'
-                          : 'bg-white text-gray-700 hover:bg-gray-100'
-                      }`}
-                    >
-                      {i + 1}
-                    </button>
-                  ))}
-
-                  {/* Botão Próximo */}
-                  <button
-                    onClick={() =>
-                      setPaginaAtual((prev) => Math.min(prev + 1, totalPaginas))
-                    }
-                    disabled={paginaAtual === totalPaginas}
-                    className="px-3 py-1 border rounded-lg bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:text-gray-400 transition"
-                  >
-                    Próximo
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
+          <TabelaTransacoes
+            transacoesFiltradas={transacoesFiltradas}
+            gastos={gastos}
+            receitas={receitas}
+            pesquisaDescricao={pesquisaDescricao}
+            onEditGasto={handleEditGasto}
+            onEditReceita={handleEditReceita}
+            onDeleteGasto={handleDeleteGasto}
+            onDeleteReceita={handleDeleteReceita}
+          />
         ) : (
-          <div>
-            {/* Navegação do calendário */}
-            <div className="flex items-center justify-between mb-6">
-              <button
-                onClick={() => {
-                  const novoMes = new Date(mesCalendario);
-                  novoMes.setMonth(novoMes.getMonth() - 1);
-                  setMesCalendario(novoMes);
-                }}
-                className="p-2 hover:bg-gray-100 rounded-lg transition"
-              >
-                <ChevronLeftIcon className="w-5 h-5 text-gray-600" />
-              </button>
-
-              {/* Título do mês (clicável) com seletor */}
-              <div className="relative">
-                <button
-                  onClick={() => setSeletorMesAberto(!seletorMesAberto)}
-                  className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-lg transition"
-                >
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {mesCalendario.toLocaleDateString('pt-BR', {
-                      month: 'long',
-                      year: 'numeric',
-                    }).replace(/^\w/, (c) => c.toUpperCase())}
-                  </h3>
-                  <ChevronDownIcon className={`w-4 h-4 text-gray-600 transition-transform ${seletorMesAberto ? 'rotate-180' : ''}`} />
-                </button>
-
-                {/* Dropdown de seleção rápida de mês/ano */}
-                {seletorMesAberto && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-20 p-4 w-80">
-                    {/* Seletor de Ano */}
-                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
-                      <button
-                        onClick={() => {
-                          const novoMes = new Date(mesCalendario);
-                          novoMes.setFullYear(novoMes.getFullYear() - 1);
-                          setMesCalendario(novoMes);
-                        }}
-                        className="p-1 hover:bg-gray-100 rounded transition"
-                      >
-                        <ChevronLeftIcon className="w-4 h-4 text-gray-600" />
-                      </button>
-
-                      <span className="text-sm font-semibold text-gray-900">
-                        {mesCalendario.getFullYear()}
-                      </span>
-
-                      <button
-                        onClick={() => {
-                          const novoMes = new Date(mesCalendario);
-                          novoMes.setFullYear(novoMes.getFullYear() + 1);
-                          setMesCalendario(novoMes);
-                        }}
-                        className="p-1 hover:bg-gray-100 rounded transition"
-                      >
-                        <ChevronRightIcon className="w-4 h-4 text-gray-600" />
-                      </button>
-                    </div>
-
-                    {/* Grid de Meses */}
-                    <div className="grid grid-cols-3 gap-2">
-                      {['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'].map((mes, index) => {
-                        const ehMesAtual = mesCalendario.getMonth() === index;
-                        const hoje = new Date();
-                        const ehMesHoje = hoje.getMonth() === index && hoje.getFullYear() === mesCalendario.getFullYear();
-
-                        return (
-                          <button
-                            key={mes}
-                            onClick={() => {
-                              const novoMes = new Date(mesCalendario);
-                              novoMes.setMonth(index);
-                              setMesCalendario(novoMes);
-                              setSeletorMesAberto(false);
-                            }}
-                            className={`
-                              px-3 py-2 rounded-lg text-sm font-medium transition-all
-                              ${ehMesAtual
-                                ? 'bg-green-600 text-white shadow-md'
-                                : ehMesHoje
-                                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                              }
-                            `}
-                          >
-                            {mes}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Botão "Hoje" */}
-                    <button
-                      onClick={() => {
-                        setMesCalendario(new Date());
-                        setSeletorMesAberto(false);
-                      }}
-                      className="w-full mt-3 pt-3 border-t border-gray-200 text-sm font-medium text-green-600 hover:text-green-700 transition"
-                    >
-                      Ir para hoje
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <button
-                onClick={() => {
-                  const novoMes = new Date(mesCalendario);
-                  novoMes.setMonth(novoMes.getMonth() + 1);
-                  setMesCalendario(novoMes);
-                }}
-                className="p-2 hover:bg-gray-100 rounded-lg transition"
-              >
-                <ChevronRightIcon className="w-5 h-5 text-gray-600" />
-              </button>
-            </div>
-
-            {/* Grade do calendário */}
-            <div className="grid grid-cols-7 gap-2">
-              {/* Cabeçalho dos dias da semana */}
-              {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((dia) => (
-                <div
-                  key={dia}
-                  className="text-center text-sm font-semibold text-gray-600 py-2"
-                >
-                  {dia}
-                </div>
-              ))}
-
-              {/* Dias do calendário */}
-              {diasCalendario.map((diaInfo, index) => {
-                const temTransacoes = diaInfo.transacoes.length > 0;
-                const hoje = new Date().toISOString().split('T')[0];
-                const ehHoje = diaInfo.data === hoje;
-
-                return (
-                  <div
-                    key={index}
-                    onClick={() => {
-                      if (temTransacoes) {
-                        setDiaSelecionado(diaInfo.data);
-                      }
-                    }}
-                    className={`
-                      min-h-[100px] p-2 rounded-lg border transition-all
-                      ${!diaInfo.mesAtual ? 'bg-gray-50 text-gray-400' : 'bg-white text-gray-900'}
-                      ${temTransacoes ? 'cursor-pointer hover:shadow-md' : 'cursor-default'}
-                      ${ehHoje ? 'ring-2 ring-blue-500' : 'border-gray-200'}
-                      ${diaSelecionado === diaInfo.data ? 'ring-2 ring-green-500 shadow-md' : ''}
-                    `}
-                  >
-                    <div className="text-sm font-medium mb-1">
-                      {diaInfo.dia}
-                      {ehHoje && (
-                        <span className="ml-1 text-xs text-blue-600 font-semibold">Hoje</span>
-                      )}
-                    </div>
-
-                    {temTransacoes && (
-                      <div className="space-y-1 text-xs">
-                        {diaInfo.totalReceitas > 0 && (
-                          <div className="bg-green-100 text-green-700 px-2 py-1 rounded font-medium">
-                            +{formatarMoeda(diaInfo.totalReceitas)}
-                          </div>
-                        )}
-                        {diaInfo.totalDespesas > 0 && (
-                          <div className="bg-red-100 text-red-700 px-2 py-1 rounded font-medium">
-                            -{formatarMoeda(diaInfo.totalDespesas)}
-                          </div>
-                        )}
-                        <div className="text-gray-500 text-center pt-1">
-                          {diaInfo.transacoes.length} {diaInfo.transacoes.length === 1 ? 'transação' : 'transações'}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Detalhes do dia selecionado */}
-            {diaSelecionado && transacoesDiaSelecionado.length > 0 && (
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="flex justify-between items-center mb-4">
-                  <h4 className="text-lg font-semibold text-gray-900">
-                    Transações de{' '}
-                    {new Date(diaSelecionado + 'T00:00:00').toLocaleDateString('pt-BR', {
-                      day: '2-digit',
-                      month: 'long',
-                      year: 'numeric',
-                    })}
-                  </h4>
-                  <button
-                    onClick={() => setDiaSelecionado(null)}
-                    className="text-gray-500 hover:text-gray-700 transition"
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                {/* Resumo do dia */}
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="bg-green-100 p-3 rounded-lg">
-                    <p className="text-sm text-green-700 mb-1">Receitas</p>
-                    <p className="text-lg font-bold text-green-700">
-                      {formatarMoeda(
-                        transacoesDiaSelecionado
-                          .filter((t) => t.tipo === 'Receita')
-                          .reduce((acc, t) => acc + t.valor, 0)
-                      )}
-                    </p>
-                  </div>
-                  <div className="bg-red-100 p-3 rounded-lg">
-                    <p className="text-sm text-red-700 mb-1">Despesas</p>
-                    <p className="text-lg font-bold text-red-700">
-                      {formatarMoeda(
-                        transacoesDiaSelecionado
-                          .filter((t) => t.tipo === 'Despesa')
-                          .reduce((acc, t) => acc + t.valor, 0)
-                      )}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Lista de transações */}
-                <div className="space-y-2">
-                  {transacoesDiaSelecionado.map((t) => (
-                    <div
-                      key={t.id}
-                      className="bg-white p-3 rounded-lg border border-gray-200 flex justify-between items-start"
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span
-                            className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                              t.tipo === 'Receita'
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-red-100 text-red-700'
-                            }`}
-                          >
-                            {t.tipo}
-                          </span>
-                          <span className="text-sm text-gray-500">{t.categoria}</span>
-                        </div>
-                        <p className="text-sm font-medium text-gray-900">{t.descricao}</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span
-                          className={`text-lg font-bold ${
-                            t.tipo === 'Receita' ? 'text-green-600' : 'text-red-600'
-                          }`}
-                        >
-                          {formatarMoeda(t.valor)}
-                        </span>
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => {
-                              if (t.tipo === 'Despesa') {
-                                const gasto = gastos.find((g) => g.id === t.id);
-                                if (gasto) handleEditGasto(gasto);
-                              } else {
-                                const receita = receitas.find((r) => r.id === t.id);
-                                if (receita) handleEditReceita(receita);
-                              }
-                            }}
-                            className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-full shadow-sm hover:shadow-md transition-all duration-200"
-                            title="Editar"
-                          >
-                            <PencilSquareIcon className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => {
-                              if (t.tipo === 'Despesa') {
-                                handleDeleteGasto(t.id);
-                              } else {
-                                handleDeleteReceita(t.id);
-                              }
-                            }}
-                            className="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-full shadow-sm hover:shadow-md transition-all duration-200"
-                            title="Deletar"
-                          >
-                            <TrashIcon className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          <CalendarioTransacoes
+            transacoesFiltradas={transacoesFiltradas}
+            gastos={gastos}
+            receitas={receitas}
+            onEditGasto={handleEditGasto}
+            onEditReceita={handleEditReceita}
+            onDeleteGasto={handleDeleteGasto}
+            onDeleteReceita={handleDeleteReceita}
+          />
         )}
       </section>
 

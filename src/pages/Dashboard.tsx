@@ -36,15 +36,10 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import ModalCartoesCredito from '../components/ModalCartoesCredito';
 
 // Novos componentes refatorados
-import CardsResumo from '../components/CardsResumo';
-import FiltrosTransacoes from '../components/FiltrosTransacoes';
-import ComparacaoPeriodos from '../components/ComparacaoPeriodos';
-import GraficosFinanceiros from '../components/GraficosFinanceiros';
-import TabelaTransacoes from '../components/TabelaTransacoes';
-import CalendarioTransacoes from '../components/CalendarioTransacoes';
-import CardGastosFuturos from '../components/CardGastosFuturos';
+import DashboardContent from '../components/DashboardContent';
+import CartoesContent from '../components/CartoesContent';
 
-type TransacaoTipo = 'Receita' | 'Despesa';
+type TransacaoTipo = 'Receita' | 'Despesa' | 'Gasto Futuro';
 
 interface ToastMessage {
   message: string;
@@ -124,9 +119,6 @@ export default function Dashboard() {
   // Estado de comparação entre períodos
   const [mostrarComparacao, setMostrarComparacao] = useState(false);
 
-  // Estado para mostrar atalhos
-  const [mostrarAtalhos, setMostrarAtalhos] = useState(false);
-
   // Estado para confirmação de exclusão
   const [confirmDelete, setConfirmDelete] = useState<{
     isOpen: boolean;
@@ -136,6 +128,9 @@ export default function Dashboard() {
 
   // Estado de visualização (tabela ou calendário)
   const [visualizacao, setVisualizacao] = useState<'tabela' | 'calendario'>('tabela');
+
+  // Estado da aba ativa
+  const [abaAtiva, setAbaAtiva] = useState<'dashboard' | 'cartoes' | 'config' | 'lembretes'>('dashboard');
 
   const handleLogout = () => {
     logout();
@@ -214,74 +209,6 @@ export default function Dashboard() {
       setShowPremiumModal(true);
     }
   }, [isPremiumActive, userProfile]);
-
-  // Atalhos de teclado
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      // Ignorar se estiver digitando em um input/textarea
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-        return;
-      }
-
-      // Ctrl/Cmd + D = Nova Despesa
-      if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
-        e.preventDefault();
-        if (isPremiumActive) {
-          setEditingGasto(null);
-          setShowGastoModal(true);
-        }
-      }
-
-      // Ctrl/Cmd + R = Nova Receita
-      if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
-        e.preventDefault();
-        if (isPremiumActive) {
-          setEditingReceita(null);
-          setShowReceitaModal(true);
-        }
-      }
-
-      // Ctrl/Cmd + L = Limpar Filtros
-      if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
-        e.preventDefault();
-        setFiltros({
-          mes: '',
-          categoria: 'todas',
-          tipo: 'todos',
-          periodo: 'todos',
-        });
-        setPesquisaDescricao('');
-      }
-
-      // Ctrl/Cmd + F = Focar na pesquisa
-      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-        e.preventDefault();
-        const searchInput = document.querySelector('input[placeholder*="Pesquisar"]') as HTMLInputElement;
-        if (searchInput) {
-          searchInput.focus();
-        }
-      }
-
-      // ESC = Fechar modais
-      if (e.key === 'Escape') {
-        if (showGastoModal) {
-          setShowGastoModal(false);
-          setEditingGasto(null);
-        }
-        if (showReceitaModal) {
-          setShowReceitaModal(false);
-          setEditingReceita(null);
-        }
-        if (showUserMenu) {
-          setShowUserMenu(false);
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [isPremiumActive, showGastoModal, showReceitaModal, showUserMenu]);
 
   const handleDeleteGasto = async (id: string) => {
     setConfirmDelete({ isOpen: true, id, tipo: 'gasto' });
@@ -363,6 +290,28 @@ export default function Dashboard() {
     setShowGastoFuturoModal(true);
   };
 
+  const handleDuplicateGastoFuturo = (gastoFuturo: GastoFuturoResponse) => {
+    // Criar uma cópia do gasto futuro, removendo o ID para criar um novo
+    // e ajustando a data de vencimento para 1 mês à frente
+    const hoje = new Date();
+    const proximaData = new Date(hoje.getFullYear(), hoje.getMonth() + 1, hoje.getDate());
+    const dataFormatada = proximaData.toISOString().split('T')[0];
+
+    const gastoFuturoDuplicado: GastoFuturoResponse = {
+      ...gastoFuturo,
+      id: '', // Remove o ID para criar um novo
+      descricao: `${gastoFuturo.descricao} (Cópia)`,
+      data_vencimento: dataFormatada,
+      status: 'ativo',
+      parcelas: [], // Limpar parcelas pois será recriado
+      created_at: '',
+      updated_at: '',
+    };
+
+    setEditingGastoFuturo(gastoFuturoDuplicado);
+    setShowGastoFuturoModal(true);
+  };
+
   const handleGastoFuturoSuccess = async () => {
     setShowGastoFuturoModal(false);
     const isEditing = editingGastoFuturo !== null;
@@ -428,7 +377,7 @@ export default function Dashboard() {
     }
   };
 
-  // Combinar gastos e receitas em transações
+  // Combinar APENAS gastos e receitas (gastos futuros NÃO impactam o saldo)
   const todasTransacoes: Transacao[] = [
     ...gastos.map((g) => ({
       id: g.id,
@@ -448,7 +397,28 @@ export default function Dashboard() {
     })),
   ];
 
-  // === APLICAR FILTROS ===
+  // Lista separada para visualização: transações + gastos futuros (apenas para exibição)
+  const todasTransacoesComFuturos: Transacao[] = [
+    ...todasTransacoes,
+    // Adicionar parcelas pendentes de gastos futuros APENAS para visualização
+    ...gastosFuturos.flatMap((gasto) => {
+      if (gasto.status === 'ativo' && gasto.parcelas) {
+        return gasto.parcelas
+          .filter((parcela) => parcela.status === 'pendente')
+          .map((parcela) => ({
+            id: `gf-${parcela.id}`, // Prefixo para diferenciar de gastos normais
+            data: parcela.data_vencimento,
+            descricao: `${gasto.descricao} (${parcela.numero_parcela}/${parcela.total_parcelas})`,
+            tipo: 'Gasto Futuro' as TransacaoTipo,
+            valor: parseFloat(parcela.valor_parcela),
+            categoria: gasto.categoria, // Manter categoria original do gasto
+          }));
+      }
+      return [];
+    }),
+  ];
+
+  // === APLICAR FILTROS (apenas para gastos e receitas reais) ===
   const transacoesFiltradas = todasTransacoes.filter((t) => {
     const dataTransacao = new Date(t.data);
     const hoje = new Date();
@@ -499,8 +469,56 @@ export default function Dashboard() {
     return filtroMesOK && filtroPeriodoOK && filtroCategoriaOK && filtroTipoOK && filtroDescricaoOK;
   });
 
+  // === APLICAR FILTROS (incluindo gastos futuros para visualização) ===
+  const transacoesFiltradasComFuturos = todasTransacoesComFuturos.filter((t) => {
+    const dataTransacao = new Date(t.data);
+    const hoje = new Date();
+    const anoMes = t.data.slice(0, 7);
 
-  // Calcular resumo com base nas transações FILTRADAS
+    const filtroMesOK = filtros.mes ? anoMes === filtros.mes : true;
+
+    let filtroPeriodoOK = true;
+    if (!filtros.mes && filtros.periodo !== 'todos') {
+      const diffTime = hoje.getTime() - dataTransacao.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      switch (filtros.periodo) {
+        case 'ultimos30':
+          filtroPeriodoOK = diffDays <= 30;
+          break;
+        case 'ultimos60':
+          filtroPeriodoOK = diffDays <= 60;
+          break;
+        case 'ultimos90':
+          filtroPeriodoOK = diffDays <= 90;
+          break;
+        case 'anoAtual':
+          filtroPeriodoOK = dataTransacao.getFullYear() === hoje.getFullYear();
+          break;
+        case 'mesAtual':
+          filtroPeriodoOK =
+            dataTransacao.getFullYear() === hoje.getFullYear() &&
+            dataTransacao.getMonth() === hoje.getMonth();
+          break;
+        default:
+          filtroPeriodoOK = true;
+      }
+    }
+
+    const filtroCategoriaOK =
+      filtros.categoria === 'todas' ? true : t.categoria === filtros.categoria;
+
+    const filtroTipoOK =
+      filtros.tipo === 'todos' ? true : t.tipo === filtros.tipo;
+
+    const filtroDescricaoOK = pesquisaDescricao
+      ? t.descricao.toLowerCase().includes(pesquisaDescricao.toLowerCase())
+      : true;
+
+    return filtroMesOK && filtroPeriodoOK && filtroCategoriaOK && filtroTipoOK && filtroDescricaoOK;
+  });
+
+  // Calcular resumo com base nas transações FILTRADAS (sem gastos futuros)
   const totalReceitas = transacoesFiltradas
     .filter((t) => t.tipo === 'Receita')
     .reduce((acc, t) => acc + t.valor, 0);
@@ -563,6 +581,57 @@ export default function Dashboard() {
   };
 
   const { variacaoReceitas, variacaoDespesas } = calcularTendencias();
+
+  // === CÁLCULO DE GASTOS FUTUROS PENDENTES ===
+  const calcularGastosFuturos = () => {
+    let totalGastosFuturos = 0;
+    let quantidadeParcelas = 0;
+
+    gastosFuturos.forEach((gasto) => {
+      if (gasto.status === 'ativo' && gasto.parcelas) {
+        gasto.parcelas.forEach((parcela) => {
+          if (parcela.status === 'pendente') {
+            totalGastosFuturos += parseFloat(parcela.valor_parcela);
+            quantidadeParcelas++;
+          }
+        });
+      }
+    });
+
+    return {
+      totalGastosFuturos,
+      quantidadeGastosFuturos: quantidadeParcelas,
+    };
+  };
+
+  const { totalGastosFuturos, quantidadeGastosFuturos } = calcularGastosFuturos();
+
+  // === CÁLCULO DE PARCELAS ATRASADAS ===
+  const calcularParcelasAtrasadas = () => {
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0); // Zerar horas para comparação precisa
+
+    let count = 0;
+
+    gastosFuturos.forEach((gasto) => {
+      if (gasto.status === 'ativo' && gasto.parcelas) {
+        gasto.parcelas.forEach((parcela) => {
+          if (parcela.status === 'pendente') {
+            const dataVencimento = new Date(parcela.data_vencimento);
+            dataVencimento.setHours(0, 0, 0, 0);
+
+            if (dataVencimento < hoje) {
+              count++;
+            }
+          }
+        });
+      }
+    });
+
+    return count;
+  };
+
+  const parcelasAtrasadas = calcularParcelasAtrasadas();
 
   // TODO: Descomentar quando implementar o módulo de metas de gastos
   // Agrupar despesas por categoria (para MetasGastos)
@@ -662,20 +731,11 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-6 md:p-10 space-y-10 overflow-x-hidden">
       {/* ===== CABEÇALHO ===== */}
-      <header className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+      <header className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-            Dashboard <span className="text-green-600 dark:text-green-400">Financeiro</span>
+            Controle Financeiro <span className="text-green-600 dark:text-green-400">- {user?.name}</span>
           </h1>
-          <button
-            onClick={() => setMostrarAtalhos(!mostrarAtalhos)}
-            className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mt-1 flex items-center gap-1"
-          >
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            {mostrarAtalhos ? 'Ocultar' : 'Ver'} atalhos de teclado
-          </button>
         </div>
 
         <div className="flex items-center gap-4">
@@ -763,274 +823,123 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* ===== ATALHOS DE TECLADO ===== */}
-      {mostrarAtalhos && (
-        <section className="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-blue-800 mb-3">Atalhos de Teclado</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs text-blue-900">
-            <div className="flex items-center gap-2">
-              <kbd className="px-2 py-1 bg-white rounded border border-blue-300 font-mono">Ctrl+D</kbd>
-              <span>Nova Despesa</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <kbd className="px-2 py-1 bg-white rounded border border-blue-300 font-mono">Ctrl+R</kbd>
-              <span>Nova Receita</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <kbd className="px-2 py-1 bg-white rounded border border-blue-300 font-mono">Ctrl+L</kbd>
-              <span>Limpar Filtros</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <kbd className="px-2 py-1 bg-white rounded border border-blue-300 font-mono">Ctrl+F</kbd>
-              <span>Buscar</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <kbd className="px-2 py-1 bg-white rounded border border-blue-300 font-mono">ESC</kbd>
-              <span>Fechar Modais</span>
-            </div>
-          </div>
-          <p className="text-xs text-blue-700 mt-3 italic">
-            💡 Use <kbd className="px-1 bg-white rounded border border-blue-300 font-mono text-xs">Cmd</kbd> no Mac ao invés de Ctrl
-          </p>
-        </section>
-      )}
+      {/* ===== NAVEGAÇÃO POR ABAS ===== */}
+      <nav className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="flex items-center">
+          <button
+            onClick={() => setAbaAtiva('dashboard')}
+            className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 font-semibold transition border-b-4 ${
+              abaAtiva === 'dashboard'
+                ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-600'
+                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-transparent hover:bg-gray-50 dark:hover:bg-gray-700'
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <span className="hidden sm:inline">Dashboard</span>
+          </button>
+          <button
+            onClick={() => setAbaAtiva('cartoes')}
+            className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 font-semibold transition border-b-4 relative ${
+              abaAtiva === 'cartoes'
+                ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border-purple-600'
+                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-transparent hover:bg-gray-50 dark:hover:bg-gray-700'
+            }`}
+          >
+            <CreditCardIcon className="w-5 h-5" />
+            <span className="hidden sm:inline">Cartões de Crédito</span>
+            <span className="sm:hidden">Cartões</span>
+            {parcelasAtrasadas > 0 && (
+              <span className="absolute -top-1 -right-1 sm:relative sm:top-0 sm:right-0 flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-red-600 text-white text-xs font-bold rounded-full animate-pulse">
+                {parcelasAtrasadas}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setAbaAtiva('config')}
+            disabled
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-4 font-semibold transition border-b-4 bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-600 border-transparent cursor-not-allowed opacity-50"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span className="hidden sm:inline">Configurações</span>
+            <span className="sm:hidden">Config</span>
+            <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 px-2 py-0.5 rounded-full">Em breve</span>
+          </button>
+          <button
+            onClick={() => setAbaAtiva('lembretes')}
+            disabled
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-4 font-semibold transition border-b-4 bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-600 border-transparent cursor-not-allowed opacity-50"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            <span className="hidden sm:inline">Lembretes</span>
+            <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 px-2 py-0.5 rounded-full">Em breve</span>
+          </button>
+        </div>
+      </nav>
 
-      {/* ===== BOTÕES DE AÇÃO ===== */}
-      <section className="flex flex-wrap gap-3 justify-center md:justify-start">
-        <button
-          onClick={() => {
-            if (!isPremiumActive) {
-              setShowPremiumModal(true);
-              return;
-            }
+      {/* ===== CONTEÚDO BASEADO NA ABA ATIVA ===== */}
+      {abaAtiva === 'dashboard' ? (
+        <DashboardContent
+          saldo={saldo}
+          totalReceitas={totalReceitas}
+          totalDespesas={totalDespesas}
+          variacaoReceitas={variacaoReceitas}
+          variacaoDespesas={variacaoDespesas}
+          totalGastosFuturos={totalGastosFuturos}
+          quantidadeGastosFuturos={quantidadeGastosFuturos}
+          todasTransacoes={todasTransacoes}
+          todasTransacoesComFuturos={todasTransacoesComFuturos}
+          transacoesFiltradas={transacoesFiltradasComFuturos}
+          gastos={gastos}
+          receitas={receitas}
+          gastosFuturos={gastosFuturos}
+          filtros={filtros}
+          setFiltros={setFiltros}
+          todasCategorias={todasCategorias}
+          contagemPorCategoria={contagemPorCategoria}
+          pesquisaDescricao={pesquisaDescricao}
+          setPesquisaDescricao={setPesquisaDescricao}
+          visualizacao={visualizacao}
+          setVisualizacao={setVisualizacao}
+          onEditGasto={handleEditGasto}
+          onEditReceita={handleEditReceita}
+          onDeleteGasto={handleDeleteGasto}
+          onDeleteReceita={handleDeleteReceita}
+          onNovoGasto={() => {
             setEditingGasto(null);
             setShowGastoModal(true);
           }}
-          disabled={!isPremiumActive}
-          className={`flex items-center gap-2 px-5 py-2 rounded-lg font-medium shadow-md transition ${
-            isPremiumActive
-              ? 'bg-red-600 hover:bg-red-700 text-white'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          }`}
-        >
-          <PlusIcon className="w-5 h-5" />
-          Novo Gasto
-        </button>
-        <button
-          onClick={() => {
-            if (!isPremiumActive) {
-              setShowPremiumModal(true);
-              return;
-            }
+          onNovaReceita={() => {
             setEditingReceita(null);
             setShowReceitaModal(true);
           }}
-          disabled={!isPremiumActive}
-          className={`flex items-center gap-2 px-5 py-2 rounded-lg font-medium shadow-md transition ${
-            isPremiumActive
-              ? 'bg-green-600 hover:bg-green-700 text-white'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          }`}
-        >
-          <PlusIcon className="w-5 h-5" />
-          Nova Receita
-        </button>
-        <button
-          onClick={() => {
-            if (!isPremiumActive) {
-              setShowPremiumModal(true);
-              return;
-            }
+          isPremiumActive={isPremiumActive}
+          onPremiumExpired={() => setShowPremiumModal(true)}
+        />
+      ) : abaAtiva === 'cartoes' ? (
+        <CartoesContent
+          gastosFuturos={gastosFuturos}
+          gastoFuturoDashboard={gastoFuturoDashboard}
+          onNovoGastoFuturo={() => {
             setEditingGastoFuturo(null);
             setShowGastoFuturoModal(true);
           }}
-          disabled={!isPremiumActive}
-          className={`flex items-center gap-2 px-5 py-2 rounded-lg font-medium shadow-md transition ${
-            isPremiumActive
-              ? 'bg-blue-600 hover:bg-blue-700 text-white'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          }`}
-        >
-          <PlusIcon className="w-5 h-5" />
-          Novo Gasto Futuro
-        </button>
-        <button
-          onClick={() => {
-            if (!isPremiumActive) {
-              setShowPremiumModal(true);
-              return;
-            }
-            setShowCartoesCreditoModal(true);
-          }}
-          disabled={!isPremiumActive}
-          className={`flex items-center gap-2 px-5 py-2 rounded-lg font-medium shadow-md transition ${
-            isPremiumActive
-              ? 'bg-purple-600 hover:bg-purple-700 text-white'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          }`}
-        >
-          <CreditCardIcon className="w-5 h-5" />
-          Meus Cartões
-        </button>
-      </section>
-
-      {/* ===== CARDS DE RESUMO ===== */}
-      <CardsResumo
-        saldo={saldo}
-        totalReceitas={totalReceitas}
-        totalDespesas={totalDespesas}
-        variacaoReceitas={variacaoReceitas}
-        variacaoDespesas={variacaoDespesas}
-      />
-
-      {/* ===== COMPARAÇÃO ENTRE PERÍODOS ===== */}
-      <ComparacaoPeriodos todasTransacoes={todasTransacoes} />
-
-      {/* ===== FILTROS ===== */}
-      <FiltrosTransacoes
-        filtros={filtros}
-        setFiltros={setFiltros}
-        todasCategorias={todasCategorias}
-        contagemPorCategoria={contagemPorCategoria}
-      />
-
-      {/* ===== ESTADO VAZIO GERAL ===== */}
-      {todasTransacoes.length === 0 && (
-        <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
-          <EmptyState
-            title="Nenhuma transação cadastrada"
-            message="Comece adicionando suas primeiras receitas e despesas para visualizar seu dashboard financeiro completo com gráficos, tendências e análises."
-            icon={
-              <svg className="w-24 h-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
-            }
-            action={{
-              label: 'Adicionar primeira transação',
-              onClick: () => setShowGastoModal(true),
-            }}
-          />
-        </section>
-      )}
-
-      {/* ===== GRÁFICOS ===== */}
-      <GraficosFinanceiros transacoesFiltradas={transacoesFiltradas} />
-
-      {/* ===== GASTOS FUTUROS ===== */}
-      <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
-        <CardGastosFuturos
-          gastosFuturos={gastosFuturos}
-          dashboard={gastoFuturoDashboard}
-          onEdit={handleEditGastoFuturo}
-          onDelete={handleDeleteGastoFuturo}
-          onMarcarComoPago={handleMarcarGastoFuturoComoPago}
+          onMeusCartoes={() => setShowCartoesCreditoModal(true)}
+          onEditGastoFuturo={handleEditGastoFuturo}
+          onDuplicateGastoFuturo={handleDuplicateGastoFuturo}
+          onDeleteGastoFuturo={handleDeleteGastoFuturo}
+          onMarcarGastoFuturoComoPago={handleMarcarGastoFuturoComoPago}
           onMarcarParcelaComoPaga={handleMarcarParcelaComoPaga}
+          isPremiumActive={isPremiumActive}
+          onPremiumExpired={() => setShowPremiumModal(true)}
         />
-      </section>
-
-      {/* ===== METAS DE GASTOS ===== */}
-      {/* TODO: Implementar módulo de metas de gastos */}
-      {/* <MetasGastos
-        gastosPorCategoria={categoriasGastos}
-        mesReferencia={new Date().toISOString().slice(0, 7)}
-      /> */}
-
-      {/* ===== TABELA/CALENDÁRIO DE TRANSAÇÕES ===== */}
-      <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-          <div className="flex items-center gap-4">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Movimentações Recentes
-            </h2>
-
-            {/* Botões de alternância Tabela/Calendário */}
-            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-              <button
-                onClick={() => setVisualizacao('tabela')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition ${
-                  visualizacao === 'tabela'
-                    ? 'bg-white dark:bg-gray-600 text-green-600 dark:text-green-400 shadow-sm'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                }`}
-              >
-                <TableCellsIcon className="w-4 h-4" />
-                <span className="text-sm font-medium">Tabela</span>
-              </button>
-              <button
-                onClick={() => setVisualizacao('calendario')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition ${
-                  visualizacao === 'calendario'
-                    ? 'bg-white dark:bg-gray-600 text-green-600 dark:text-green-400 shadow-sm'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                }`}
-              >
-                <CalendarIcon className="w-4 h-4" />
-                <span className="text-sm font-medium">Calendário</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Campo de Pesquisa */}
-          <div className="w-full md:w-80 relative">
-            <input
-              type="text"
-              value={pesquisaDescricao}
-              onChange={(e) => setPesquisaDescricao(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700
-                text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition
-                placeholder-gray-400 dark:placeholder-gray-500"
-              placeholder="🔍 Pesquisar por descrição..."
-            />
-            {pesquisaDescricao && (
-              <button
-                onClick={() => setPesquisaDescricao('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition"
-                title="Limpar pesquisa"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Visualização condicional: Tabela ou Calendário */}
-        {visualizacao === 'tabela' ? (
-          <TabelaTransacoes
-            transacoesFiltradas={transacoesFiltradas}
-            gastos={gastos}
-            receitas={receitas}
-            pesquisaDescricao={pesquisaDescricao}
-            onEditGasto={handleEditGasto}
-            onEditReceita={handleEditReceita}
-            onDeleteGasto={handleDeleteGasto}
-            onDeleteReceita={handleDeleteReceita}
-          />
-        ) : (
-          <CalendarioTransacoes
-            transacoesFiltradas={transacoesFiltradas}
-            gastos={gastos}
-            receitas={receitas}
-            onEditGasto={handleEditGasto}
-            onEditReceita={handleEditReceita}
-            onDeleteGasto={handleDeleteGasto}
-            onDeleteReceita={handleDeleteReceita}
-          />
-        )}
-      </section>
-
-      {/* Botão Flutuante do WhatsApp 
-      <a
-        href="https://wa.me/5581991189612?text=Olá!%20Gostaria%20de%20falar%20com%20o%20suporte."
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50"
-      >
-        <img
-          src="https://img.icons8.com/?size=100&id=964RahB4l606&format=png&color=25D366"
-          alt="Ícone do WhatsApp"
-          className="w-20 h-20 md:w-22 md:h-22 hover:scale-110 transition-transform duration-200"
-        />
-      </a>*/}
+      ) : null}
 
       {/* ===== MODAIS ===== */}
       <Modal

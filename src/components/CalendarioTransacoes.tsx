@@ -12,7 +12,7 @@ interface Transacao {
   id: string;
   data: string;
   descricao: string;
-  tipo: 'Receita' | 'Despesa';
+  tipo: 'Receita' | 'Despesa' | 'Gasto Futuro';
   valor: number;
   categoria: string;
 }
@@ -80,6 +80,7 @@ export default function CalendarioTransacoes({
       transacoes: Transacao[];
       totalReceitas: number;
       totalDespesas: number;
+      totalGastosFuturos: number;
     }> = [];
 
     // Dias do mês anterior
@@ -97,6 +98,9 @@ export default function CalendarioTransacoes({
       const totalDespesas = transacoesDia
         .filter((t) => t.tipo === 'Despesa')
         .reduce((acc, t) => acc + t.valor, 0);
+      const totalGastosFuturos = transacoesDia
+        .filter((t) => t.tipo === 'Gasto Futuro')
+        .reduce((acc, t) => acc + t.valor, 0);
 
       dias.push({
         data: dataStr,
@@ -105,6 +109,7 @@ export default function CalendarioTransacoes({
         transacoes: transacoesDia,
         totalReceitas,
         totalDespesas,
+        totalGastosFuturos,
       });
     }
 
@@ -119,6 +124,9 @@ export default function CalendarioTransacoes({
       const totalDespesas = transacoesDia
         .filter((t) => t.tipo === 'Despesa')
         .reduce((acc, t) => acc + t.valor, 0);
+      const totalGastosFuturos = transacoesDia
+        .filter((t) => t.tipo === 'Gasto Futuro')
+        .reduce((acc, t) => acc + t.valor, 0);
 
       dias.push({
         data: dataStr,
@@ -127,6 +135,7 @@ export default function CalendarioTransacoes({
         transacoes: transacoesDia,
         totalReceitas,
         totalDespesas,
+        totalGastosFuturos,
       });
     }
 
@@ -144,6 +153,9 @@ export default function CalendarioTransacoes({
       const totalDespesas = transacoesDia
         .filter((t) => t.tipo === 'Despesa')
         .reduce((acc, t) => acc + t.valor, 0);
+      const totalGastosFuturos = transacoesDia
+        .filter((t) => t.tipo === 'Gasto Futuro')
+        .reduce((acc, t) => acc + t.valor, 0);
 
       dias.push({
         data: dataStr,
@@ -152,6 +164,7 @@ export default function CalendarioTransacoes({
         transacoes: transacoesDia,
         totalReceitas,
         totalDespesas,
+        totalGastosFuturos,
       });
     }
 
@@ -374,6 +387,11 @@ export default function CalendarioTransacoes({
                       -{formatarMoeda(diaInfo.totalDespesas)}
                     </div>
                   )}
+                  {diaInfo.totalGastosFuturos > 0 && (
+                    <div className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded font-medium">
+                      {formatarMoeda(diaInfo.totalGastosFuturos)}
+                    </div>
+                  )}
                   <div className="text-gray-500 dark:text-gray-400 text-center pt-1">
                     {diaInfo.transacoes.length}{' '}
                     {diaInfo.transacoes.length === 1 ? 'transação' : 'transações'}
@@ -406,7 +424,7 @@ export default function CalendarioTransacoes({
           </div>
 
           {/* Resumo do dia */}
-          <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-3 gap-4 mb-4">
             <div className="bg-green-100 dark:bg-green-900 p-3 rounded-lg">
               <p className="text-sm text-green-700 dark:text-green-300 mb-1">Receitas</p>
               <p className="text-lg font-bold text-green-700 dark:text-green-300">
@@ -427,6 +445,16 @@ export default function CalendarioTransacoes({
                 )}
               </p>
             </div>
+            <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300 mb-1">Gastos Futuros</p>
+              <p className="text-lg font-bold text-blue-700 dark:text-blue-300">
+                {formatarMoeda(
+                  transacoesDiaSelecionado
+                    .filter((t) => t.tipo === 'Gasto Futuro')
+                    .reduce((acc, t) => acc + t.valor, 0)
+                )}
+              </p>
+            </div>
           </div>
 
           {/* Lista de transações */}
@@ -442,6 +470,8 @@ export default function CalendarioTransacoes({
                       className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
                         t.tipo === 'Receita'
                           ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
+                          : t.tipo === 'Gasto Futuro'
+                          ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
                           : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300'
                       }`}
                     >
@@ -460,41 +490,49 @@ export default function CalendarioTransacoes({
                     className={`text-lg font-bold ${
                       t.tipo === 'Receita'
                         ? 'text-green-600 dark:text-green-400'
+                        : t.tipo === 'Gasto Futuro'
+                        ? 'text-blue-600 dark:text-blue-400'
                         : 'text-red-600 dark:text-red-400'
                     }`}
                   >
                     {formatarMoeda(t.valor)}
                   </span>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => {
-                        if (t.tipo === 'Despesa') {
-                          const gasto = gastos.find((g) => g.id === t.id);
-                          if (gasto) onEditGasto(gasto);
-                        } else {
-                          const receita = receitas.find((r) => r.id === t.id);
-                          if (receita) onEditReceita(receita);
-                        }
-                      }}
-                      className="p-2 bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-full shadow-sm hover:shadow-md transition-all duration-200"
-                      title="Editar"
-                    >
-                      <PencilSquareIcon className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (t.tipo === 'Despesa') {
-                          onDeleteGasto(t.id);
-                        } else {
-                          onDeleteReceita(t.id);
-                        }
-                      }}
-                      className="p-2 bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800 text-red-700 dark:text-red-300 rounded-full shadow-sm hover:shadow-md transition-all duration-200"
-                      title="Deletar"
-                    >
-                      <TrashIcon className="w-4 h-4" />
-                    </button>
-                  </div>
+                  {t.tipo === 'Gasto Futuro' ? (
+                    <span className="text-xs text-gray-500 dark:text-gray-400 italic">
+                      Gerenciar em Cartões
+                    </span>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => {
+                          if (t.tipo === 'Despesa') {
+                            const gasto = gastos.find((g) => g.id === t.id);
+                            if (gasto) onEditGasto(gasto);
+                          } else {
+                            const receita = receitas.find((r) => r.id === t.id);
+                            if (receita) onEditReceita(receita);
+                          }
+                        }}
+                        className="p-2 bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-full shadow-sm hover:shadow-md transition-all duration-200"
+                        title="Editar"
+                      >
+                        <PencilSquareIcon className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (t.tipo === 'Despesa') {
+                            onDeleteGasto(t.id);
+                          } else {
+                            onDeleteReceita(t.id);
+                          }
+                        }}
+                        className="p-2 bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800 text-red-700 dark:text-red-300 rounded-full shadow-sm hover:shadow-md transition-all duration-200"
+                        title="Deletar"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

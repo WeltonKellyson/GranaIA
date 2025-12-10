@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   PieChart,
   Pie,
@@ -11,6 +12,7 @@ import {
   CartesianGrid,
   Legend,
 } from 'recharts';
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 
 interface Transacao {
   tipo: 'Receita' | 'Despesa';
@@ -19,8 +21,23 @@ interface Transacao {
   data: string;
 }
 
+interface ParcelaGastoFuturo {
+  id: string;
+  status: string;
+  valor_parcela: string;
+  data_vencimento: string;
+}
+
+interface GastoFuturo {
+  id: string;
+  status: string;
+  categoria: string;
+  parcelas: ParcelaGastoFuturo[];
+}
+
 interface GraficosFinanceirosProps {
   transacoesFiltradas: Transacao[];
+  gastosFuturos?: GastoFuturo[];
 }
 
 const formatarMoeda = (valor: number): string => {
@@ -32,61 +49,103 @@ const formatarMoeda = (valor: number): string => {
 
 export default function GraficosFinanceiros({
   transacoesFiltradas,
+  gastosFuturos = [],
 }: GraficosFinanceirosProps) {
-  // Cores
+  const [mostrarDetalhesDespesas, setMostrarDetalhesDespesas] = useState(false);
+  const [mostrarDetalhesReceitas, setMostrarDetalhesReceitas] = useState(false);
+
+  // Cores mais diferenciadas e vibrantes
   const coresReceitas = [
-    '#22c55e',
-    '#16a34a',
-    '#059669',
-    '#047857',
-    '#065f46',
-    '#064e3b',
+    '#10b981', // Emerald 500
+    '#3b82f6', // Blue 500
+    '#8b5cf6', // Violet 500
+    '#ec4899', // Pink 500
+    '#f59e0b', // Amber 500
+    '#06b6d4', // Cyan 500
+    '#84cc16', // Lime 500
+    '#a855f7', // Purple 500
+    '#14b8a6', // Teal 500
+    '#f97316', // Orange 500
   ];
   const coresDespesas = [
-    '#ef4444',
-    '#dc2626',
-    '#b91c1c',
-    '#991b1b',
-    '#7f1d1d',
-    '#6b1414',
+    '#ef4444', // Red 500
+    '#f97316', // Orange 500
+    '#f59e0b', // Amber 500
+    '#eab308', // Yellow 500
+    '#84cc16', // Lime 500
+    '#22c55e', // Green 500
+    '#14b8a6', // Teal 500
+    '#06b6d4', // Cyan 500
+    '#3b82f6', // Blue 500
+    '#8b5cf6', // Violet 500
   ];
 
   // === AGRUPAMENTO POR MÊS PARA O GRÁFICO DE LINHA ===
   const fluxoMensal = (() => {
-    const mapa: Record<string, { receitas: number; despesas: number }> = {};
+    const mapa: Record<string, { receitas: number; despesas: number; gastosFuturos: number; data: Date }> = {};
 
+    // Adicionar transações normais (receitas e despesas)
     transacoesFiltradas.forEach((t) => {
       const data = new Date(t.data);
       if (isNaN(data.getTime())) return;
 
-      // Nome do mês em PT-BR abreviado
-      const mes = data
-        .toLocaleString('pt-BR', { month: 'short' })
-        .replace('.', '');
+      // Chave única com ano e mês: "2025-12"
+      const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`;
 
-      if (!mapa[mes]) {
-        mapa[mes] = { receitas: 0, despesas: 0 };
+      if (!mapa[chave]) {
+        mapa[chave] = { receitas: 0, despesas: 0, gastosFuturos: 0, data: new Date(data.getFullYear(), data.getMonth(), 1) };
       }
 
       if (t.tipo === 'Receita') {
-        mapa[mes].receitas += t.valor;
-      } else {
-        mapa[mes].despesas += t.valor;
+        mapa[chave].receitas += t.valor;
+      } else if (t.tipo === 'Despesa') {
+        mapa[chave].despesas += t.valor;
       }
     });
 
-    // Converter o mapa em array
-    return Object.entries(mapa).map(([mes, valores]) => ({
-      mes: mes.charAt(0).toUpperCase() + mes.slice(1), // Jan, Fev, Mar…
-      receitas: valores.receitas,
-      despesas: valores.despesas,
-    }));
+    // Adicionar gastos futuros pendentes por mês
+    gastosFuturos.forEach((gasto) => {
+      if (gasto.status === 'ativo' && gasto.parcelas) {
+        gasto.parcelas.forEach((parcela) => {
+          if (parcela.status === 'pendente') {
+            const data = new Date(parcela.data_vencimento);
+            if (isNaN(data.getTime())) return;
+
+            const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`;
+
+            if (!mapa[chave]) {
+              mapa[chave] = { receitas: 0, despesas: 0, gastosFuturos: 0, data: new Date(data.getFullYear(), data.getMonth(), 1) };
+            }
+
+            mapa[chave].gastosFuturos += parseFloat(parcela.valor_parcela);
+          }
+        });
+      }
+    });
+
+    // Converter o mapa em array e ordenar cronologicamente
+    return Object.entries(mapa)
+      .map(([chave, valores]) => ({
+        mes: valores.data.toLocaleString('pt-BR', { month: 'short', year: '2-digit' }).replace('.', ''),
+        receitas: valores.receitas > 0 ? valores.receitas : null,
+        despesas: valores.despesas > 0 ? valores.despesas : null,
+        gastosFuturos: valores.gastosFuturos > 0 ? valores.gastosFuturos : null,
+        ordem: valores.data.getTime(), // Para ordenação
+      }))
+      .sort((a, b) => a.ordem - b.ordem) // Ordenar cronologicamente
+      .map(({ mes, receitas, despesas, gastosFuturos }) => ({
+        mes: mes.charAt(0).toUpperCase() + mes.slice(1),
+        receitas,
+        despesas,
+        gastosFuturos,
+      }));
   })();
 
-  // Agrupar despesas por categoria
+  // Agrupar despesas por categoria (SEM gastos futuros)
   const categoriasGastos = (() => {
     const categoriaMap: Record<string, number> = {};
 
+    // Adicionar APENAS despesas normais (não incluir gastos futuros)
     transacoesFiltradas
       .filter((t) => t.tipo === 'Despesa')
       .forEach((t) => {
@@ -95,6 +154,39 @@ export default function GraficosFinanceiros({
         }
         categoriaMap[t.categoria] += t.valor;
       });
+
+    return Object.entries(categoriaMap)
+      .map(([name, value]) => ({
+        name,
+        value,
+      }))
+      .sort((a, b) => b.value - a.value); // Ordenar para cores consistentes
+  })();
+
+  // Criar mapeamento de cores fixas para despesas (agora já ordenado)
+  const coresMapDespesas = categoriasGastos.reduce((acc, categoria, index) => {
+    acc[categoria.name] = coresDespesas[index % coresDespesas.length];
+    return acc;
+  }, {} as Record<string, string>);
+
+  // Agrupar gastos futuros por categoria (separado)
+  const categoriasGastosFuturos = (() => {
+    const categoriaMap: Record<string, number> = {};
+
+    // Adicionar gastos futuros pendentes por categoria
+    gastosFuturos.forEach((gasto) => {
+      if (gasto.status === 'ativo' && gasto.parcelas) {
+        gasto.parcelas.forEach((parcela) => {
+          if (parcela.status === 'pendente') {
+            const categoria = gasto.categoria;
+            if (!categoriaMap[categoria]) {
+              categoriaMap[categoria] = 0;
+            }
+            categoriaMap[categoria] += parseFloat(parcela.valor_parcela);
+          }
+        });
+      }
+    });
 
     return Object.entries(categoriaMap).map(([name, value]) => ({
       name,
@@ -115,11 +207,19 @@ export default function GraficosFinanceiros({
         categoriaMap[t.categoria] += t.valor;
       });
 
-    return Object.entries(categoriaMap).map(([name, value]) => ({
-      name,
-      value,
-    }));
+    return Object.entries(categoriaMap)
+      .map(([name, value]) => ({
+        name,
+        value,
+      }))
+      .sort((a, b) => b.value - a.value); // Ordenar para cores consistentes
   })();
+
+  // Criar mapeamento de cores fixas para receitas (agora já ordenado)
+  const coresMapReceitas = categoriasReceitas.reduce((acc, categoria, index) => {
+    acc[categoria.name] = coresReceitas[index % coresReceitas.length];
+    return acc;
+  }, {} as Record<string, string>);
 
   return (
     <>
@@ -131,11 +231,21 @@ export default function GraficosFinanceiros({
           </h2>
 
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={fluxoMensal}>
+            <LineChart data={fluxoMensal} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.2} />
 
               <XAxis dataKey="mes" stroke="#6b7280" />
-              <YAxis stroke="#6b7280" />
+              <YAxis
+                stroke="#6b7280"
+                tickFormatter={(value: number) => {
+                  return value.toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  });
+                }}
+              />
 
               <Tooltip
                 formatter={(value: number) => formatarMoeda(value)}
@@ -155,6 +265,7 @@ export default function GraficosFinanceiros({
                 stroke="#16a34a"
                 strokeWidth={3}
                 name="Receitas"
+                connectNulls={false}
               />
 
               <Line
@@ -163,6 +274,16 @@ export default function GraficosFinanceiros({
                 stroke="#ef4444"
                 strokeWidth={3}
                 name="Despesas"
+                connectNulls={false}
+              />
+
+              <Line
+                type="monotone"
+                dataKey="gastosFuturos"
+                stroke="#2563eb"
+                strokeWidth={3}
+                name="Gastos Futuros"
+                connectNulls={false}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -182,22 +303,22 @@ export default function GraficosFinanceiros({
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
                 Distribuição de Despesas por Categoria
               </h2>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={350}>
                 <PieChart>
                   <Pie
                     data={categoriasGastos}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={(entry) => `${entry.name}: ${formatarMoeda(entry.value)}`}
-                    outerRadius={100}
+                    label={false}
+                    outerRadius={120}
                     fill="#8884d8"
                     dataKey="value"
                   >
                     {categoriasGastos.map((entry, index) => (
                       <Cell
                         key={`cell-despesa-${index}`}
-                        fill={coresDespesas[index % coresDespesas.length]}
+                        fill={coresMapDespesas[entry.name]}
                       />
                     ))}
                   </Pie>
@@ -210,9 +331,66 @@ export default function GraficosFinanceiros({
                       color: '#fff',
                     }}
                   />
-                  <Legend />
+                  <Legend
+                    verticalAlign="bottom"
+                    height={36}
+                    wrapperStyle={{ paddingTop: '20px' }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
+
+              {/* Botão para mostrar/ocultar detalhes */}
+              <div className="mt-4">
+                <button
+                  onClick={() => setMostrarDetalhesDespesas(!mostrarDetalhesDespesas)}
+                  className="flex items-center justify-center gap-2 w-full py-2 px-4 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                >
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {mostrarDetalhesDespesas ? 'Ocultar Detalhes' : 'Ver Detalhes'}
+                  </span>
+                  {mostrarDetalhesDespesas ? (
+                    <ChevronUpIcon className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                  ) : (
+                    <ChevronDownIcon className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                  )}
+                </button>
+              </div>
+
+              {/* Lista detalhada de categorias */}
+              {mostrarDetalhesDespesas && (
+                <div className="mt-4 space-y-2 max-h-[280px] overflow-y-auto pr-2">
+                  {categoriasGastos
+                    .sort((a, b) => b.value - a.value)
+                    .map((categoria, index) => {
+                      const total = categoriasGastos.reduce((acc, c) => acc + c.value, 0);
+                      const percentual = ((categoria.value / total) * 100).toFixed(1);
+                      return (
+                        <div
+                          key={`despesa-detail-${index}`}
+                          className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="w-4 h-4 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: coresMapDespesas[categoria.name] }}
+                            />
+                            <span className="font-medium text-gray-900 dark:text-white">
+                              {categoria.name}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              {percentual}%
+                            </span>
+                            <span className="font-bold text-red-600 dark:text-red-400">
+                              {formatarMoeda(categoria.value)}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
             </div>
           )}
 
@@ -226,22 +404,22 @@ export default function GraficosFinanceiros({
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
                 Distribuição de Receitas por Categoria
               </h2>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={350}>
                 <PieChart>
                   <Pie
                     data={categoriasReceitas}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={(entry) => `${entry.name}: ${formatarMoeda(entry.value)}`}
-                    outerRadius={100}
+                    label={false}
+                    outerRadius={120}
                     fill="#8884d8"
                     dataKey="value"
                   >
                     {categoriasReceitas.map((entry, index) => (
                       <Cell
                         key={`cell-receita-${index}`}
-                        fill={coresReceitas[index % coresReceitas.length]}
+                        fill={coresMapReceitas[entry.name]}
                       />
                     ))}
                   </Pie>
@@ -254,9 +432,66 @@ export default function GraficosFinanceiros({
                       color: '#fff',
                     }}
                   />
-                  <Legend />
+                  <Legend
+                    verticalAlign="bottom"
+                    height={36}
+                    wrapperStyle={{ paddingTop: '20px' }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
+
+              {/* Botão para mostrar/ocultar detalhes */}
+              <div className="mt-4">
+                <button
+                  onClick={() => setMostrarDetalhesReceitas(!mostrarDetalhesReceitas)}
+                  className="flex items-center justify-center gap-2 w-full py-2 px-4 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                >
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {mostrarDetalhesReceitas ? 'Ocultar Detalhes' : 'Ver Detalhes'}
+                  </span>
+                  {mostrarDetalhesReceitas ? (
+                    <ChevronUpIcon className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                  ) : (
+                    <ChevronDownIcon className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                  )}
+                </button>
+              </div>
+
+              {/* Lista detalhada de categorias */}
+              {mostrarDetalhesReceitas && (
+                <div className="mt-4 space-y-2 max-h-[280px] overflow-y-auto pr-2">
+                  {categoriasReceitas
+                    .sort((a, b) => b.value - a.value)
+                    .map((categoria, index) => {
+                      const total = categoriasReceitas.reduce((acc, c) => acc + c.value, 0);
+                      const percentual = ((categoria.value / total) * 100).toFixed(1);
+                      return (
+                        <div
+                          key={`receita-detail-${index}`}
+                          className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="w-4 h-4 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: coresMapReceitas[categoria.name] }}
+                            />
+                            <span className="font-medium text-gray-900 dark:text-white">
+                              {categoria.name}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              {percentual}%
+                            </span>
+                            <span className="font-bold text-green-600 dark:text-green-400">
+                              {formatarMoeda(categoria.value)}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
             </div>
           )}
         </section>

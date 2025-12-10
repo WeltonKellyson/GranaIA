@@ -2,6 +2,7 @@ import {
   BanknotesIcon,
   ArrowUpCircleIcon,
   ArrowDownCircleIcon,
+  ClockIcon,
 } from '@heroicons/react/24/outline';
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 
@@ -11,6 +12,8 @@ interface CardsResumoProps {
   totalDespesas: number;
   variacaoReceitas: number;
   variacaoDespesas: number;
+  totalGastosFuturos: number;
+  quantidadeGastosFuturos: number;
 }
 
 const formatarMoeda = (valor: number): string => {
@@ -26,9 +29,11 @@ export default function CardsResumo({
   totalDespesas,
   variacaoReceitas,
   variacaoDespesas,
+  totalGastosFuturos,
+  quantidadeGastosFuturos,
 }: CardsResumoProps) {
   return (
-    <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {/* Saldo */}
       <div className="bg-white dark:bg-gray-800 shadow-md rounded-xl p-6 flex items-center gap-4 border border-gray-100 dark:border-gray-700">
         <BanknotesIcon className="w-10 h-10 text-green-600 dark:text-green-400" />
@@ -111,6 +116,27 @@ export default function CardsResumo({
             </span>
             <span className="text-gray-500 dark:text-gray-400 text-xs ml-1">
               vs mês anterior
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Gastos Futuros */}
+      <div className="bg-white dark:bg-gray-800 shadow-md rounded-xl p-6 border border-gray-100 dark:border-gray-700">
+        <div className="flex items-center gap-4 mb-2">
+          <ClockIcon className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+          <div className="flex-1">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Gastos Futuros</p>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {formatarMoeda(totalGastosFuturos)}
+            </h3>
+          </div>
+        </div>
+        {/* Quantidade de parcelas pendentes */}
+        {quantidadeGastosFuturos > 0 && (
+          <div className="flex items-center gap-1 text-sm mt-2 text-blue-600 dark:text-blue-400">
+            <span className="font-medium">
+              {quantidadeGastosFuturos} parcela{quantidadeGastosFuturos !== 1 ? 's' : ''} pendente{quantidadeGastosFuturos !== 1 ? 's' : ''}
             </span>
           </div>
         )}

@@ -20,7 +20,7 @@ interface ExcelExportButtonProps {
     id: string;
     data: string;
     descricao: string;
-    tipo: 'Receita' | 'Despesa';
+    tipo: 'Receita' | 'Despesa' | 'Gasto Futuro';
     valor: number;
     categoria: string;
   }>;

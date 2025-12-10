@@ -81,6 +81,14 @@ export default function Dashboard() {
   // Verifica se o premium está ativo
   const isPremiumActive = userProfile?.is_premium_active ?? false;
 
+  // Função para pegar apenas o primeiro e segundo nome
+  const getShortName = (fullName?: string) => {
+    if (!fullName) return '';
+    const nameParts = fullName.trim().split(' ');
+    if (nameParts.length === 1) return nameParts[0];
+    return `${nameParts[0]} ${nameParts[1]}`;
+  };
+
   // Estados dos dados
   const [gastos, setGastos] = useState<GastoResponse[]>([]);
   const [receitas, setReceitas] = useState<ReceitaResponse[]>([]);
@@ -734,7 +742,7 @@ export default function Dashboard() {
       <header className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-            Controle Financeiro <span className="text-green-600 dark:text-green-400">- {user?.name}</span>
+            Controle Financeiro <span className="text-green-600 dark:text-green-400">- {getShortName(user?.name)}</span>
           </h1>
         </div>
 
@@ -772,7 +780,7 @@ export default function Dashboard() {
             >
               <UserCircleIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
               <span className="hidden md:inline text-gray-700 dark:text-gray-200">
-                {user?.name}
+                {getShortName(user?.name)}
               </span>
               <ChevronDownIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
             </button>
@@ -782,7 +790,7 @@ export default function Dashboard() {
               <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
                 <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    {user?.name}
+                    {getShortName(user?.name)}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{user?.email}</p>
                 </div>

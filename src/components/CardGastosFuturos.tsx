@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   GastoFuturoResponse,
   GastoFuturoDashboard,
+  ParcelaResponse,
   apiService,
 } from '../services/api';
 import {

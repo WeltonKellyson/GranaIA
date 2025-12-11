@@ -321,7 +321,7 @@ export default function CalendarioTransacoes({
       </div>
 
       {/* Grade do calendário */}
-      <div className="grid grid-cols-7 gap-2">
+      <div className="grid grid-cols-7 gap-1.5 md:gap-2">
         {/* Cabeçalho dos dias da semana */}
         {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((dia) => (
           <div
@@ -342,12 +342,11 @@ export default function CalendarioTransacoes({
             <div
               key={index}
               onClick={() => {
-                if (temTransacoes) {
-                  setDiaSelecionado(diaInfo.data);
-                }
+                if (!temTransacoes) return;
+                setDiaSelecionado((prev) => (prev === diaInfo.data ? null : diaInfo.data));
               }}
               className={`
-                min-h-[100px] p-2 rounded-lg border transition-all
+                min-h-[100px] sm:min-h-[120px] p-2.5 rounded-lg border transition-all overflow-hidden
                 ${
                   !diaInfo.mesAtual
                     ? 'bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
@@ -366,38 +365,54 @@ export default function CalendarioTransacoes({
                 }
               `}
             >
-              <div className="text-sm font-medium mb-1">
-                {diaInfo.dia}
-                {ehHoje && (
-                  <span className="ml-1 text-xs text-blue-600 dark:text-blue-400 font-semibold">
-                    Hoje
-                  </span>
+              <div className="flex flex-col items-center text-center text-[10px] md:text-xs leading-tight text-gray-700 dark:text-gray-200 gap-1">
+                <div className="text-sm font-semibold">
+                  {diaInfo.dia}
+                  {ehHoje && (
+                    <span className="ml-1 text-xs text-blue-600 dark:text-blue-400 font-semibold">
+                      Hoje
+                    </span>
+                  )}
+                </div>
+
+                {temTransacoes && (
+                  <>
+                    {/* Mobile: apenas indicador e contagem vertical */}
+                    <div className="md:hidden flex flex-col items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-red-500 inline-block"></span>
+                      <span className="whitespace-pre-line break-words">
+                        {diaInfo.transacoes.length}
+                        {'\ntran\nsa\nções'}
+                      </span>
+                    </div>
+
+                    {/* Desktop/tablet: valores detalhados */}
+                    <div className="hidden md:block space-y-1 text-[11px] leading-tight text-center">
+                      <div className="flex flex-col items-center gap-0.5">
+                        {diaInfo.totalReceitas > 0 && (
+                          <span className="px-1.5 py-0.5 rounded bg-green-50 dark:bg-green-900/40 text-green-700 dark:text-green-200 font-semibold">
+                            +{formatarMoeda(diaInfo.totalReceitas)}
+                          </span>
+                        )}
+                        {diaInfo.totalDespesas > 0 && (
+                          <span className="px-1.5 py-0.5 rounded bg-red-50 dark:bg-red-900/40 text-red-700 dark:text-red-200 font-semibold">
+                            -{formatarMoeda(diaInfo.totalDespesas)}
+                          </span>
+                        )}
+                        {diaInfo.totalGastosFuturos > 0 && (
+                          <span className="px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-200 font-semibold">
+                            {formatarMoeda(diaInfo.totalGastosFuturos)}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-gray-500 dark:text-gray-400 pt-0.5 truncate">
+                        {diaInfo.transacoes.length}{' '}
+                        {diaInfo.transacoes.length === 1 ? 'transação' : 'transações'}
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
-
-              {temTransacoes && (
-                <div className="space-y-1 text-xs">
-                  {diaInfo.totalReceitas > 0 && (
-                    <div className="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-1 rounded font-medium">
-                      +{formatarMoeda(diaInfo.totalReceitas)}
-                    </div>
-                  )}
-                  {diaInfo.totalDespesas > 0 && (
-                    <div className="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-2 py-1 rounded font-medium">
-                      -{formatarMoeda(diaInfo.totalDespesas)}
-                    </div>
-                  )}
-                  {diaInfo.totalGastosFuturos > 0 && (
-                    <div className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded font-medium">
-                      {formatarMoeda(diaInfo.totalGastosFuturos)}
-                    </div>
-                  )}
-                  <div className="text-gray-500 dark:text-gray-400 text-center pt-1">
-                    {diaInfo.transacoes.length}{' '}
-                    {diaInfo.transacoes.length === 1 ? 'transação' : 'transações'}
-                  </div>
-                </div>
-              )}
             </div>
           );
         })}
@@ -424,7 +439,7 @@ export default function CalendarioTransacoes({
           </div>
 
           {/* Resumo do dia */}
-          <div className="grid grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
             <div className="bg-green-100 dark:bg-green-900 p-3 rounded-lg">
               <p className="text-sm text-green-700 dark:text-green-300 mb-1">Receitas</p>
               <p className="text-lg font-bold text-green-700 dark:text-green-300">
@@ -462,7 +477,7 @@ export default function CalendarioTransacoes({
             {transacoesDiaSelecionado.map((t) => (
               <div
                 key={t.id}
-                className="bg-white dark:bg-gray-700 p-3 rounded-lg border border-gray-200 dark:border-gray-600 flex justify-between items-start"
+                className="bg-white dark:bg-gray-700 p-3 rounded-lg border border-gray-200 dark:border-gray-600 flex flex-col sm:flex-row sm:justify-between items-start gap-3"
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
@@ -481,13 +496,13 @@ export default function CalendarioTransacoes({
                       {t.categoria}
                     </span>
                   </div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 break-words">
                     {t.descricao}
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:items-end gap-2 min-w-[140px] w-full sm:w-auto">
                   <span
-                    className={`text-lg font-bold ${
+                    className={`text-lg font-bold text-right sm:text-left ${
                       t.tipo === 'Receita'
                         ? 'text-green-600 dark:text-green-400'
                         : t.tipo === 'Gasto Futuro'
@@ -498,11 +513,11 @@ export default function CalendarioTransacoes({
                     {formatarMoeda(t.valor)}
                   </span>
                   {t.tipo === 'Gasto Futuro' ? (
-                    <span className="text-xs text-gray-500 dark:text-gray-400 italic">
+                    <span className="text-xs text-gray-500 dark:text-gray-400 italic text-right sm:text-left">
                       Gerenciar em Cartões
                     </span>
                   ) : (
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 flex-wrap justify-end sm:justify-start">
                       <button
                         onClick={() => {
                           if (t.tipo === 'Despesa') {

@@ -192,7 +192,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
-                <span className="text-sm font-medium">Tabela</span>
+                <span className="hidden md:inline text-sm font-medium">Tabela</span>
+                <span className="sr-only">Tabela</span>
               </button>
               <button
                 onClick={() => setVisualizacao('calendario')}
@@ -205,21 +206,27 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span className="text-sm font-medium">Calendário</span>
+                <span className="hidden md:inline text-sm font-medium">Calendário</span>
+                <span className="sr-only">Calendário</span>
               </button>
             </div>
           </div>
 
           {/* Campo de Pesquisa */}
           <div className="w-full md:w-80 relative">
+            <img
+              src="https://img.icons8.com/?size=100&id=DZe3wFKTc8IK&format=png&color=ffffff"
+              alt="Ícone de pesquisa"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+            />
             <input
               type="text"
               value={pesquisaDescricao}
               onChange={(e) => setPesquisaDescricao(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700
                 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition
                 placeholder-gray-400 dark:placeholder-gray-500"
-              placeholder="🔍 Pesquisar por descrição..."
+              placeholder="Pesquisar por descrição..."
             />
             {pesquisaDescricao && (
               <button

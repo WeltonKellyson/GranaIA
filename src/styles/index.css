@@ -19,6 +19,10 @@ body {
   min-height: 100vh;
 }
 
+#root {
+  overflow-x: hidden; /* garante que nenhum componente estoure lateralmente */
+}
+
 /* Remove o flex fixo que estava centralizando tudo (atrapalhava o layout) */
 
 /* Exemplo de suavização nos botões (pode deixar ou remover, já usamos Tailwind) */
@@ -46,4 +50,3 @@ button {
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
-

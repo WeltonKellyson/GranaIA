@@ -225,7 +225,7 @@ export default function GraficosFinanceiros({
     <>
       {/* ===== GRÁFICO: FLUXO DE CAIXA MENSAL ===== */}
       {fluxoMensal.length > 0 && (
-        <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
+        <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700 overflow-hidden">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
             Fluxo de Caixa Mensal
           </h2>
@@ -298,7 +298,7 @@ export default function GraficosFinanceiros({
             <div
               className={`bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700 transition-all duration-500 ease-in-out ${
                 categoriasReceitas.length === 0 ? 'lg:col-span-2' : ''
-              }`}
+              } overflow-hidden`}
             >
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
                 Distribuição de Despesas por Categoria
@@ -399,7 +399,7 @@ export default function GraficosFinanceiros({
             <div
               className={`bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700 transition-all duration-500 ease-in-out ${
                 categoriasGastos.length === 0 ? 'lg:col-span-2' : ''
-              }`}
+              } overflow-hidden`}
             >
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
                 Distribuição de Receitas por Categoria

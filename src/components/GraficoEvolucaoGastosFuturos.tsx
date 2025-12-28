@@ -123,12 +123,14 @@ const GraficoEvolucaoGastosFuturos: React.FC<GraficoEvolucaoGastosFuturosProps> 
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                border: '1px solid #ccc',
+                backgroundColor: 'var(--tooltip-bg)',
+                border: '1px solid var(--tooltip-border)',
                 borderRadius: '8px',
+                color: 'var(--tooltip-text)',
               }}
               formatter={(value: number) => formatarMoeda(value)}
-              labelStyle={{ fontWeight: 'bold' }}
+              labelStyle={{ fontWeight: 'bold', color: 'var(--tooltip-text)' }}
+              itemStyle={{ color: 'var(--tooltip-text)' }}
             />
             <Legend />
             <Bar

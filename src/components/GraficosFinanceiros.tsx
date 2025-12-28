@@ -250,11 +250,14 @@ export default function GraficosFinanceiros({
               <Tooltip
                 formatter={(value: number) => formatarMoeda(value)}
                 contentStyle={{
-                  backgroundColor: '#1f2937',
-                  border: '1px solid #374151',
+                  backgroundColor: 'var(--tooltip-bg)',
+                  border: '1px solid var(--tooltip-border)',
                   borderRadius: '8px',
-                  color: '#fff',
+                  color: 'var(--tooltip-text)',
                 }}
+
+                labelStyle={{ fontWeight: 'bold', color: 'var(--tooltip-text)' }}
+                itemStyle={{ color: 'var(--tooltip-text)' }}
               />
 
               <Legend />
@@ -325,11 +328,14 @@ export default function GraficosFinanceiros({
                   <Tooltip
                     formatter={(value: number) => formatarMoeda(value)}
                     contentStyle={{
-                      backgroundColor: '#1f2937',
-                      border: '1px solid #374151',
+                      backgroundColor: 'var(--tooltip-bg)',
+                      border: '1px solid var(--tooltip-border)',
                       borderRadius: '8px',
-                      color: '#fff',
+                      color: 'var(--tooltip-text)',
                     }}
+
+                    labelStyle={{ fontWeight: 'bold', color: 'var(--tooltip-text)' }}
+                    itemStyle={{ color: 'var(--tooltip-text)' }}
                   />
                   <Legend
                     verticalAlign="bottom"
@@ -426,11 +432,14 @@ export default function GraficosFinanceiros({
                   <Tooltip
                     formatter={(value: number) => formatarMoeda(value)}
                     contentStyle={{
-                      backgroundColor: '#1f2937',
-                      border: '1px solid #374151',
+                      backgroundColor: 'var(--tooltip-bg)',
+                      border: '1px solid var(--tooltip-border)',
                       borderRadius: '8px',
-                      color: '#fff',
+                      color: 'var(--tooltip-text)',
                     }}
+
+                    labelStyle={{ fontWeight: 'bold', color: 'var(--tooltip-text)' }}
+                    itemStyle={{ color: 'var(--tooltip-text)' }}
                   />
                   <Legend
                     verticalAlign="bottom"

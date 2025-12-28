@@ -23,6 +23,18 @@ body {
   overflow-x: hidden; /* garante que nenhum componente estoure lateralmente */
 }
 
+:root {
+  --tooltip-bg: #f3f4f6;
+  --tooltip-border: #e5e7eb;
+  --tooltip-text: #111827;
+}
+
+.dark {
+  --tooltip-bg: #111827;
+  --tooltip-border: #374151;
+  --tooltip-text: #f9fafb;
+}
+
 /* Remove o flex fixo que estava centralizando tudo (atrapalhava o layout) */
 
 /* Exemplo de suavizacao nos botoes (pode deixar ou remover, ja usamos Tailwind) */

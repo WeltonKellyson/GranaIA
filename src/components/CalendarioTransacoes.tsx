@@ -47,7 +47,7 @@ export default function CalendarioTransacoes({
   const [diaSelecionado, setDiaSelecionado] = useState<string | null>(null);
   const [seletorMesAberto, setSeletorMesAberto] = useState(false);
 
-  // Agrupar transações por dia
+  // Agrupar transacoes por dia
   const transacoesPorDia = (() => {
     const mapa: Record<string, Transacao[]> = {};
 
@@ -62,7 +62,7 @@ export default function CalendarioTransacoes({
     return mapa;
   })();
 
-  // Gerar dias do calendário
+  // Gerar dias do calendario
   const gerarDiasCalendario = () => {
     const ano = mesCalendario.getFullYear();
     const mes = mesCalendario.getMonth();
@@ -83,7 +83,7 @@ export default function CalendarioTransacoes({
       totalGastosFuturos: number;
     }> = [];
 
-    // Dias do mês anterior
+    // Dias do mes anterior
     const ultimoDiaMesAnterior = new Date(ano, mes, 0).getDate();
     for (let i = diasAnteriores - 1; i >= 0; i--) {
       const dia = ultimoDiaMesAnterior - i;
@@ -113,7 +113,7 @@ export default function CalendarioTransacoes({
       });
     }
 
-    // Dias do mês atual
+    // Dias do mes atual
     for (let dia = 1; dia <= diasNoMes; dia++) {
       const dataStr = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
 
@@ -139,8 +139,8 @@ export default function CalendarioTransacoes({
       });
     }
 
-    // Dias do próximo mês (para completar a grade)
-    const diasRestantes = 42 - dias.length; // 6 semanas × 7 dias
+    // Dias do proximo mes (para completar a grade)
+    const diasRestantes = 42 - dias.length; // 6 semanas  7 dias
     for (let dia = 1; dia <= diasRestantes; dia++) {
       const proximoMes = mes === 11 ? 0 : mes + 1;
       const proximoAno = mes === 11 ? ano + 1 : ano;
@@ -173,14 +173,14 @@ export default function CalendarioTransacoes({
 
   const diasCalendario = gerarDiasCalendario();
 
-  // Transações do dia selecionado
+  // Transacoes do dia selecionado
   const transacoesDiaSelecionado = diaSelecionado
     ? transacoesPorDia[diaSelecionado] || []
     : [];
 
   return (
     <div>
-      {/* Navegação do calendário */}
+      {/* Navegacao do calendario */}
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => {
@@ -193,7 +193,7 @@ export default function CalendarioTransacoes({
           <ChevronLeftIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         </button>
 
-        {/* Título do mês (clicável) com seletor */}
+        {/* Titulo do mes (clicavel) com seletor */}
         <div className="relative">
           <button
             onClick={() => setSeletorMesAberto(!seletorMesAberto)}
@@ -214,7 +214,7 @@ export default function CalendarioTransacoes({
             />
           </button>
 
-          {/* Dropdown de seleção rápida de mês/ano */}
+          {/* Dropdown de selecao rapida de mes/ano */}
           {seletorMesAberto && (
             <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-20 p-4 w-80">
               {/* Seletor de Ano */}
@@ -294,7 +294,7 @@ export default function CalendarioTransacoes({
                 })}
               </div>
 
-              {/* Botão "Hoje" */}
+              {/* Botao "Hoje" */}
               <button
                 onClick={() => {
                   setMesCalendario(new Date());
@@ -320,10 +320,10 @@ export default function CalendarioTransacoes({
         </button>
       </div>
 
-      {/* Grade do calendário */}
+      {/* Grade do calendario */}
       <div className="grid grid-cols-7 gap-1.5 md:gap-2">
-        {/* Cabeçalho dos dias da semana */}
-        {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((dia) => (
+        {/* Cabecalho dos dias da semana */}
+        {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'].map((dia) => (
           <div
             key={dia}
             className="text-center text-sm font-semibold text-gray-600 dark:text-gray-400 py-2"
@@ -332,7 +332,7 @@ export default function CalendarioTransacoes({
           </div>
         ))}
 
-        {/* Dias do calendário */}
+        {/* Dias do calendario */}
         {diasCalendario.map((diaInfo, index) => {
           const temTransacoes = diaInfo.transacoes.length > 0;
           const hoje = new Date().toISOString().split('T')[0];
@@ -382,7 +382,7 @@ export default function CalendarioTransacoes({
                       <span className="w-2 h-2 rounded-full bg-red-500 inline-block"></span>
                       <span className="whitespace-pre-line break-words">
                         {diaInfo.transacoes.length}
-                        {'\ntran\nsa\nções'}
+                        {'\ntran\nsa\ncoes'}
                       </span>
                     </div>
 
@@ -407,7 +407,7 @@ export default function CalendarioTransacoes({
                       </div>
                       <div className="text-gray-500 dark:text-gray-400 pt-0.5 truncate">
                         {diaInfo.transacoes.length}{' '}
-                        {diaInfo.transacoes.length === 1 ? 'transação' : 'transações'}
+                        {diaInfo.transacoes.length === 1 ? 'transacao' : 'transacoes'}
                       </div>
                     </div>
                   </>
@@ -423,7 +423,7 @@ export default function CalendarioTransacoes({
         <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="flex justify-between items-center mb-4">
             <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Transações de{' '}
+              Transacoes de{' '}
               {new Date(diaSelecionado + 'T00:00:00').toLocaleDateString('pt-BR', {
                 day: '2-digit',
                 month: 'long',
@@ -434,7 +434,7 @@ export default function CalendarioTransacoes({
               onClick={() => setDiaSelecionado(null)}
               className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition"
             >
-              ✕
+              
             </button>
           </div>
 
@@ -472,7 +472,7 @@ export default function CalendarioTransacoes({
             </div>
           </div>
 
-          {/* Lista de transações */}
+          {/* Lista de transacoes */}
           <div className="space-y-2">
             {transacoesDiaSelecionado.map((t) => (
               <div
@@ -514,7 +514,7 @@ export default function CalendarioTransacoes({
                   </span>
                   {t.tipo === 'Gasto Futuro' ? (
                     <span className="text-xs text-gray-500 dark:text-gray-400 italic text-right sm:text-left">
-                      Gerenciar em Cartões
+                      Gerenciar em Cartoes
                     </span>
                   ) : (
                     <div className="flex items-center gap-1 flex-wrap justify-end sm:justify-start">

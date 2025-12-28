@@ -28,13 +28,13 @@ export default function ComparacaoPeriodos({
   const mesAnterior = mesAtual === 0 ? 11 : mesAtual - 1;
   const anoMesAnterior = mesAtual === 0 ? anoAtual - 1 : anoAtual;
 
-  // Dados mês atual
+  // Dados mes atual
   const dadosMesAtual = todasTransacoes.filter((t) => {
     const data = new Date(t.data);
     return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
   });
 
-  // Dados mês anterior
+  // Dados mes anterior
   const dadosMesAnterior = todasTransacoes.filter((t) => {
     const data = new Date(t.data);
     return (
@@ -80,19 +80,19 @@ export default function ComparacaoPeriodos({
     <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
-          Comparação de Períodos
+          Comparacao de Periodos
         </h2>
         <button
           onClick={() => setMostrarComparacao(!mostrarComparacao)}
           className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition"
         >
-          {mostrarComparacao ? 'Ocultar' : 'Mostrar'} Comparação
+          {mostrarComparacao ? 'Ocultar' : 'Mostrar'} Comparacao
         </button>
       </div>
 
       {mostrarComparacao && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-          {/* Mês Anterior */}
+          {/* Mes Anterior */}
           <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-700">
             <h3 className="font-semibold text-gray-700 dark:text-gray-200 mb-3">
               {meses[mesAnterior]} {anoMesAnterior}
@@ -131,7 +131,7 @@ export default function ComparacaoPeriodos({
             </div>
           </div>
 
-          {/* Mês Atual */}
+          {/* Mes Atual */}
           <div className="border-2 border-green-500 dark:border-green-400 rounded-lg p-4 bg-green-50 dark:bg-gray-700">
             <h3 className="font-semibold text-gray-700 dark:text-gray-200 mb-3">
               {meses[mesAtual]} {anoAtual}{' '}

@@ -25,10 +25,10 @@ export default function FiltrosTransacoes({
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Filtro de Período */}
+        {/* Filtro de Periodo */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Período
+            Periodo
           </label>
           <select
             value={filtros?.periodo || 'todos'}
@@ -43,19 +43,19 @@ export default function FiltrosTransacoes({
               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
               focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
           >
-            <option value="todos">Todos os períodos</option>
-            <option value="mesAtual">Mês atual</option>
-            <option value="ultimos30">Últimos 30 dias</option>
-            <option value="ultimos60">Últimos 60 dias</option>
-            <option value="ultimos90">Últimos 90 dias</option>
+            <option value="todos">Todos os periodos</option>
+            <option value="mesAtual">Mes atual</option>
+            <option value="ultimos30">ltimos 30 dias</option>
+            <option value="ultimos60">ltimos 60 dias</option>
+            <option value="ultimos90">ltimos 90 dias</option>
             <option value="anoAtual">Ano atual</option>
           </select>
         </div>
 
-        {/* Filtro de Mês/Data Específico */}
+        {/* Filtro de Mes/Data Especifico */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Mês Específico
+            Mes Especifico
           </label>
           <input
             type="month"
@@ -125,7 +125,7 @@ export default function FiltrosTransacoes({
         </div>
       </div>
 
-      {/* BOTÃO LIMPAR FILTROS */}
+      {/* BOTAO LIMPAR FILTROS */}
       <div className="flex justify-end mt-4">
         <button
           onClick={() =>

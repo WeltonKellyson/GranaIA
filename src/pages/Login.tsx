@@ -34,7 +34,7 @@ export default function Login() {
   const [forgotPasswordError, setForgotPasswordError] = useState('');
   const [isSendingReset, setIsSendingReset] = useState(false);
 
-  // Redireciona se já estiver autenticado
+  // Redireciona se ja estiver autenticado
   useEffect(() => {
     if (isAuthenticated && !loading) {
       navigate('/dashboard');
@@ -62,7 +62,7 @@ export default function Login() {
 
     try {
       await login(formData);
-      // O redirecionamento será feito pelo useEffect quando isAuthenticated mudar
+      // O redirecionamento sera feito pelo useEffect quando isAuthenticated mudar
     } catch (err: any) {
       console.error('Erro ao fazer login:', err);
       setError(err.message || 'Email ou senha incorretos. Tente novamente.');
@@ -75,29 +75,29 @@ export default function Login() {
     e.preventDefault();
     setForgotPasswordError('');
 
-    // Validação dos campos
+    // Validacao dos campos
     if (!forgotPasswordData.phone || !forgotPasswordData.confirmPhone) {
       setForgotPasswordError('Por favor, preencha ambos os campos de telefone');
       return;
     }
 
-    // Valida se os telefones são brasileiros (13 dígitos: 55 + 11 dígitos)
+    // Valida se os telefones sao brasileiros (13 digitos: 55 + 11 digitos)
     const phone = forgotPasswordData.phone.replace(/\D/g, '');
     const confirmPhone = forgotPasswordData.confirmPhone.replace(/\D/g, '');
 
     if (!phone.startsWith('55') || phone.length !== 13) {
-      setForgotPasswordError('Por favor, insira um número de telefone brasileiro válido (DDD + 9 dígitos)');
+      setForgotPasswordError('Por favor, insira um numero de telefone brasileiro valido (DDD + 9 digitos)');
       return;
     }
 
     if (!confirmPhone.startsWith('55') || confirmPhone.length !== 13) {
-      setForgotPasswordError('Por favor, confirme com um número de telefone brasileiro válido');
+      setForgotPasswordError('Por favor, confirme com um numero de telefone brasileiro valido');
       return;
     }
 
-    // Verifica se os números são iguais
+    // Verifica se os numeros sao iguais
     if (phone !== confirmPhone) {
-      setForgotPasswordError('Os números de telefone não coincidem');
+      setForgotPasswordError('Os numeros de telefone nao coincidem');
       return;
     }
 
@@ -116,16 +116,16 @@ export default function Login() {
       });
 
       if (!response.ok) {
-        throw new Error('Erro ao enviar solicitação');
+        throw new Error('Erro ao enviar solicitacao');
       }
 
       // Sucesso
-      alert('Solicitação de recuperação enviada com sucesso! Você receberá instruções em breve.');
+      alert('Solicitacao de recuperacao enviada com sucesso! Voce recebera instrucoes em breve.');
       setShowForgotPasswordModal(false);
       setForgotPasswordData({ phone: '', confirmPhone: '' });
     } catch (err: any) {
-      console.error('Erro ao enviar recuperação:', err);
-      setForgotPasswordError('Erro ao enviar solicitação. Tente novamente.');
+      console.error('Erro ao enviar recuperacao:', err);
+      setForgotPasswordError('Erro ao enviar solicitacao. Tente novamente.');
     } finally {
       setIsSendingReset(false);
     }
@@ -142,13 +142,13 @@ export default function Login() {
           className="w-64 md:w-72 mx-auto mb-4 transition-transform duration-300 hover:scale-105"
         />
 
-        {/* Título */}
+        {/* Titulo */}
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800 mb-1">
-            Gerencie suas finanças
+            Gerencie suas financas
           </h1>
           <p className="text-gray-500 text-sm">
-            Faça login ou crie sua conta para continuar
+            Faca login ou crie sua conta para continuar
           </p>
         </div>
 
@@ -212,7 +212,7 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Botão Entrar */}
+            {/* Botao Entrar */}
             <button
               type="submit"
               disabled={isLoading}
@@ -242,7 +242,7 @@ export default function Login() {
           <div className="bg-blue-50 text-blue-700 border border-blue-200 rounded-lg p-4 mt-5 text-center">
             <p className="font-semibold mb-1 text-sm">Novo por aqui?</p>
             <p className="text-sm mb-3">
-              Crie sua conta e comece a controlar suas finanças!
+              Crie sua conta e comece a controlar suas financas!
             </p>
             <button
               onClick={() => navigate('/register')}
@@ -253,7 +253,7 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Rodapé */}
+        {/* Rodape */}
         <p className="text-xs text-gray-400 mt-4">
           Problemas para acessar?{' '}
           <a 
@@ -266,43 +266,43 @@ export default function Login() {
         </p>
       </div>
 
-      {/* ==== LADO DIREITO (INFORMAÇÕES) ==== */}
+      {/* ==== LADO DIREITO (INFORMACOES) ==== */}
       <div className="hidden md:flex w-full md:w-1/2 flex-col justify-center text-white px-12 bg-gradient-to-br from-emerald-900 via-emerald-700 to-green-600">
         <div className="max-w-lg mx-auto space-y-5">
           <h2 className="text-3xl font-extrabold leading-snug">
-            Controle total das suas finanças
+            Controle total das suas financas
           </h2>
           <p className="text-green-100 text-sm">
-            O GranaIA oferece todas as ferramentas que você precisa para
-            gerenciar suas finanças de forma simples e eficiente.
+            O GranaIA oferece todas as ferramentas que vocee precisa para
+            gerenciar suas financas de forma simples e eficiente.
           </p>
 
           <ul className="space-y-3 text-sm">
             <li className="flex items-center gap-3">
               <ChartBarIcon className="w-5 h-5 text-white" />
-              Dashboard intuitivo com resumo das finanças
+              Dashboard intuitivo com resumo das financas
             </li>
             <li className="flex items-center gap-3">
               <ChartBarIcon className="w-5 h-5 text-white" />
-              Relatórios avançados e DRE automático
+              Relatorios avancados e DRE automatico
             </li>
             <li className="flex items-center gap-3">
               <UsersIcon className="w-5 h-5 text-white" />
-              Gestão inteligente na palma da sua mão
+              Gestao inteligente na palma da sua mao
             </li>
             <li className="flex items-center gap-3">
               <ChatBubbleOvalLeftEllipsisIcon className="w-5 h-5 text-white" />
-              Integração segura com WhatsApp
+              Integracao segura com WhatsApp
             </li>
           </ul>
 
           <div className="mt-6 border border-green-300 rounded-lg p-4 text-green-50 text-sm flex items-center justify-center text-center">
             <ShieldCheckIcon className="w-5 h-5 mr-2" />
             <span>
-              Seus dados estão protegidos com criptografia de nível bancário
+              Seus dados estao protegidos com criptografia de nivel bancario
             </span>
           </div>
-          {/* Botão Voltar / Ver Planos */}
+          {/* Botao Voltar / Ver Planos */}
           <div className="mt-6 flex justify-center">
             <button
               onClick={() => navigate('/')}
@@ -335,7 +335,7 @@ export default function Login() {
             </div>
 
             <p className="text-sm text-gray-600 mb-4">
-              Digite seu número de telefone para recuperar sua senha. Você receberá instruções via WhatsApp.
+              Digite seu numero de telefone para recuperar sua senha. Voce recebera instrucoes via WhatsApp.
             </p>
 
             <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
@@ -348,7 +348,7 @@ export default function Login() {
               {/* Telefone */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Número de Telefone (com DDD) <span className="text-red-500">*</span>
+                  Numero de Telefone (com DDD) <span className="text-red-500">*</span>
                 </label>
                 <PhoneInput
                   country={'br'}
@@ -385,17 +385,17 @@ export default function Login() {
                   }}
                   preferredCountries={['br', 'us', 'pt']}
                   enableSearch={true}
-                  searchPlaceholder="Buscar país..."
+                  searchPlaceholder="Buscar pais..."
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Digite 11 dígitos: DDD + número (ex: (11) 987654321)
+                  Digite 11 digitos: DDD + numero (ex: (11) 987654321)
                 </p>
               </div>
 
               {/* Confirmar Telefone */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Confirmar Número de Telefone <span className="text-red-500">*</span>
+                  Confirmar Numero de Telefone <span className="text-red-500">*</span>
                 </label>
                 <PhoneInput
                   country={'br'}
@@ -432,14 +432,14 @@ export default function Login() {
                   }}
                   preferredCountries={['br', 'us', 'pt']}
                   enableSearch={true}
-                  searchPlaceholder="Buscar país..."
+                  searchPlaceholder="Buscar pais..."
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Digite o mesmo número novamente
+                  Digite o mesmo numero novamente
                 </p>
               </div>
 
-              {/* Botões */}
+              {/* Botoes */}
               <div className="flex gap-3 mt-6">
                 <button
                   type="button"

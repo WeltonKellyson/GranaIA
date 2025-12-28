@@ -195,7 +195,7 @@ const MetasGastos: React.FC<MetasGastosProps> = ({ gastosPorCategoria, mesRefere
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500 italic">
-                    Nenhuma meta definida. Clique no ícone para definir.
+                    Nenhuma meta definida. Clique no icone para definir.
                   </p>
                 )}
               </div>

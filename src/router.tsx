@@ -9,19 +9,19 @@ import PrivateRoute from "./components/PrivateRoute";
 function Router() {
   return (
     <Routes>
-      {/* Página inicial */}
+      {/* Pagina inicial */}
       <Route path="/" element={<Home />} />
 
-      {/* Página de login */}
+      {/* Pagina de login */}
       <Route path="/login" element={<Login />} />
 
-      {/* Página de cadastro */}
+      {/* Pagina de cadastro */}
       <Route path="/register" element={<Register />} />
 
-      {/* Página de redefinição de senha */}
+      {/* Pagina de redefinicao de senha */}
       <Route path="/reset-password" element={<ResetPassword />} />
 
-      {/* Página do dashboard - PROTEGIDA */}
+      {/* Pagina do dashboard - PROTEGIDA */}
       <Route
         path="/dashboard"
         element={

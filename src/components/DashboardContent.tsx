@@ -18,9 +18,9 @@ interface DashboardContentProps {
   totalGastosFuturos: number;
   quantidadeGastosFuturos: number;
 
-  // Props para transações
-  todasTransacoes: any[]; // Apenas gastos e receitas (para cálculos)
-  todasTransacoesComFuturos: any[]; // Inclui gastos futuros (apenas visualização)
+  // Props para transacoes
+  todasTransacoes: any[]; // Apenas gastos e receitas (para clculos)
+  todasTransacoesComFuturos: any[]; // Inclui gastos futuros (apenas visualizacao)
   transacoesFiltradas: any[];
   gastos: any[];
   receitas: any[];
@@ -32,7 +32,7 @@ interface DashboardContentProps {
   todasCategorias: string[];
   contagemPorCategoria: Record<string, number>;
 
-  // Props para pesquisa e visualização
+  // Props para pesquisa e visualizacao
   pesquisaDescricao: string;
   setPesquisaDescricao: (value: string) => void;
   visualizacao: 'tabela' | 'calendario';
@@ -84,7 +84,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 }) => {
   return (
     <div className="space-y-10">
-      {/* ===== BOTÕES DE AÇÃO ===== */}
+      {/* ===== BOTOES DE ACAO ===== */}
       <section className="flex flex-wrap gap-3 justify-center md:justify-start">
         <button
           onClick={() => {
@@ -135,7 +135,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         quantidadeGastosFuturos={quantidadeGastosFuturos}
       />
 
-      {/* ===== COMPARAÇÃO ENTRE PERÍODOS ===== */}
+      {/* ===== COMPARACAO ENTRE PERIODOS ===== */}
       <ComparacaoPeriodos todasTransacoes={todasTransacoes} />
 
       {/* ===== FILTROS ===== */}
@@ -150,36 +150,36 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       {todasTransacoes.length === 0 && (
         <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
           <EmptyState
-            title="Nenhuma transação cadastrada"
-            message="Comece adicionando suas primeiras receitas e despesas para visualizar seu dashboard financeiro completo com gráficos, tendências e análises."
+            title="Nenhuma transacao cadastrada"
+            message="Comece adicionando suas primeiras receitas e despesas para visualizar seu dashboard financeiro completo com graficos, tendencias e analises."
             icon={
               <svg className="w-24 h-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
               </svg>
             }
             action={{
-              label: 'Adicionar primeira transação',
+              label: 'Adicionar primeira transacao',
               onClick: onNovoGasto,
             }}
           />
         </section>
       )}
 
-      {/* ===== GRÁFICOS ===== */}
+      {/* ===== GRAFICOS ===== */}
       <GraficosFinanceiros
         transacoesFiltradas={transacoesFiltradas}
         gastosFuturos={gastosFuturos}
       />
 
-      {/* ===== TABELA/CALENDÁRIO DE TRANSAÇÕES ===== */}
+      {/* ===== TABELA/CALENDARIO DE TRANSACOES ===== */}
       <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <div className="flex items-center gap-4">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Movimentações Recentes
+              Movimentacoes Recentes
             </h2>
 
-            {/* Botões de alternância Tabela/Calendário */}
+            {/* Botoes de alternncia Tabela/Calendario */}
             <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
               <button
                 onClick={() => setVisualizacao('tabela')}
@@ -206,8 +206,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span className="hidden md:inline text-sm font-medium">Calendário</span>
-                <span className="sr-only">Calendário</span>
+                <span className="hidden md:inline text-sm font-medium">Calendario</span>
+                <span className="sr-only">Calendario</span>
               </button>
             </div>
           </div>
@@ -215,8 +215,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
           {/* Campo de Pesquisa */}
           <div className="w-full md:w-80 relative">
             <img
-              src="https://img.icons8.com/?size=100&id=DZe3wFKTc8IK&format=png&color=ffffff"
-              alt="Ícone de pesquisa"
+              src="https://img.icons8.com/?size=100&id=7695&format=png&color=000000"
+              alt="Icone de pesquisa"
               className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
             />
             <input
@@ -226,7 +226,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
               className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700
                 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition
                 placeholder-gray-400 dark:placeholder-gray-500"
-              placeholder="Pesquisar por descrição..."
+              placeholder="Pesquisar por descricao..."
             />
             {pesquisaDescricao && (
               <button
@@ -234,13 +234,13 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition"
                 title="Limpar pesquisa"
               >
-                ✕
+                X
               </button>
             )}
           </div>
         </div>
 
-        {/* Visualização condicional: Tabela ou Calendário */}
+        {/* Visualizacao condicional: Tabela ou Calendario */}
         {visualizacao === 'tabela' ? (
           <TabelaTransacoes
             transacoesFiltradas={transacoesFiltradas}

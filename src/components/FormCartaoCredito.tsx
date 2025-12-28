@@ -66,9 +66,9 @@ const FormCartaoCredito: React.FC<FormCartaoCreditoProps> = ({ cartao, onSuccess
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validações
+    // Validacoes
     if (!formData.nome_cartao || formData.nome_cartao.trim().length < 2) {
-      setError('O nome do cartão deve ter pelo menos 2 caracteres');
+      setError('O nome do cartao deve ter pelo menos 2 caracteres');
       return;
     }
 
@@ -83,7 +83,7 @@ const FormCartaoCredito: React.FC<FormCartaoCreditoProps> = ({ cartao, onSuccess
     }
 
     if (formData.limite && formData.limite < 0) {
-      setError('O limite não pode ser negativo');
+      setError('O limite nao pode ser negativo');
       return;
     }
 
@@ -92,7 +92,7 @@ const FormCartaoCredito: React.FC<FormCartaoCreditoProps> = ({ cartao, onSuccess
 
     try {
       if (cartao) {
-        // Atualizar cartão existente
+        // Atualizar cartao existente
         const updateData: CartaoCreditoUpdate = {
           nome_cartao: formData.nome_cartao.trim(),
           nome_titular: formData.nome_titular.trim(),
@@ -104,7 +104,7 @@ const FormCartaoCredito: React.FC<FormCartaoCreditoProps> = ({ cartao, onSuccess
         };
         await apiService.updateCartaoCredito(cartao.id, updateData);
       } else {
-        // Criar novo cartão
+        // Criar novo cartao
         const createData: CartaoCreditoCreate = {
           nome_cartao: formData.nome_cartao.trim(),
           nome_titular: formData.nome_titular.trim(),
@@ -119,9 +119,9 @@ const FormCartaoCredito: React.FC<FormCartaoCreditoProps> = ({ cartao, onSuccess
 
       onSuccess();
     } catch (err: any) {
-      console.error('Erro ao salvar cartão:', err);
+      console.error('Erro ao salvar cartao:', err);
 
-      let errorMessage = 'Erro ao salvar cartão. Tente novamente.';
+      let errorMessage = 'Erro ao salvar cartao. Tente novamente.';
 
       if (err.message) {
         errorMessage = err.message;
@@ -153,10 +153,10 @@ const FormCartaoCredito: React.FC<FormCartaoCreditoProps> = ({ cartao, onSuccess
         </div>
       )}
 
-      {/* Nome do Cartão */}
+      {/* Nome do Cartao */}
       <div>
         <label htmlFor="nome_cartao" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Nome do Cartão <span className="text-red-500">*</span>
+          Nome do Cartao <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
@@ -204,7 +204,7 @@ const FormCartaoCredito: React.FC<FormCartaoCreditoProps> = ({ cartao, onSuccess
           required
         />
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          Dia do mês em que a fatura vence (1-31)
+          Dia do mes em que a fatura vence (1-31)
         </p>
       </div>
 
@@ -229,7 +229,7 @@ const FormCartaoCredito: React.FC<FormCartaoCreditoProps> = ({ cartao, onSuccess
       {/* Cor */}
       <div>
         <label htmlFor="cor" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Cor do Cartão
+          Cor do Cartao
         </label>
         <div className="flex gap-2 mb-2">
           {coresPopulares.map((cor) => (
@@ -266,14 +266,14 @@ const FormCartaoCredito: React.FC<FormCartaoCreditoProps> = ({ cartao, onSuccess
           className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
         />
         <label htmlFor="ativo" className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-          Cartão ativo
+          Cartao ativo
         </label>
       </div>
 
-      {/* Observações */}
+      {/* Observacoes */}
       <div>
         <label htmlFor="observacoes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Observações
+          Observacoes
         </label>
         <textarea
           id="observacoes"
@@ -283,11 +283,11 @@ const FormCartaoCredito: React.FC<FormCartaoCreditoProps> = ({ cartao, onSuccess
           rows={2}
           maxLength={1000}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-          placeholder="Informações adicionais..."
+          placeholder="Informacoes adicionais..."
         />
       </div>
 
-      {/* Botões */}
+      {/* Botoes */}
       <div className="flex gap-3 pt-4">
         <button
           type="button"

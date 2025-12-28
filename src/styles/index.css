@@ -6,7 +6,7 @@
    ESTILOS GLOBAIS
    ======================= */
 html {
-  scroll-behavior: smooth; /* rolagem suave entre seções */
+  scroll-behavior: smooth; /* rolagem suave entre secoes */
 }
 
 /* Reseta o body para deixar o Tailwind controlar o layout */
@@ -25,7 +25,7 @@ body {
 
 /* Remove o flex fixo que estava centralizando tudo (atrapalhava o layout) */
 
-/* Exemplo de suavização nos botões (pode deixar ou remover, já usamos Tailwind) */
+/* Exemplo de suavizacao nos botoes (pode deixar ou remover, ja usamos Tailwind) */
 button {
   transition: all 0.3s ease;
   cursor: pointer;

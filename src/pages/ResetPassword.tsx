@@ -26,7 +26,7 @@ const ResetPassword: React.FC = () => {
   // Verifica se tem token na URL
   useEffect(() => {
     if (!token) {
-      setError('Token de recuperação não encontrado. Solicite um novo link.');
+      setError('Token de recuperacao nao encontrado. Solicite um novo link.');
     }
   }, [token]);
 
@@ -50,7 +50,7 @@ const ResetPassword: React.FC = () => {
     }
 
     if (formData.senha !== formData.confirmSenha) {
-      setError('As senhas não coincidem');
+      setError('As senhas nao coincidem');
       return false;
     }
 
@@ -61,7 +61,7 @@ const ResetPassword: React.FC = () => {
     e.preventDefault();
 
     if (!token) {
-      setError('Token inválido. Solicite um novo link de recuperação.');
+      setError('Token invalido. Solicite um novo link de recuperacao.');
       return;
     }
 
@@ -91,7 +91,7 @@ const ResetPassword: React.FC = () => {
       }
 
       // Sucesso
-      alert('Senha redefinida com sucesso! Você já pode fazer login com a nova senha.');
+      alert('Senha redefinida com sucesso! Voce ja pode fazer login com a nova senha.');
       navigate('/login');
     } catch (err: any) {
       console.error('Erro ao redefinir senha:', err);
@@ -103,7 +103,7 @@ const ResetPassword: React.FC = () => {
 
   return (
     <div className="min-h-screen flex">
-      {/* Lado Esquerdo - Formulário */}
+      {/* Lado Esquerdo - Formulario */}
       <div className="flex-1 flex items-center justify-center p-8 bg-white">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
@@ -144,7 +144,7 @@ const ResetPassword: React.FC = () => {
                     onChange={handleChange}
                     disabled={!token}
                     className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder="Minimo 6 caracteres"
                   />
                   <button
                     type="button"
@@ -228,14 +228,14 @@ const ResetPassword: React.FC = () => {
         </div>
       </div>
 
-      {/* ==== LADO DIREITO (INFORMAÇÕES) ==== */}
+      {/* ==== LADO DIREITO (INFORMACOES) ==== */}
       <div className="hidden md:flex w-full md:w-1/2 flex-col justify-center text-white px-12 bg-gradient-to-br from-emerald-900 via-emerald-700 to-green-600">
         <div className="max-w-lg mx-auto space-y-5">
           <h2 className="text-4xl font-bold leading-snug">
-            Recupere o acesso à sua conta
+            Recupere o acesso a sua conta
           </h2>
           <p className="text-green-100 text-base">
-            Defina uma nova senha segura e volte a gerenciar suas finanças com facilidade.
+            Defina uma nova senha segura e volte a gerenciar suas financas com facilidade.
           </p>
 
           <ul className="space-y-4 text-sm">
@@ -269,7 +269,7 @@ const ResetPassword: React.FC = () => {
                   d="M5 13l4 4L19 7"
                 />
               </svg>
-              <span>Combine letras, números e caracteres especiais</span>
+              <span>Combine letras, numeros e caracteres especiais</span>
             </li>
             <li className="flex items-start gap-3">
               <svg
@@ -285,14 +285,14 @@ const ResetPassword: React.FC = () => {
                   d="M5 13l4 4L19 7"
                 />
               </svg>
-              <span>Evite usar informações pessoais óbvias</span>
+              <span>Evite usar informacoes pessoais obvias</span>
             </li>
           </ul>
 
           <div className="mt-6 border border-green-300 rounded-lg p-4 text-green-50 text-sm flex items-center justify-center text-center">
             <ShieldCheckIcon className="w-5 h-5 mr-2" />
             <span>
-              Sua nova senha será criptografada com segurança de nível bancário
+              Sua nova senha sera criptografada com seguranca de nivel bancario
             </span>
           </div>
         </div>

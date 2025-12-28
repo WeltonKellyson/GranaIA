@@ -20,19 +20,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Registrar listener para logout automático quando o token expirar
+    // Registrar listener para logout automatico quando o token expirar
     const handleAutoLogout = () => {
-      console.log('[AuthContext] Sessão expirada - fazendo logout automático');
+      console.log('[AuthContext] Sessao expirada - fazendo logout automatico');
       setUser(null);
       setUserProfile(null);
-      // Forçar navegação para login será feita pelo PrivateRoute
+      // Forcar navegacao para login sera feita pelo PrivateRoute
     };
 
     apiService.onUnauthorized(handleAutoLogout);
 
-    // Verifica se há um token salvo ao carregar a aplicação
+    // Verifica se ha um token salvo ao carregar a aplicacao
     const initAuth = async () => {
-      console.log('[AuthContext] Iniciando autenticação...');
+      console.log('[AuthContext] Iniciando autenticacao...');
       try {
         const isAuth = apiService.isAuthenticated();
         console.log('[AuthContext] isAuthenticated:', isAuth);
@@ -44,7 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (userData) {
             setUser(userData);
 
-            // Tenta buscar o perfil completo do usuário
+            // Tenta buscar o perfil completo do usuario
             try {
               console.log('[AuthContext] Buscando perfil completo...');
               const response = await apiService.getCurrentUser();
@@ -54,8 +54,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 console.log('[AuthContext] UserProfile recebido:', response.data);
                 setUserProfile(response.data);
               } else {
-                console.warn('[AuthContext] API /auth/me não disponível, usando dados do localStorage');
-                // WORKAROUND: Cria um userProfile temporário usando localStorage
+                console.warn('[AuthContext] API /auth/me nao disponivel, usando dados do localStorage');
+                // WORKAROUND: Cria um userProfile temporario usando localStorage
                 const phone = localStorage.getItem('user_phone');
                 const remotejid = localStorage.getItem('user_remotejid') || phone || '';
 
@@ -70,13 +70,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     premium_until: null,
                     is_premium_active: false,
                   };
-                  console.log('[AuthContext] UserProfile temporário criado:', tempProfile);
+                  console.log('[AuthContext] UserProfile temporario criado:', tempProfile);
                   setUserProfile(tempProfile);
                 }
               }
             } catch (error) {
               console.error('[AuthContext] Erro ao buscar perfil:', error);
-              // WORKAROUND: Mesmo com erro, tenta criar perfil temporário
+              // WORKAROUND: Mesmo com erro, tenta criar perfil temporario
               const phone = localStorage.getItem('user_phone');
               const remotejid = localStorage.getItem('user_remotejid') || phone || '';
 
@@ -91,14 +91,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   premium_until: null,
                   is_premium_active: false,
                 };
-                console.log('[AuthContext] UserProfile temporário criado (fallback):', tempProfile);
+                console.log('[AuthContext] UserProfile temporario criado (fallback):', tempProfile);
                 setUserProfile(tempProfile);
               }
             }
           }
         }
       } catch (error) {
-        console.error('[AuthContext] Erro ao inicializar autenticação:', error);
+        console.error('[AuthContext] Erro ao inicializar autenticacao:', error);
       } finally {
         console.log('[AuthContext] Finalizando loading...');
         setLoading(false);
@@ -129,8 +129,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           await refreshUserProfile();
         } catch (error) {
-          console.warn('[AuthContext] Erro ao buscar perfil após login, criando temporário');
-          // WORKAROUND: Cria perfil temporário se a API falhar
+          console.warn('[AuthContext] Erro ao buscar perfil apos login, criando temporario');
+          // WORKAROUND: Cria perfil temporario se a API falhar
           const phone = localStorage.getItem('user_phone');
           const remotejid = response.data.remotejid || localStorage.getItem('user_remotejid') || phone || '';
 
@@ -145,7 +145,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               premium_until: null,
               is_premium_active: false,
             };
-            console.log('[AuthContext] UserProfile temporário criado após login:', tempProfile);
+            console.log('[AuthContext] UserProfile temporario criado apos login:', tempProfile);
             setUserProfile(tempProfile);
           }
         }
@@ -162,10 +162,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await apiService.register(data);
       if (!response.success) {
-        throw new Error(response.message || 'Erro ao cadastrar usuário');
+        throw new Error(response.message || 'Erro ao cadastrar usuario');
       }
-      // Após cadastrar, não faz login automático
-      // O usuário precisa fazer login manualmente
+      // Apos cadastrar, nao faz login automatico
+      // O usuario precisa fazer login manualmente
     } finally {
       setLoading(false);
     }
@@ -189,8 +189,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('[AuthContext] remotejid:', response.data.remotejid);
         setUserProfile(response.data);
       } else {
-        console.warn('[AuthContext] getCurrentUser falhou, criando perfil temporário');
-        // WORKAROUND: Cria perfil temporário se a API falhar
+        console.warn('[AuthContext] getCurrentUser falhou, criando perfil temporario');
+        // WORKAROUND: Cria perfil temporario se a API falhar
         const userData = apiService.getUserData();
         if (userData) {
           const phone = localStorage.getItem('user_phone');
@@ -207,14 +207,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               premium_until: null,
               is_premium_active: false,
             };
-            console.log('[AuthContext] UserProfile temporário criado em refreshUserProfile:', tempProfile);
+            console.log('[AuthContext] UserProfile temporario criado em refreshUserProfile:', tempProfile);
             setUserProfile(tempProfile);
           }
         }
       }
     } catch (error) {
       console.error('[AuthContext] Erro ao atualizar perfil:', error);
-      // WORKAROUND: Mesmo com erro, cria perfil temporário
+      // WORKAROUND: Mesmo com erro, cria perfil temporario
       const userData = apiService.getUserData();
       if (userData) {
         const phone = localStorage.getItem('user_phone');
@@ -231,7 +231,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             premium_until: null,
             is_premium_active: false,
           };
-          console.log('[AuthContext] UserProfile temporário criado (erro):', tempProfile);
+          console.log('[AuthContext] UserProfile temporario criado (erro):', tempProfile);
           setUserProfile(tempProfile);
         }
       }

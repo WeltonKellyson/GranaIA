@@ -55,10 +55,10 @@ const Register: React.FC = () => {
       return false;
     }
 
-    // Valida se o telefone brasileiro tem 13 dígitos (55 + 11 dígitos)
+    // Valida se o telefone brasileiro tem 13 digitos (55 + 11 digitos)
     const phoneNumbers = formData.phone.replace(/\D/g, '');
     if (!phoneNumbers.startsWith('55') || phoneNumbers.length !== 13) {
-      setError('Por favor, insira um número de telefone brasileiro válido (DDD + 9 dígitos)');
+      setError('Por favor, insira um numero de telefone brasileiro valido (DDD + 9 digitos)');
       return false;
     }
 
@@ -68,13 +68,13 @@ const Register: React.FC = () => {
     }
 
     if (formData.senha !== formData.confirmSenha) {
-      setError('As senhas não coincidem');
+      setError('As senhas nao coincidem');
       return false;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      setError('Por favor, insira um email válido');
+      setError('Por favor, insira um email valido');
       return false;
     }
 
@@ -92,7 +92,7 @@ const Register: React.FC = () => {
     setError('');
 
     try {
-      // Remove formatação do telefone (já vem com código do país da biblioteca)
+      // Remove formatacao do telefone (ja vem com codigo do pais da biblioteca)
       const phoneNumbers = formData.phone.replace(/\D/g, '');
 
       await register({
@@ -106,7 +106,7 @@ const Register: React.FC = () => {
       localStorage.setItem('user_phone', phoneNumbers);
 
       // Cadastro realizado com sucesso, redireciona para login
-      alert('Cadastro realizado com sucesso! Faça login para continuar.');
+      alert('Cadastro realizado com sucesso! Faca login para continuar.');
       navigate('/login');
     } catch (err: any) {
       console.error('Erro ao cadastrar:', err);
@@ -118,7 +118,7 @@ const Register: React.FC = () => {
 
   return (
     <div className="min-h-screen flex">
-      {/* Lado Esquerdo - Formulário */}
+      {/* Lado Esquerdo - Formulario */}
       <div className="flex-1 flex items-center justify-center p-8 bg-white">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
@@ -129,7 +129,7 @@ const Register: React.FC = () => {
             />
             <h2 className="text-3xl font-bold text-gray-900">Criar conta</h2>
             <p className="mt-2 text-sm text-gray-600">
-              Gerencie suas finanças de forma inteligente
+              Gerencie suas financas de forma inteligente
             </p>
           </div>
 
@@ -221,10 +221,10 @@ const Register: React.FC = () => {
                   }}
                   preferredCountries={['br', 'us', 'pt']}
                   enableSearch={true}
-                  searchPlaceholder="Buscar país..."
+                  searchPlaceholder="Buscar pais..."
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Digite 11 dígitos: DDD + número (ex: (11) 987654321)
+                  Digite 11 digitos: DDD + numero (ex: (11) 987654321)
                 </p>
               </div>
 
@@ -245,7 +245,7 @@ const Register: React.FC = () => {
                     value={formData.senha}
                     onChange={handleChange}
                     className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder="Minimo 6 caracteres"
                   />
                   <button
                     type="button"
@@ -311,7 +311,7 @@ const Register: React.FC = () => {
 
             <div className="flex items-center justify-center">
               <div className="text-sm text-center">
-                <span className="text-gray-600">Já tem uma conta? </span>
+                <span className="text-gray-600">Ja tem uma conta? </span>
                 <button
                   type="button"
                   onClick={() => navigate('/login')}
@@ -325,15 +325,15 @@ const Register: React.FC = () => {
         </div>
       </div>
 
-      {/* ==== LADO DIREITO (INFORMAÇÕES) ==== */}
+      {/* ==== LADO DIREITO (INFORMACOES) ==== */}
       <div className="hidden md:flex w-full md:w-1/2 flex-col justify-center text-white px-12 bg-gradient-to-br from-emerald-900 via-emerald-700 to-green-600">
         <div className="max-w-lg mx-auto space-y-5">
           <h2 className="text-4xl font-bold leading-snug">
-            Controle total das suas finanças
+            Controle total das suas financas
           </h2>
           <p className="text-green-100 text-base">
-            O GranaIA oferece todas as ferramentas que você precisa para
-            gerenciar suas finanças de forma simples e eficiente.
+            O GranaIA oferece todas as ferramentas que vocee precisa para
+            gerenciar suas financas de forma simples e eficiente.
           </p>
 
           <ul className="space-y-4 text-sm">
@@ -367,7 +367,7 @@ const Register: React.FC = () => {
                   d="M5 13l4 4L19 7"
                 />
               </svg>
-              <span>Visualize relatórios detalhados em tempo real</span>
+              <span>Visualize relatorios detalhados em tempo real</span>
             </li>
             <li className="flex items-start gap-3">
               <svg
@@ -383,7 +383,7 @@ const Register: React.FC = () => {
                   d="M5 13l4 4L19 7"
                 />
               </svg>
-              <span>Receba insights e análises automáticas</span>
+              <span>Receba insights e analises automaticas</span>
             </li>
             <li className="flex items-start gap-3">
               <svg
@@ -406,11 +406,11 @@ const Register: React.FC = () => {
           <div className="mt-6 border border-green-300 rounded-lg p-4 text-green-50 text-sm flex items-center justify-center text-center">
             <ShieldCheckIcon className="w-5 h-5 mr-2" />
             <span>
-              Seus dados estão protegidos com criptografia de nível bancário
+              Seus dados estao protegidos com criptografia de nivel bancario
             </span>
           </div>
 
-          {/* Botão Voltar / Ver Planos */}
+          {/* Botao Voltar / Ver Planos */}
           <div className="mt-6 flex justify-center">
             <button
               onClick={() => navigate('/')}

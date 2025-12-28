@@ -66,7 +66,7 @@ export default function TabelaTransacoes({
     }
   };
 
-  // Ordenar transações
+  // Ordenar transacoes
   const transacoesOrdenadas = [...transacoesFiltradas].sort((a, b) => {
     if (ordenacao.campo === 'data') {
       const dataA = new Date(a.data).getTime();
@@ -79,7 +79,7 @@ export default function TabelaTransacoes({
     }
   });
 
-  // Paginação
+  // Paginacao
   const totalPaginas = Math.ceil(transacoesOrdenadas.length / itensPorPagina);
   const indiceInicial = (paginaAtual - 1) * itensPorPagina;
   const transacoesPaginadas = transacoesOrdenadas.slice(
@@ -105,7 +105,7 @@ export default function TabelaTransacoes({
                     <ArrowDownIcon className="inline w-4 h-4" />
                   ))}
               </th>
-              <th className="py-3 px-4 text-left">Descrição</th>
+              <th className="py-3 px-4 text-left">Descricao</th>
               <th className="py-3 px-4 text-left">Categoria</th>
               <th
                 className="py-3 px-4 text-left cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
@@ -120,7 +120,7 @@ export default function TabelaTransacoes({
                   ))}
               </th>
               <th className="py-3 px-4 text-right">Valor</th>
-              <th className="py-3 px-4 text-center">Ações</th>
+              <th className="py-3 px-4 text-center">Acoes</th>
             </tr>
           </thead>
           <tbody>
@@ -128,11 +128,11 @@ export default function TabelaTransacoes({
               <tr>
                 <td colSpan={6} className="py-12">
                   <EmptyState
-                    title="Nenhuma transação encontrada"
+                    title="Nenhuma transacao encontrada"
                     message={
                       pesquisaDescricao
-                        ? `Não encontramos transações com "${pesquisaDescricao}". Tente ajustar sua pesquisa ou filtros.`
-                        : 'Não há transações para os filtros selecionados. Tente ajustar os filtros ou adicionar novas transações.'
+                        ? `Nao encontramos transacoes com "${pesquisaDescricao}". Tente ajustar sua pesquisa ou filtros.`
+                        : 'Nao h transacoes para os filtros selecionados. Tente ajustar os filtros ou adicionar novas transacoes.'
                     }
                     icon={
                       <svg
@@ -195,7 +195,7 @@ export default function TabelaTransacoes({
                     {t.tipo === 'Gasto Futuro' ? (
                       <div className="flex items-center justify-center">
                         <span className="text-xs text-gray-500 dark:text-gray-400 italic">
-                          Gerenciar em Cartões
+                          Gerenciar em Cartoes
                         </span>
                       </div>
                     ) : (
@@ -239,19 +239,19 @@ export default function TabelaTransacoes({
         </table>
       </div>
 
-      {/* ===== PAGINAÇÃO ===== */}
+      {/* ===== PAGINACAO ===== */}
       {totalPaginas > 1 && (
         <div className="flex justify-between items-center mt-4 text-sm text-gray-700 dark:text-gray-300">
-          {/* Texto "mostrando X–Y" */}
+          {/* Texto "mostrando XY" */}
           <span>
-            Mostrando {indiceInicial + 1}–
+            Mostrando {indiceInicial + 1}
             {Math.min(indiceInicial + itensPorPagina, transacoesOrdenadas.length)}{' '}
             de {transacoesOrdenadas.length}
           </span>
 
-          {/* Botões */}
+          {/* Botoes */}
           <div className="flex gap-2">
-            {/* Botão Anterior */}
+            {/* Botao Anterior */}
             <button
               onClick={() => setPaginaAtual((prev) => Math.max(prev - 1, 1))}
               disabled={paginaAtual === 1}
@@ -260,7 +260,7 @@ export default function TabelaTransacoes({
               Anterior
             </button>
 
-            {/* Botões numerados */}
+            {/* Botoes numerados */}
             {Array.from({ length: totalPaginas }, (_, i) => (
               <button
                 key={i}
@@ -275,7 +275,7 @@ export default function TabelaTransacoes({
               </button>
             ))}
 
-            {/* Botão Próximo */}
+            {/* Botao Proximo */}
             <button
               onClick={() =>
                 setPaginaAtual((prev) => Math.min(prev + 1, totalPaginas))
@@ -283,7 +283,7 @@ export default function TabelaTransacoes({
               disabled={paginaAtual === totalPaginas}
               className="px-3 py-1 border rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:text-gray-400 dark:disabled:text-gray-500 transition"
             >
-              Próximo
+              Proximo
             </button>
           </div>
         </div>

@@ -75,7 +75,7 @@ const HistoricoParcelasPagas: React.FC<HistoricoParcelasPagasProps> = ({
     return mesAnoPagamento === filtroMes;
   });
 
-  // Aplicar ordenação
+  // Aplicar ordenacao
   const parcelasOrdenadas = [...parcelasFiltradas].sort((a, b) => {
     switch (ordenacao) {
       case 'data_desc':
@@ -97,7 +97,7 @@ const HistoricoParcelasPagas: React.FC<HistoricoParcelasPagasProps> = ({
     }
   });
 
-  // Obter lista de meses disponíveis
+  // Obter lista de meses disponiveis
   const mesesDisponiveis = Array.from(
     new Set(
       parcelasPagas.map((p) => {
@@ -116,7 +116,7 @@ const HistoricoParcelasPagas: React.FC<HistoricoParcelasPagasProps> = ({
     0
   );
 
-  // Agrupar por mês para exibição
+  // Agrupar por mes para exibicao
   const parcelasPorMes = parcelasOrdenadas.reduce((acc, parcela) => {
     const mesAno = formatarMesAno(parcela.data_pagamento!);
     if (!acc[mesAno]) {
@@ -128,17 +128,17 @@ const HistoricoParcelasPagas: React.FC<HistoricoParcelasPagasProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Cabeçalho */}
+      {/* Cabecalho */}
       <div className="flex items-center gap-3">
         <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
           <CheckCircleIcon className="w-6 h-6 text-green-600 dark:text-green-400" />
         </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Histórico de Parcelas Pagas
+            Historico de Parcelas Pagas
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Confira todas as parcelas que já foram pagas
+            Confira todas as parcelas que ja foram pagas
           </p>
         </div>
       </div>
@@ -149,7 +149,7 @@ const HistoricoParcelasPagas: React.FC<HistoricoParcelasPagasProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h3 className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                Total Pago {filtroMes !== 'todos' ? 'no Período' : 'Geral'}
+                Total Pago {filtroMes !== 'todos' ? 'no Periodo' : 'Geral'}
               </h3>
               <p className="text-3xl font-bold text-green-700 dark:text-green-400">
                 {formatarMoeda(totalPago)}
@@ -167,14 +167,14 @@ const HistoricoParcelasPagas: React.FC<HistoricoParcelasPagasProps> = ({
         </div>
       )}
 
-      {/* Filtros e Ordenação */}
+      {/* Filtros e Ordenacao */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-100 dark:border-gray-700">
         <div className="flex flex-col md:flex-row gap-4">
-          {/* Filtro por Mês */}
+          {/* Filtro por Mes */}
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <FunnelIcon className="w-4 h-4 inline mr-1" />
-              Filtrar por Mês
+              Filtrar por Mes
             </label>
             <select
               value={filtroMes}
@@ -197,7 +197,7 @@ const HistoricoParcelasPagas: React.FC<HistoricoParcelasPagasProps> = ({
             </select>
           </div>
 
-          {/* Ordenação */}
+          {/* Ordenacao */}
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <CalendarIcon className="w-4 h-4 inline mr-1" />
@@ -215,7 +215,7 @@ const HistoricoParcelasPagas: React.FC<HistoricoParcelasPagasProps> = ({
             </select>
           </div>
 
-          {/* Botão Limpar Filtros */}
+          {/* Botao Limpar Filtros */}
           {filtroMes !== 'todos' && (
             <div className="flex items-end">
               <button
@@ -238,7 +238,7 @@ const HistoricoParcelasPagas: React.FC<HistoricoParcelasPagasProps> = ({
             Nenhuma parcela paga ainda
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            Quando você marcar parcelas como pagas, elas aparecerão aqui.
+            Quando vocee marcar parcelas como pagas, elas aparecerao aqui.
           </p>
         </div>
       ) : parcelasOrdenadas.length === 0 ? (
@@ -248,7 +248,7 @@ const HistoricoParcelasPagas: React.FC<HistoricoParcelasPagasProps> = ({
             Nenhuma parcela encontrada
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Não há parcelas pagas no período selecionado.
+            Nao ha parcelas pagas no periodo selecionado.
           </p>
           <button
             onClick={() => setFiltroMes('todos')}
@@ -267,7 +267,7 @@ const HistoricoParcelasPagas: React.FC<HistoricoParcelasPagasProps> = ({
 
             return (
               <div key={mesAno} className="space-y-3">
-                {/* Cabeçalho do Mês */}
+                {/* Cabecalho do Mes */}
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                     {mesAno}
@@ -282,7 +282,7 @@ const HistoricoParcelasPagas: React.FC<HistoricoParcelasPagasProps> = ({
                   </div>
                 </div>
 
-                {/* Lista de Parcelas do Mês */}
+                {/* Lista de Parcelas do Mes */}
                 <div className="space-y-2">
                   {parcelas.map((parcela) => (
                     <div
@@ -301,11 +301,11 @@ const HistoricoParcelasPagas: React.FC<HistoricoParcelasPagasProps> = ({
                             <span>
                               Parcela {parcela.numero_parcela}/{parcela.total_parcelas}
                             </span>
-                            <span>•</span>
+                            <span></span>
                             <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded text-xs">
                               {parcela.gastoCategoria}
                             </span>
-                            <span>•</span>
+                            <span></span>
                             <span>Pago em {formatarData(parcela.data_pagamento!)}</span>
                           </div>
                         </div>

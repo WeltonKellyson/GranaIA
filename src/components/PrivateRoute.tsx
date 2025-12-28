@@ -9,7 +9,7 @@ interface PrivateRouteProps {
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
-  // Mostra um loading enquanto verifica a autenticação
+  // Mostra um loading enquanto verifica a autenticacao
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -21,7 +21,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
     );
   }
 
-  // Se não estiver autenticado, redireciona para o login
+  // Se nao estiver autenticado, redireciona para o login
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }

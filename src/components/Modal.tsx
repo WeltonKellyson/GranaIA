@@ -10,7 +10,11 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md' }) => {
-  useEffect(() => {
+    useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    const previousOverflowX = document.body.style.overflowX;
+    const previousOverflowY = document.body.style.overflowY;
+
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();
@@ -24,7 +28,9 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = previousOverflow;
+      document.body.style.overflowX = previousOverflowX;
+      document.body.style.overflowY = previousOverflowY;
     };
   }, [isOpen, onClose]);
 

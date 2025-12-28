@@ -30,7 +30,7 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
     observacoes: gastoFuturo?.observacoes || '',
   });
 
-  // Formatar valor para exibição
+  // Formatar valor para exibicao
   const formatarValorDisplay = (valor: number): string => {
     if (valor === 0) return '';
     const valorStr = valor.toFixed(2).replace('.', ',');
@@ -39,7 +39,7 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
     return `${inteiroFormatado},${decimal}`;
   };
 
-  // Carregar cartões de crédito
+  // Carregar cartoes de credito
   useEffect(() => {
     const loadCartoes = async () => {
       try {
@@ -47,7 +47,7 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
         const response = await apiService.getCartoesCredito({ ativo: true, page_size: 100 });
         setCartoes(response.data || []);
       } catch (error) {
-        console.error('Erro ao carregar cartões:', error);
+        console.error('Erro ao carregar cartoes:', error);
       } finally {
         setLoadingCartoes(false);
       }
@@ -78,7 +78,7 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
     }
   }, [gastoFuturo]);
 
-  // Calcula valor da parcela automaticamente quando muda valor total ou número de parcelas
+  // Calcula valor da parcela automaticamente quando muda valor total ou numero de parcelas
   useEffect(() => {
     if (formData.numero_parcelas > 1 && formData.valor_total > 0) {
       const valorParcela = formData.valor_total / formData.numero_parcelas;
@@ -118,16 +118,16 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
   const handleValorTotalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let input = e.target.value;
 
-    // Remove tudo exceto números e vírgula
+    // Remove tudo exceto numeros e virgula
     input = input.replace(/[^\d,]/g, '');
 
-    // Garante apenas uma vírgula
+    // Garante apenas uma virgula
     const parts = input.split(',');
     if (parts.length > 2) {
       input = parts[0] + ',' + parts.slice(1).join('');
     }
 
-    // Limita a 2 casas decimais após a vírgula
+    // Limita a 2 casas decimais apos a virgula
     if (parts.length === 2 && parts[1].length > 2) {
       input = parts[0] + ',' + parts[1].slice(0, 2);
     }
@@ -141,7 +141,7 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
 
     setValorTotalDisplay(input);
 
-    // Converte para número para salvar no formData
+    // Converte para numero para salvar no formData
     const valorNumerico = parseFloat(
       input.replace(/\./g, '').replace(',', '.')
     ) || 0;
@@ -156,19 +156,19 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validações
+    // Validacoes
     if (!formData.descricao || formData.descricao.trim().length === 0) {
-      setError('Por favor, informe uma descrição válida');
+      setError('Por favor, informe uma descricao valida');
       return;
     }
 
     if (formData.descricao.trim().length < 3) {
-      setError('A descrição deve ter pelo menos 3 caracteres');
+      setError('A descricao deve ter pelo menos 3 caracteres');
       return;
     }
 
     if (formData.descricao.trim().length > 500) {
-      setError('A descrição deve ter no máximo 500 caracteres');
+      setError('A descricao deve ter no maximo 500 caracteres');
       return;
     }
 
@@ -178,7 +178,7 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
     }
 
     if (formData.valor_total > 999999999) {
-      setError('O valor é muito alto. Máximo permitido: R$ 999.999.999,00');
+      setError('O valor e muito alto. Maximo permitido: R$ 999.999.999,00');
       return;
     }
 
@@ -187,19 +187,19 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
       return;
     }
 
-    // Validação: cartão OU data de vencimento deve ser fornecido
+    // Validacao: cartao OU data de vencimento deve ser fornecido
     if (!formData.cartao_credito_id && !formData.data_vencimento) {
-      setError('Por favor, selecione um cartão de crédito OU informe a data de vencimento manualmente');
+      setError('Por favor, selecione um cartao de credito OU informe a data de vencimento manualmente');
       return;
     }
 
     if (formData.numero_parcelas < 1) {
-      setError('O número de parcelas deve ser maior que zero');
+      setError('O numero de parcelas deve ser maior que zero');
       return;
     }
 
     if (formData.numero_parcelas > 100) {
-      setError('O número de parcelas não pode ser maior que 100');
+      setError('O numero de parcelas nao pode ser maior que 100');
       return;
     }
 
@@ -246,18 +246,18 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
 
       if (err.response) {
         if (err.response.status === 401) {
-          errorMessage = 'Sessão expirada. Por favor, faça login novamente.';
+          errorMessage = 'Sessao expirada. Por favor, faca login novamente.';
         } else if (err.response.status === 403) {
-          errorMessage = 'Você não tem permissão para realizar esta ação. É necessário ter o premium ativo.';
+          errorMessage = 'Voce nao tem permissao para realizar esta acao. E necessario ter o premium ativo.';
         } else if (err.response.status === 404) {
-          errorMessage = 'Gasto futuro não encontrado.';
+          errorMessage = 'Gasto futuro nao encontrado.';
         } else if (err.response.status === 500) {
           errorMessage = 'Erro no servidor. Tente novamente mais tarde.';
         } else if (err.response.data?.message) {
           errorMessage = err.response.data.message;
         }
       } else if (err.request) {
-        errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
+        errorMessage = 'Erro de conexao. Verifique sua internet e tente novamente.';
       } else if (err.message) {
         errorMessage = err.message;
       }
@@ -269,11 +269,11 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
   };
 
   const categorias = [
-    'Alimentação',
+    'Alimentacao',
     'Transporte',
     'Moradia',
-    'Saúde',
-    'Educação',
+    'Saude',
+    'Educacao',
     'Lazer',
     'Compras',
     'Viagem',
@@ -303,10 +303,10 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
         </div>
       )}
 
-      {/* Descrição */}
+      {/* Descricao */}
       <div>
         <label htmlFor="descricao" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Descrição <span className="text-red-500 dark:text-red-400">*</span>
+          Descricao <span className="text-red-500 dark:text-red-400">*</span>
         </label>
         <input
           type="text"
@@ -315,7 +315,7 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
           value={formData.descricao}
           onChange={handleChange}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 dark:placeholder-gray-500"
-          placeholder="Ex: Compra no cartão de crédito"
+          placeholder="Ex: Compra no cartao de credito"
           required
         />
       </div>
@@ -359,15 +359,15 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
         </select>
       </div>
 
-      {/* Cartão de Crédito */}
+      {/* Cartao de Credito */}
       <div>
         <label htmlFor="cartao_credito_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           <CreditCardIcon className="w-4 h-4 inline mr-1" />
-          Cartão de Crédito
+          Cartao de Credito
         </label>
         {loadingCartoes ? (
           <div className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg">
-            Carregando cartões...
+            Carregando cartoes...
           </div>
         ) : (
           <>
@@ -392,22 +392,22 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
                 className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
               >
                 <PlusIcon className="w-4 h-4" />
-                Gerenciar meus cartões
+                Gerenciar meus cartoes
               </button>
             )}
           </>
         )}
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
           {formData.cartao_credito_id
-            ? 'A data de vencimento será calculada automaticamente baseada no cartão selecionado'
-            : 'Se não selecionar um cartão, você deve informar a data de vencimento manualmente abaixo'}
+            ? 'A data de vencimento sera calculada automaticamente baseada no cartao selecionado'
+            : 'Se nao selecionar um cartao, vocee deve informar a data de vencimento manualmente abaixo'}
         </p>
       </div>
 
-      {/* Número de Parcelas */}
+      {/* Numero de Parcelas */}
       <div>
         <label htmlFor="numero_parcelas" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Número de Parcelas
+          Numero de Parcelas
         </label>
         <input
           type="number"
@@ -420,7 +420,7 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          1 = à vista, 2 ou mais = parcelado
+          1 = a vista, 2 ou mais = parcelado
         </p>
       </div>
 
@@ -438,15 +438,15 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg cursor-not-allowed"
           />
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Calculado automaticamente: {formatarValorDisplay(formData.valor_total)} ÷ {formData.numero_parcelas}
+            Calculado automaticamente: {formatarValorDisplay(formData.valor_total)}  {formData.numero_parcelas}
           </p>
         </div>
       )}
 
-      {/* Método de Pagamento */}
+      {/* Metodo de Pagamento */}
       <div>
         <label htmlFor="metodo_pagamento" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Método de Pagamento
+          Metodo de Pagamento
         </label>
         <select
           id="metodo_pagamento"
@@ -458,13 +458,13 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
             formData.numero_parcelas > 1 ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : ''
           }`}
         >
-          <option value="credito">Crédito</option>
-          <option value="debito_futuro">Débito Futuro</option>
+          <option value="credito">Credito</option>
+          <option value="debito_futuro">Debito Futuro</option>
           <option value="parcelado">Parcelado</option>
         </select>
         {formData.numero_parcelas > 1 && (
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Automaticamente definido como "Parcelado" quando há mais de 1 parcela
+            Automaticamente definido como "Parcelado" quando ha mais de 1 parcela
           </p>
         )}
       </div>
@@ -501,16 +501,16 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
           />
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             {formData.numero_parcelas > 1
-              ? 'Data de vencimento da primeira parcela. As demais serão criadas automaticamente mês a mês.'
+              ? 'Data de vencimento da primeira parcela. As demais serao criadas automaticamente mes a mes.'
               : 'Data em que o pagamento vence'}
           </p>
         </div>
       )}
 
-      {/* Observações */}
+      {/* Observacoes */}
       <div>
         <label htmlFor="observacoes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Observações
+          Observacoes
         </label>
         <textarea
           id="observacoes"
@@ -520,22 +520,22 @@ const FormGastoFuturo: React.FC<FormGastoFuturoProps> = ({ gastoFuturo, onSucces
           rows={3}
           maxLength={1000}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 dark:placeholder-gray-500 resize-none"
-          placeholder="Informações adicionais sobre esta compra..."
+          placeholder="Informacoes adicionais sobre esta compra..."
         />
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
           {formData.observacoes.length}/1000 caracteres
         </p>
       </div>
 
-      {/* Informação sobre impacto no saldo */}
+      {/* Informacao sobre impacto no saldo */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 dark:border-blue-400 text-blue-700 dark:text-blue-300 px-4 py-3 rounded-lg text-sm">
-        <p className="font-medium">ℹ️ Importante</p>
+        <p className="font-medium">i Importante</p>
         <p className="text-xs mt-1">
-          Este gasto futuro <strong>não irá impactar seu saldo imediatamente</strong>. Apenas quando você marcá-lo como pago é que será criado um gasto normal que reduzirá seu saldo.
+          Este gasto futuro <strong>nao ira impactar seu saldo imediatamente</strong>. Apenas quando vocee marca-lo como pago e que sera criado um gasto normal que reduzira seu saldo.
         </p>
       </div>
 
-      {/* Botões */}
+      {/* Botoes */}
       <div className="flex gap-3 pt-4">
         <button
           type="button"

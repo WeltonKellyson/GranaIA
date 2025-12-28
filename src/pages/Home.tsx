@@ -14,39 +14,39 @@ export default function Home() {
 
   const faqs = [
     {
-      question: 'Preciso entender de finanças para usar?',
+      question: 'Preciso entender de financas para usar?',
       answer:
-        "Não! O GranaIA foi criado para ser simples. Basta falar ou digitar no WhatsApp como você já faz todos os dias. Por exemplo: 'Recebi 500 da cliente Maria' ou envie um áudio dizendo 'Paguei 150 de luz hoje'.",
+        "Nao! O GranaIA foi criado para ser simples. Basta falar ou digitar no WhatsApp como voce ja faz todos os dias. Por exemplo: 'Recebi 500 da cliente Maria' ou envie um Audio dizendo 'Paguei 150 de luz hoje'.",
     },
     {
-      question: 'E se eu não gostar?',
+      question: 'E se eu nao gostar?',
       answer:
-        'Sem problemas! Você pode testar gratuitamente por 7 dias e cancelar quando quiser, sem taxas e sem compromisso.',
+        'Sem problemas! Voce pode testar gratuitamente por 7 dias e cancelar quando quiser, sem taxas e sem compromisso.',
     },
     {
       question: 'Funciona no celular?',
       answer:
-        'Sim! Todo o controle é feito diretamente pelo WhatsApp, sem precisar baixar aplicativos adicionais.',
+        'Sim! Todo o controle e feito diretamente pelo WhatsApp, sem precisar baixar aplicativos adicionais.',
     },
     {
       question: 'Meus dados ficam seguros?',
       answer:
-        'Sim. Utilizamos criptografia AES-256 — o mesmo padrão usado por bancos — para garantir a segurança das suas informações.',
+        'Sim. Utilizamos criptografia AES-256 - o mesmo padrao usado por bancos - para garantir a seguranca das suas informacoes.',
     },
     {
-      question: 'Como faço para registrar uma transação?',
+      question: 'Como faco para registrar uma transacao?',
       answer:
-        "Basta enviar uma mensagem ou áudio com o valor e descrição, como 'Paguei 300 de aluguel'. O sistema entende e registra automaticamente.",
+        "Basta enviar uma mensagem ou Audio com o valor e descricao, como 'Paguei 300 de aluguel'. O sistema entende e registra automaticamente.",
     },
     {
       question: 'Posso consultar meu saldo a qualquer hora?',
       answer:
-        "Pode sim! É só perguntar no WhatsApp: 'Qual meu saldo?' que o GranaIA responde instantaneamente com suas finanças atualizadas.",
+        "Pode sim! E so perguntar no WhatsApp: 'Qual meu saldo?' que o GranaIA responde instantaneamente com suas financas atualizadas.",
     },
     {
       question: 'E se eu precisar de ajuda?',
       answer:
-        'Nosso suporte está disponível 24 horas por dia via WhatsApp, sempre pronto para te ajudar.',
+        'Nosso suporte esta disponivel 24 horas por dia via WhatsApp, sempre pronto para te ajudar.',
     },
   ];
 
@@ -93,12 +93,12 @@ export default function Home() {
 
   const { ref: statsRef, inView: statsInView } = useInView({
     triggerOnce: true,
-    threshold: 0.3, // dispara quando 30% da seção estiver visível
+    threshold: 0.3, // dispara quando 30% da secao estiver visvel
   });
 
   useEffect(() => {
     if (statsInView) {
-      // ====== Contador de satisfação ======
+      // ====== Contador de satisfacao ======
       let start = 0;
       const endSatisfaction = 98;
       const duration = 1500;
@@ -122,7 +122,7 @@ export default function Home() {
         if (start2 >= endSetup) clearInterval(timer2);
       }, stepTime2);
 
-      // ====== Digitação do 24/7 ======
+      // ====== Digitacao do 24/7 ======
       setTyped247("");
       let index = 0;
       const typeInterval = setInterval(() => {
@@ -145,7 +145,7 @@ export default function Home() {
 
   return (
     <div className="relative bg-[#fafaf7] text-gray-900 scroll-smooth overflow-x-hidden">
-      {/* ===== BOTÃO LOGIN FIXO ===== */}
+      {/* ===== BOTAO LOGIN FIXO ===== */}
       <button
         onClick={() => navigate('/login')}
         className="fixed top-6 right-8 bg-white border border-gray-200 shadow-md text-gray-700 px-5 py-2 rounded-lg font-medium hover:bg-gray-50 hover:shadow-lg transition-all duration-300 z-50"
@@ -153,7 +153,7 @@ export default function Home() {
         Login
       </button>
 
-      {/* ===== SEÇÂO 1 ===== */}
+      {/* ===== SECAO 1 ===== */}
       <section className="min-h-screen flex flex-col items-center justify-center text-center space-y-8 max-w-3xl mx-auto px-6 md:px-12">
         {/* Logo */}
        <img
@@ -162,7 +162,7 @@ export default function Home() {
         className="w-72 md:w-96 mx-auto mb-2 animate-float"
       />
 
-        {/* Título principal */}
+        {/* Titulo principal */}
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-gray-900 text-center">
           Controle seu financeiro <br />
           <span className="text-green-600">
@@ -172,7 +172,7 @@ export default function Home() {
               <span className="border-r-2 border-green-600 ml-1 animate-pulse"></span>
             </span>
 
-            {/* Versão mobile/tablet com quebra antes do typedText */}
+            {/* Versao mobile/tablet com quebra antes do typedText */}
             <span className="block md:hidden">
               direto do <br />
               {typedText}
@@ -181,18 +181,18 @@ export default function Home() {
           </span>
         </h1>
 
-        {/* Subtítulo em destaque */}
+        {/* Subtitulo em destaque */}
         <p className="text-xl md:text-2xl font-bold text-gray-900">
-          Simples, rápido e sem planilhas.
+          Simples, rapido e sem planilhas.
         </p>
 
         {/* Texto descritivo */}
         <p className="text-gray-600 max-w-2xl">
-          No <span className="font-semibold text-gray-800">GranaIA</span>, você
+          No <span className="font-semibold text-gray-800">GranaIA</span>, voce
           registra receitas, despesas, contas a pagar e a receber por texto, imagem ou
-          áudio e consulta sua saúde financeira direto pelo WhatsApp.{' '}
+          Audio e consulta sua saude financeira direto pelo WhatsApp.{' '}
           <span className="text-green-600 font-semibold">
-            Planos a partir de R$5,99/mês.
+            Planos a partir de R$5,99/mes.
           </span>
         </p>
 
@@ -209,7 +209,7 @@ export default function Home() {
                       text-white px-10 py-4 rounded-xl font-semibold 
                       shadow-md hover:shadow-lg"
           >
-            Teste grátis GranaIA Starter por 7 dias
+            Teste gratis GranaIA Starter por 7 dias
           </button>
         </div>
 
@@ -218,16 +218,16 @@ export default function Home() {
           <div className="flex items-center gap-2 flex-shrink-0">
             <img
               src="https://img.icons8.com/?size=100&id=2862&format=png&color=25D366"
-              alt="Cadeado de segurança"
+              alt="Cadeado de seguranca"
               className="w-5 h-5"
             />
-            <p>Segurança bancária AES-256</p>
+            <p>Seguranca bancaria AES-256</p>
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
             <img
               src="https://img.icons8.com/?size=100&id=964RahB4l606&format=png&color=25D366"
-              alt="Ícone do WhatsApp"
+              alt="Icone do WhatsApp"
               className="w-5 h-5"
             />
             <p>100% pelo WhatsApp</p>
@@ -236,15 +236,15 @@ export default function Home() {
           <div className="flex items-center gap-2 flex-shrink-0">
             <img
               src="https://img.icons8.com/?size=100&id=53420&format=png&color=25D366"
-              alt="Ícone de Configuração"
+              alt="Icone de Configuracao"
               className="w-5 h-5"
             />
-            <p>Configuração em 2 minutos</p>
+            <p>Configuracao em 2 minutos</p>
           </div>
         </div>
       </section>
 
-      {/* ===== SEÇÃO 2 - COMO FUNCIONA ===== */}
+      {/* ===== SECAO 2 - COMO FUNCIONA ===== */}
       <section id="funcionalidades" className="min-h-screen bg-white flex flex-col md:flex-row items-center justify-center px-8 md:px-16 lg:px-24 gap-12 py-20">
         {/* Texto (lado esquerdo) */}
         <div className="flex-1 text-center md:text-left space-y-8 max-w-xl">
@@ -258,29 +258,29 @@ export default function Home() {
             <span>Como funciona</span>
           </div>
 
-          {/* Título */}
+          {/* Titulo */}
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight">
-            Controle financeiro tão fácil quanto{' '}
+            Controle financeiro tao facil quanto{' '}
             <span className="text-green-600">enviar uma mensagem</span>
           </h2>
 
-          {/* Subtítulo */}
+          {/* Subtitulo */}
           <p className="text-gray-600 text-lg">
             Lance suas despesas, receitas e contas usando voz, imagem ou texto pelo
             WhatsApp. O GranaIA processa tudo automaticamente e organiza suas
-            finanças em segundos.
+            financas em segundos.
           </p>
 
           {/* Itens explicativos */}
           <div className="flex flex-col gap-6 mt-6">
             {[
               {
-                title: "Áudio, imagem ou texto, você escolhe",
-                desc: "Registre transações do jeito mais rápido e prático para você.",
+                title: "Audio, imagem ou texto, voce escolhe",
+                desc: "Registre transacoes do jeito mais rapido e pratico para voce.",
               },
               {
-                title: "Confirmação instantânea",
-                desc: "Receba feedback automático de cada lançamento em segundos.",
+                title: "Confirmacao instantnea",
+                desc: "Receba feedback automatico de cada lancamento em segundos.",
               },
               {
                 title: "Contas a pagar e receber",
@@ -327,7 +327,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== SEÇÃO 3 - ANÁLISES INTELIGENTES / DASHBOARD ===== */}
+      {/* ===== SECAO 3 - ANALISES INTELIGENTES / DASHBOARD ===== */}
       <section className="min-h-screen bg-white flex flex-col md:flex-row items-center justify-center px-8 md:px-16 lg:px-24 gap-12">
         {/* Imagem da Dash (lado esquerdo) */}
         <div className="flex-1 flex justify-center">
@@ -344,20 +344,20 @@ export default function Home() {
           <div className="inline-flex items-center gap-2 bg-green-50 text-green-600 px-4 py-1 rounded-full text-sm font-medium shadow-sm">
             <img
               src="https://img.icons8.com/?size=100&id=ALrL90O362w9&format=png&color=25D366"
-              alt="Ícone de Análises"
+              alt="Icone de Analises"
               className="w-4 h-4"
             />
-            <span>Análises Inteligentes</span>
+            <span>Analises Inteligentes</span>
           </div>
 
-          {/* Título e subtítulo */}
+          {/* Titulo e subtitulo */}
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight">
-            Acompanhe suas finanças{' '}
+            Acompanhe suas financas{' '}
             <span className="text-green-600">em tempo real</span>
           </h2>
           <p className="text-gray-600 text-lg">
-            Acesse relatórios completos, gráficos intuitivos e análises
-            detalhadas do seu fluxo de caixa — tudo organizado e sempre
+            Acesse relatorios completos, graficos intuitivos e analises
+            detalhadas do seu fluxo de caixa - tudo organizado e sempre
             atualizado.
           </p>
 
@@ -366,17 +366,17 @@ export default function Home() {
             {[
               {
                 title: "Fluxo de caixa detalhado",
-                desc: "Visualize entradas, saídas e saldo em tempo real.",
+                desc: "Visualize entradas, saidas e saldo em tempo real.",
                 delay: 0.2,
               },
               {
-                title: "Categorização automática",
-                desc: "Entenda para onde seu dinheiro está indo.",
+                title: "Categorizacao automtica",
+                desc: "Entenda para onde seu dinheiro esta indo.",
                 delay: 0.4,
               },
               {
-                title: "Relatórios profissionais",
-                desc: "Dados prontos para tomada de decisão e apresentações.",
+                title: "Relatorios profissionais",
+                desc: "Dados prontos para tomada de decisao e apresentacoes.",
                 delay: 0.6,
               },
             ].map((item, index) => {
@@ -413,44 +413,44 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== SEÇÃO 4 - BENEFÍCIOS PRINCIPAIS ===== */}
+      {/* ===== SECAO 4 - BENEFICIOS PRINCIPAIS ===== */}
       <section id="beneficios" className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-8 md:px-16 lg:px-24 py-20">
-        {/* Título e subtítulo */}
+        {/* Titulo e subtitulo */}
         <div className="text-center mb-16 max-w-3xl">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight">
             Por que escolher o <span className="text-green-600">GranaIA?</span>
           </h2>
           <p className="text-gray-600 mt-4 text-lg">
-            Simplifique sua gestão financeira com a tecnologia que já está no
+            Simplifique sua gestao financeira com a tecnologia que ja esta no
             seu bolso.
           </p>
         </div>
 
-        {/* Cards de Benefícios */}
+        {/* Cards de Beneficios */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl w-full">
           {[
             {
               icon: "https://img.icons8.com/?size=100&id=8XhS2MrAHUXV&format=png&color=25D366",
               title: "Registro por voz, imagem ou texto no WhatsApp",
-              desc: "Lance transações em segundos — incluindo contas a pagar e receber.",
+              desc: "Lance transacoes em segundos  incluindo contas a pagar e receber.",
               delay: 0.2,
             },
             {
               icon: "https://img.icons8.com/?size=100&id=ALrL90O362w9&format=png&color=25D366",
               title: "Fluxo de caixa no bolso",
-              desc: "Consulte saldo, entradas e saídas direto pelo WhatsApp, sem abrir planilhas.",
+              desc: "Consulte saldo, entradas e saidas direto pelo WhatsApp, sem abrir planilhas.",
               delay: 0.4,
             },
             {
               icon: "https://img.icons8.com/?size=100&id=16421&format=png&color=25D366",
               title: "Mais tempo para vender e crescer",
-              desc: "Elimine tarefas manuais e foque no crescimento do seu negócio.",
+              desc: "Elimine tarefas manuais e foque no crescimento do seu negocio.",
               delay: 0.6,
             },
             {
               icon: "https://img.icons8.com/?size=100&id=2862&format=png&color=25D366",
-              title: "Segurança bancária",
-              desc: "Criptografia AES-256 garante a proteção dos seus dados financeiros.",
+              title: "Seguranca bancaria",
+              desc: "Criptografia AES-256 garante a protecao dos seus dados financeiros.",
               delay: 0.8,
             },
           ].map((item, index) => {
@@ -482,11 +482,11 @@ export default function Home() {
           })}
         </div>
 
-        {/* CTA Secundário */}
+        {/* CTA Secundrio */}
         <div className="mt-16 text-center">
           <p className="text-gray-700 text-lg mb-4">
             Planos a partir de{' '}
-            <span className="text-green-600 font-semibold">R$5,99/mês</span>
+            <span className="text-green-600 font-semibold">R$5,99/mes</span>
           </p>
           <button
             onClick={() =>
@@ -499,21 +499,21 @@ export default function Home() {
               text-white px-10 py-4 rounded-xl font-semibold 
               shadow-md hover:shadow-lg"
           >
-            Testar GranaIA Starter grátis por 7 dias
+            Testar GranaIA Starter gratis por 7 dias
           </button>
         </div>
       </section>
 
-      {/* ===== SEÇÃO 5 - PLANOS ===== */}
+      {/* ===== SECAO 5 - PLANOS ===== */}
       <section id="precos" className="min-h-screen bg-white flex flex-col items-center justify-center px-6 md:px-12 lg:px-24 py-10">
-        {/* Título */}
+        {/* Titulo */}
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
             Escolha o plano ideal para seu{' '}
-            <span className="text-green-600">negócio</span>
+            <span className="text-green-600">negocio</span>
           </h2>
           <p className="text-gray-600 mt-3 text-base md:text-lg">
-            Teste grátis por 7 dias. Sem compromisso, sem cartão de crédito.
+            Teste gratis por 7 dias. Sem compromisso, sem cartao de credito.
           </p>
         </div>
 
@@ -524,16 +524,16 @@ export default function Home() {
               name: 'GranaIA Starter',
               price: 'R$5,99',
               original: 'R$7,99',
-              period: '/mês',
+              period: '/mes',
               link: "https://pay.kirvano.com/be9147a1-addd-4d1e-bc6b-ce77886be90d",
               description:
-                'Ideal para quem está começando. Controle seus gastos e receitas diretamente pelo sistema GranaIA.',
+                'Ideal para quem esta comecando. Controle seus gastos e receitas diretamente pelo sistema GranaIA.',
               benefits: [
                 'Crie, edite e exclua gastos e receitas com facilidade',
-                'Visualize relatórios completos de receitas e despesas',
+                'Visualize relatorios completos de receitas e despesas',
                 'Acompanhe seu fluxo de caixa em tempo real pela dashboard',
-                'Exporte relatórios diretamente em PDF, Excel ou CSV',
-                'Acesso completo à plataforma web GranaIA',
+                'Exporte relatorios diretamente em PDF, Excel ou CSV',
+                'Acesso completo  plataforma web GranaIA',
               ],
               button: 'Assinar Starter',
               popular: false,
@@ -542,14 +542,14 @@ export default function Home() {
               name: 'GranaIA Premium',
               price: 'R$10,99',
               original: 'R$14,99',
-              period: '/mês',
+              period: '/mes',
               link: "https://pay.kirvano.com/a7458233-e00c-4747-8c2f-2789512e91da",
               description:
-                'Tudo do plano Starter e mais: controle total das suas finanças também pelo WhatsApp.',
+                'Tudo do plano Starter e mais: controle total das suas financas tambm pelo WhatsApp.',
               benefits: [
                 'Todos os recursos do plano Starter',
                 'Crie, edite e exclua gastos e receitas pelo WhatsApp',
-                'Solicite relatórios diretamente pelo WhatsApp',
+                'Solicite relatorios diretamente pelo WhatsApp',
                 'Suporte dedicado via WhatsApp',
               ],
               button: 'Assinar Premium',
@@ -566,9 +566,9 @@ export default function Home() {
               benefits: [
                 'Todos os recursos do plano Premium',
                 'Desconto exclusivo por pagamento anual',
-                'Acesso contínuo à plataforma e ao bot do WhatsApp',
-                'Suporte prioritário via WhatsApp',
-                'Atualizações incluídas durante o ano',
+                'Acesso continuo a plataforma e ao bot do WhatsApp',
+                'Suporte prioritario via WhatsApp',
+                'Atualizacoes includas durante o ano',
               ],
               button: 'Assinar Pro Anual',
               popular: false,
@@ -589,19 +589,19 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Conteúdo */}
+              {/* Contedo */}
               <div className="p-6 text-center flex-grow flex flex-col justify-start">
                 <h3 className="text-lg md:text-xl font-extrabold text-gray-900 mb-2">
                   {plan.name}
                 </h3>
-                {/* Preços promocionais */}
+                {/* Preaos promocionais */}
                 <div className="mb-3">
-                  {/* Preço original riscado */}
+                  {/* Preao original riscado */}
                   <p className="text-sm text-gray-500 line-through">
                     {plan.original}
                   </p>
 
-                  {/* Preço atual */}
+                  {/* Preao atual */}
                   <p className="text-green-600 text-3xl md:text-4xl font-extrabold">
                     {plan.price}
                     <span className="text-base font-semibold text-gray-500">
@@ -622,16 +622,14 @@ export default function Home() {
                 <div className="text-left space-y-2 mb-6">
                   {plan.benefits.map((benefit, i) => (
                     <div key={i} className="flex items-start gap-2">
-                      <span className="text-green-600 font-bold text-lg leading-none mt-[1px]">
-                        ✓
-                      </span>
+                      <span className="text-green-600 font-bold text-lg leading-none mt-[1px]">v</span>
                       <p className="text-gray-700 text-sm">{benefit}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Botão fixado na base */}
+              {/* Botao fixado na base */}
               <div className="px-6 pb-6 mt-auto">
                 <button
                   onClick={() => window.open(plan.link, "_blank")}
@@ -649,9 +647,9 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Rodapé da seção */}
+        {/* Rodap da secao */}
         <p className="text-gray-500 text-xs mt-8 text-center">
-          7 dias de acesso gratuito ao GranaIA Starter dentro da plataforma • Nenhuma cobrança durante o período de teste •{" "}
+          7 dias de acesso gratuito ao GranaIA Starter dentro da plataforma " Nenhuma cobranca durante o periodo de teste "{" "}
           <a
             href="https://granaia.weltonkellyson.com.br/register"
             target="_blank"
@@ -663,20 +661,20 @@ export default function Home() {
         </p>
       </section>
 
-      {/* ===== SEÇÃO 6 - DEPOIMENTOS ===== */}
+      {/* ===== SECAO 6 - DEPOIMENTOS ===== */}
       <section id="depoimentos" className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-8 md:px-16 lg:px-24 py-20">
-        {/* Título e subtítulo */}
+        {/* Titulo e subtitulo */}
         <div className="text-center max-w-4xl mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight">
-            Pessoas como você estão{' '}
-            <span className="text-green-600">simplificando suas finanças.</span>
+            Pessoas como voce estao{' '}
+            <span className="text-green-600">simplificando suas financas.</span>
           </h2>
           <p className="text-gray-600 mt-4 text-lg">
-            Veja o que nossos usuários estão dizendo sobre a experiência.
+            Veja o que nossos usuarios estao dizendo sobre a experiencia.
           </p>
         </div>
 
-        {/* Estatísticas */}
+        {/* Estatasticas */}
         <div
           ref={statsRef}
           className="flex flex-col md:flex-row justify-center items-center gap-12 mb-16 text-center"
@@ -685,21 +683,21 @@ export default function Home() {
             <p className="text-4xl font-extrabold text-green-600">
               {satisfaction}%
             </p>
-            <p className="text-gray-600 text-base">Taxa de satisfação</p>
+            <p className="text-gray-600 text-base">Taxa de satisfacao</p>
           </div>
 
           <div>
             <p className="text-4xl font-extrabold text-green-600">
               {setupTime}min
             </p>
-            <p className="text-gray-600 text-base">Tempo médio de setup</p>
+            <p className="text-gray-600 text-base">Tempo medio de setup</p>
           </div>
 
           <div>
             <p className="text-4xl font-extrabold text-green-600">
               {typed247}
             </p>
-            <p className="text-gray-600 text-base">Disponível no WhatsApp</p>
+            <p className="text-gray-600 text-base">Disponivel no WhatsApp</p>
           </div>
         </div>
 
@@ -710,12 +708,12 @@ export default function Home() {
               name: "Marina Silva",
               role: "Consultora Freelancer",
               initials: "MS",
-              text: `"Antes eu perdia horas organizando planilhas. Agora registro tudo por áudio no WhatsApp em segundos. Revolucionou minha gestão financeira!"`,
+              text: `"Antes eu perdia horas organizando planilhas. Agora registro tudo por Audio no WhatsApp em segundos. Revolucionou minha gestao financeira!"`,
               delay: 0.2,
             },
             {
               name: "Carlos Mendes",
-              role: "MEI – Serviços de Marketing",
+              role: "MEI  Servicos de Marketing",
               initials: "CM",
               text: `"O GranaIA me deu controle total das contas a pagar e receber. Consigo ver meu fluxo de caixa instantaneamente pelo WhatsApp."`,
               delay: 0.4,
@@ -724,7 +722,7 @@ export default function Home() {
               name: "Ana Rodrigues",
               role: "Pequena Empresa de Design",
               initials: "AR",
-              text: `"Simples, eficiente e barato. Em uma semana já estava organizando todas as finanças sem esforço. Recomendo!"`,
+              text: `"Simples, eficiente e barato. Em uma semana ja estava organizando todas as financas sem esforco. Recomendo!"`,
               delay: 0.6,
             },
           ].map((item, index) => {
@@ -743,7 +741,7 @@ export default function Home() {
                 className="bg-white shadow-md rounded-2xl p-8 flex flex-col justify-between hover:shadow-lg transition duration-300"
               >
                 <div>
-                  <div className="flex mb-4 text-green-600 text-lg">★★★★★</div>
+                  <div className="flex mb-4 text-green-600 text-lg"></div>
                   <p className="text-gray-700 italic mb-6">{item.text}</p>
                 </div>
                 <div className="flex items-center gap-4 mt-auto">
@@ -761,19 +759,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== SEÇÃO 7 - FAq */}
+      {/* ===== SECAO 7 - FAQ */}
       <section id="faq" className="min-h-screen bg-white flex flex-col items-center justify-center px-8 md:px-16 lg:px-24 py-20">
-        {/* ===== TÍTULO ===== */}
+        {/* ===== TITULO ===== */}
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight">
-            Dúvidas <span className="text-green-600">frequentes</span>
+            Duvidas <span className="text-green-600">frequentes</span>
           </h2>
           <p className="text-gray-600 mt-4 text-lg">
-            Respondemos às principais perguntas sobre o GranaIA
+            Respondemos as principais perguntas sobre o GranaIA
           </p>
         </div>
 
-        {/* ===== ACORDEÕES ===== */}
+        {/* ===== ACORDEOES ===== */}
         <div className="w-full max-w-3xl space-y-4">
           {faqs.map((faq, index) => {
             const { ref, inView } = useInView({
@@ -798,7 +796,7 @@ export default function Home() {
                 >
                   {faq.question}
 
-                  {/* Ícone minimalista (seta) */}
+                  {/* Icone minimalista (seta) */}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className={`w-5 h-5 text-gray-500 transform transition-transform duration-300 ${
@@ -828,35 +826,35 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== SEÇÃO 8 - CTA FINAL + RODAPÉ ===== */}
+      {/* ===== SECAO 8 - CTA FINAL + RODAPE ===== */}
       <section className="h-screen flex flex-col">
         {/* ===== 60% - CHAMADA FINAL ===== */}
         <div className="flex-1 bg-gradient-to-br from-[#0a5b7a] via-[#0e8a63] to-[#00a884] flex flex-col items-center justify-center text-center text-white px-8 md:px-16">
           <h2 className="text-3xl md:text-5xl font-extrabold leading-tight mb-6">
             Chega de perder tempo em planilhas. <br />
             <span className="text-green-200">
-              Organize suas finanças no WhatsApp
+              Organize suas financas no WhatsApp
             </span>{' '}
             agora mesmo.
           </h2>
 
           <p className="text-lg md:text-xl text-green-100 max-w-2xl mb-10">
-            Junte-se aos negócios que já simplificaram sua gestão financeira com
-            o<span className="font-semibold text-white"> GranaIA</span>.
+            Junte-se aos negocios que ja simplificaram sua gestao financeira com
+            o <span className="font-semibold text-white"> GranaIA</span>.
           </p>
 
           <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-green-100 mb-8">
             <div className="flex items-center gap-1">
-              🚀 <p>Setup em 5 minutos</p>
+              <p>Setup em 5 minutos</p>
             </div>
             <div className="flex items-center gap-1">
-              🎁 <p>7 dias grátis (GranaIA Starter)</p>
+              <p>7 dias gratis (GranaIA Starter)</p>
             </div>
             <div className="flex items-center gap-1">
-              💳 <p>Sem cartão de crédito</p>
+              <p>Sem cartao de credito</p>
             </div>
             <div className="flex items-center gap-1">
-              🔒 <p>Dados 100% seguros</p>
+              <p>Dados 100% seguros</p>
             </div>
           </div>
 
@@ -869,18 +867,18 @@ export default function Home() {
             {/* Efeito de brilho animado */}
             <span className="absolute inset-0 bg-gradient-to-r from-green-50 via-white to-green-50 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-[1px]"></span>
 
-            {/* Texto do botão */}
-            <span className="relative z-10">Testar GranaIA grátis agora</span>
+            {/* Texto do botao */}
+            <span className="relative z-10">Testar GranaIA gratis agora</span>
           </button>
 
           <p className="text-green-100 mt-4 text-sm">
-            7 dias de acesso gratuito ao GranaIA Starter dentro da plataforma • Nenhuma cobrança durante o período de teste.
+            7 dias de acesso gratuito ao GranaIA Starter dentro da plataforma " Nenhuma cobranca durante o periodo de teste.
           </p>
         </div>
 
-        {/* ===== 40% - RODAPÉ ===== */}
+        {/* ===== 40% - RODAPE ===== */}
         <footer className="bg-[#1b1b1b] text-gray-300 py-14 px-8 md:px-20 flex flex-col md:flex-row justify-between items-center md:items-start gap-12">
-          {/* Logo e descrição */}
+          {/* Logo e descricao */}
           <div className="max-w-sm text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
               <img
@@ -892,18 +890,18 @@ export default function Home() {
             </div>
 
             <p className="text-gray-400 text-sm leading-relaxed mb-4">
-              Gestão financeira inteligente pelo WhatsApp. Simplifique o
-              controle das suas finanças e foque no que realmente importa: fazer
-              seu negócio crescer.
+              Gestao financeira inteligente pelo WhatsApp. Simplifique o
+              controle das suas financas e foque no que realmente importa: fazer
+              seu negocio crescer.
             </p>
 
             <div className="flex flex-wrap gap-4 text-xs text-gray-400">
-              <span>🔒 Seguro</span>
-              <span>🇧🇷 Feito no Brasil</span>
+              <span>Seguro</span>
+              <span>Feito no Brasil</span>
               <span className="inline-flex items-center gap-2">
                 <img
                   src="https://img.icons8.com/?size=100&id=964RahB4l606&format=png&color=25D366"
-                  alt="Ícone do WhatsApp"
+                  alt="Icone do WhatsApp"
                   className="w-5 h-5"
                 />
                 <span>WhatsApp</span>
@@ -911,10 +909,10 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Navegação */}
+          {/* Navegacao */}
           <div className="flex gap-16 text-center md:text-left">
             <div>
-              <h4 className="text-white font-semibold mb-3">Navegação</h4>
+              <h4 className="text-white font-semibold mb-3">Navegacao</h4>
               <ul className="space-y-2 text-sm text-gray-400">
                 <li>
                   <a href="#funcionalidades" className="hover:text-green-400">
@@ -923,12 +921,12 @@ export default function Home() {
                 </li>
                 <li>
                   <a href="#beneficios" className="hover:text-green-400">
-                    Benefícios
+                    Beneficios
                   </a>
                 </li>
                 <li>
                   <a href="#precos" className="hover:text-green-400">
-                    Preços
+                    Preaos
                   </a>
                 </li>
                 <li>
@@ -969,7 +967,7 @@ export default function Home() {
 
         {/* ===== Direitos autorais ===== */}
         <div className="bg-[#141414] text-center py-4 text-gray-500 text-xs border-t border-gray-800">
-          © 2025{" "}
+           2025{" "}
           <a
             href="https://www.instagram.com/we_tech.oficial?igsh=Nng2czAxNnIwbWow&utm_source=qr"
             target="_blank"

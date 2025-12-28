@@ -11,7 +11,7 @@ const PremiumExpiredModal: React.FC<PremiumExpiredModalProps> = ({ isOpen, onClo
   if (!isOpen) return null;
 
   const handleGoToPlans = () => {
-    // Redireciona para a página inicial onde estão os planos
+    // Redireciona para a pagina inicial onde estao os planos
     window.location.href = '/';
   };
 
@@ -72,19 +72,19 @@ const PremiumExpiredModal: React.FC<PremiumExpiredModalProps> = ({ isOpen, onClo
           <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-6">
             <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <li className="flex items-start">
-                <span className="text-green-600 dark:text-green-400 mr-2">✓</span>
+                <span className="text-green-600 dark:text-green-400 mr-2"></span>
                 <span>Registro de gastos e receitas</span>
               </li>
               <li className="flex items-start">
-                <span className="text-green-600 dark:text-green-400 mr-2">✓</span>
-                <span>Visualização de dados financeiros</span>
+                <span className="text-green-600 dark:text-green-400 mr-2"></span>
+                <span>Visualizacao de dados financeiros</span>
               </li>
               <li className="flex items-start">
-                <span className="text-green-600 dark:text-green-400 mr-2">✓</span>
-                <span>Dashboard com gráficos e relatórios</span>
+                <span className="text-green-600 dark:text-green-400 mr-2"></span>
+                <span>Dashboard com graficos e relatorios</span>
               </li>
               <li className="flex items-start">
-                <span className="text-green-600 dark:text-green-400 mr-2">✓</span>
+                <span className="text-green-600 dark:text-green-400 mr-2"></span>
                 <span>Assistente de IA (planos IA)</span>
               </li>
             </ul>
@@ -108,7 +108,7 @@ const PremiumExpiredModal: React.FC<PremiumExpiredModalProps> = ({ isOpen, onClo
 
           {/* Additional info */}
           <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-4">
-            Escolha o plano ideal para suas necessidades e continue gerenciando suas finanças!
+            Escolha o plano ideal para suas necessidades e continue gerenciando suas financas!
           </p>
         </div>
       </div>

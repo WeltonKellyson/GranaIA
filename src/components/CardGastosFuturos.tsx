@@ -91,7 +91,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
     return diffDays;
   };
 
-  // Obter a próxima parcela pendente de um gasto
+  // Obter a proxima parcela pendente de um gasto
   const getProximaParcelaPendente = (gasto: GastoFuturoResponse) => {
     if (!gasto.parcelas || gasto.parcelas.length === 0) {
       return null;
@@ -126,7 +126,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
     setConfirmPago({ isOpen: false, id: '' });
   };
 
-  // Função para obter todas as parcelas pendentes do mês atual
+  // Funcao para obter todas as parcelas pendentes do mes atual
   const getParcelasPendentesMesAtual = (): ParcelaResponse[] => {
     const hoje = new Date();
     const mesAtual = hoje.getMonth();
@@ -178,8 +178,8 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
     } finally {
       setProcessandoPagamentos(false);
 
-      // A mensagem de sucesso/erro será exibida pelo Dashboard
-      // que já tem o sistema de Toast configurado
+      // A mensagem de sucesso/erro ser exibida pelo Dashboard
+      // que ja tem o sistema de Toast configurado
     }
   };
 
@@ -189,7 +189,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
     const filtroStatusOk =
       filtros.status === 'todos' ? true : gasto.status === filtros.status;
 
-    // Filtro por cartão
+    // Filtro por cartao
     const filtroCartaoOk =
       filtros.cartao === 'todos'
         ? true
@@ -201,7 +201,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
     const filtroCategoriaOk =
       filtros.categoria === 'todas' ? true : gasto.categoria === filtros.categoria;
 
-    // Filtro por data de vencimento - início
+    // Filtro por data de vencimento - incio
     const filtroDataInicioOk = filtros.dataInicio
       ? new Date(gasto.data_vencimento) >= new Date(filtros.dataInicio)
       : true;
@@ -211,7 +211,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
       ? new Date(gasto.data_vencimento) <= new Date(filtros.dataFim)
       : true;
 
-    // Filtro por pesquisa de descrição
+    // Filtro por pesquisa de descricao
     const filtroPesquisaOk = pesquisa
       ? gasto.descricao.toLowerCase().includes(pesquisa.toLowerCase())
       : true;
@@ -226,7 +226,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
     );
   });
 
-  // Aplicar ordenação
+  // Aplicar ordenacao
   const gastosOrdenados = [...gastosFiltrados].sort((a, b) => {
     switch (ordenacao) {
       case 'data_venc_asc':
@@ -254,7 +254,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
     return diasRestantes < 0;
   });
 
-  // Calcular parcelas e valor do mês atual (usando gastos futuros completos, sem filtros)
+  // Calcular parcelas e valor do mes atual (usando gastos futuros completos, sem filtros)
   const parcelasMesAtual = getParcelasPendentesMesAtual();
   const totalParcelasMesAtual = parcelasMesAtual.reduce(
     (acc, parcela) => acc + parseFloat(parcela.valor_parcela),
@@ -286,12 +286,12 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
             totalPendente += valor;
             temParcelaPendente = true;
 
-            // Verificar se está vencido
+            // Verificar se est vencido
             if (dataVencimento < hoje) {
               valorVencido += valor;
             }
 
-            // Verificar se é do mês atual
+            // Verificar se  do mes atual
             if (
               dataVencimento.getMonth() === hoje.getMonth() &&
               dataVencimento.getFullYear() === hoje.getFullYear()
@@ -307,7 +307,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
       }
     });
 
-    // Contar gastos vencidos (gastos que têm pelo menos uma parcela vencida)
+    // Contar gastos vencidos (gastos que tm pelo menos uma parcela vencida)
     gastosFuturos.forEach((gasto) => {
       if (gasto.status === 'ativo' && gasto.parcelas) {
         const temParcelaVencida = gasto.parcelas.some((parcela) => {
@@ -325,7 +325,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
       }
     });
 
-    // Contar gastos do mês atual
+    // Contar gastos do mes atual
     gastosFuturos.forEach((gasto) => {
       if (gasto.status === 'ativo' && gasto.parcelas) {
         const temParcelaMesAtual = gasto.parcelas.some((parcela) => {
@@ -358,14 +358,14 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
 
   const resumoCorreto = calcularResumoCorreto();
 
-  // Lista de categorias únicas
+  // Lista de categorias Unicas
   const todasCategorias = Array.from(
     new Set(gastosFuturos.map((g) => g.categoria))
   ).sort();
 
   return (
     <div className="space-y-6">
-      {/* Cabeçalho */}
+      {/* Cabealho */}
       <div className="flex items-center gap-3">
         <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
           <CreditCardIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -375,13 +375,13 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
             Gastos Futuros
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Gerenciamento de cartão de crédito e compras parceladas
+            Gerenciamento de cartao de credito e compras parceladas
           </p>
         </div>
       </div>
 
-      {/* Abas de Navegação */}
-      <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 overflow-x-auto">
+      {/* Abas de Navegacao */}
+      <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 overflow-x-auto w-full max-w-full">
         <button
           onClick={() => setAbaAtiva('gastos')}
           className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md transition whitespace-nowrap ${
@@ -403,7 +403,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
           }`}
         >
           <CreditCardIcon className="w-5 h-5" />
-          <span className="font-medium hidden md:inline">Faturas por Cartão</span>
+          <span className="font-medium hidden md:inline">Faturas por Cartao</span>
           <span className="font-medium md:hidden">Faturas</span>
         </button>
         <button
@@ -415,8 +415,8 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
           }`}
         >
           <CheckCircleIcon className="w-5 h-5" />
-          <span className="font-medium hidden md:inline">Histórico</span>
-          <span className="font-medium md:hidden">Histórico</span>
+          <span className="font-medium hidden md:inline">Historico</span>
+          <span className="font-medium md:hidden">Historico</span>
         </button>
         <button
           onClick={() => setAbaAtiva('resumo')}
@@ -432,7 +432,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
         </button>
       </div>
 
-      {/* Conteúdo baseado na aba ativa */}
+      {/* Contedo baseado na aba ativa */}
       {abaAtiva === 'gastos' ? (
         <>
           {/* Cards de Resumo */}
@@ -459,20 +459,20 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
             {formatarMoeda(resumoCorreto.valorVencido)}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-            {resumoCorreto.quantidadeVencidos} gasto(s) com parcelas atrasadas
+            {resumoCorreto.quantidadeVencidos} gasto(s) com parcelas atrasaidas
           </p>
         </div>
 
-        {/* Parcelas do Mês Atual */}
+        {/* Parcelas do Mes Atual */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border-l-4 border-yellow-500">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-            Parcelas do Mês Atual
+            Parcelas do Mes Atual
           </p>
           <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
             {formatarMoeda(resumoCorreto.valorMesAtual)}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-            {resumoCorreto.quantidadeMesAtual} gasto(s) com vencimento este mês
+            {resumoCorreto.quantidadeMesAtual} gasto(s) com vencimento este mes
           </p>
         </div>
       </div>
@@ -501,19 +501,24 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
         todasCategorias={todasCategorias}
       />
 
-      {/* Campo de Pesquisa e Ordenação */}
+      {/* Campo de Pesquisa e Ordenacao */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-100 dark:border-gray-700">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Campo de Pesquisa */}
           <div className="relative">
+            <img
+              src="https://img.icons8.com/?size=100&id=7695&format=png&color=000000"
+              alt="Icone de pesquisa"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+            />
             <input
               type="text"
               value={pesquisa}
               onChange={(e) => setPesquisa(e.target.value)}
-              className="w-full px-4 py-3 pl-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700
+              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700
                 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition
                 placeholder-gray-400 dark:placeholder-gray-500"
-              placeholder="🔍 Pesquisar gasto futuro por descrição..."
+              placeholder="Pesquisar gasto futuro por descricao..."
             />
             {pesquisa && (
               <button
@@ -521,28 +526,28 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition"
                 title="Limpar pesquisa"
               >
-                ✕
+                X
               </button>
             )}
           </div>
 
-          {/* Seletor de Ordenação */}
+          {/* Seletor de Ordenacao */}
           <div className="relative">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0 w-full">
               <ArrowsUpDownIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               <select
                 value={ordenacao}
                 onChange={(e) => setOrdenacao(e.target.value)}
-                className="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700
+                className="flex-1 min-w-0 w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700
                   text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition
                   cursor-pointer"
               >
-                <option value="data_venc_asc">Data de Vencimento (Mais próximo)</option>
+                <option value="data_venc_asc">Data de Vencimento (Mais proximo)</option>
                 <option value="data_venc_desc">Data de Vencimento (Mais distante)</option>
                 <option value="valor_asc">Valor (Menor primeiro)</option>
                 <option value="valor_desc">Valor (Maior primeiro)</option>
-                <option value="descricao_asc">Descrição (A-Z)</option>
-                <option value="descricao_desc">Descrição (Z-A)</option>
+                <option value="descricao_asc">Descricao (A-Z)</option>
+                <option value="descricao_desc">Descricao (Z-A)</option>
                 <option value="categoria">Categoria (A-Z)</option>
               </select>
             </div>
@@ -550,7 +555,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
         </div>
       </div>
 
-      {/* Botão para Pagar Todas as Parcelas do Mês */}
+      {/* Botao para Pagar Todas as Parcelas do Mes */}
       {!processandoPagamentos && parcelasMesAtual.length > 0 && (
         <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-500 dark:border-green-600 rounded-lg p-5 shadow-lg">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -558,17 +563,17 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
               <div className="flex items-center gap-2 mb-2">
                 <CheckCircleIcon className="w-6 h-6 text-green-600 dark:text-green-400" />
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                  Pagar Todas as Parcelas do Mês
+                  Pagar Todas as Parcelas do Mes
                 </h3>
               </div>
               <p className="text-sm text-gray-700 dark:text-gray-300">
-                Você tem {parcelasMesAtual.length} parcela(s) pendente(s) para pagar neste mês no valor total de{' '}
+                Voce tem {parcelasMesAtual.length} parcela(s) pendente(s) para pagar neste mes no valor total de{' '}
                 <span className="font-bold text-green-700 dark:text-green-400">
                   {formatarMoeda(totalParcelasMesAtual)}
                 </span>
               </p>
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                Clique no botão ao lado para marcar todas como pagas de uma vez
+                Clique no botao ao lado para marcar todas como pagas de uma vez
               </p>
             </div>
             <button
@@ -587,13 +592,13 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
         </div>
       )}
 
-      {/* Próximos Vencimentos */}
+      {/* Proximos Vencimentos */}
       {dashboard && dashboard.proximos_vencimentos.length > 0 && (
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-3">
             <ClockIcon className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
             <h3 className="font-semibold text-yellow-800 dark:text-yellow-300">
-              Próximos Vencimentos (7 dias)
+              Proximos Vencimentos (7 dias)
             </h3>
           </div>
           <div className="space-y-2">
@@ -612,7 +617,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
                       {gasto.descricao}
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {formatarData(gasto.data_vencimento)} •{' '}
+                      {formatarData(gasto.data_vencimento)} "{' '}
                       {formatarMoeda(gasto.valor_total)}
                     </p>
                   </div>
@@ -646,7 +651,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
             Nenhum gasto futuro cadastrado
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            Clique em "Novo Gasto Futuro" para começar a gerenciar seus gastos
+            Clique em "Novo Gasto Futuro" para comear a gerenciar seus gastos
             futuros
           </p>
         </div>
@@ -657,7 +662,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
             Nenhum resultado encontrado
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Não encontramos gastos futuros que correspondam aos filtros aplicados.
+            Nao encontramos gastos futuros que correspondam aos filtros aplicados.
           </p>
           <button
             onClick={() => {
@@ -677,7 +682,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               Gastos Futuros ({gastosAtivos.length})
             </h3>
@@ -696,7 +701,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
             const isExpanded = expandedId === gasto.id;
             const isParcelado = gasto.numero_parcelas > 1;
 
-            // Obter a próxima parcela pendente
+            // Obter a proxima parcela pendente
             const proximaParcela = getProximaParcelaPendente(gasto);
             const dataVencimentoAtual = proximaParcela ? proximaParcela.data_vencimento : gasto.data_vencimento;
             const diasRestantes = getDiasRestantes(dataVencimentoAtual);
@@ -752,7 +757,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
                         </div>
                         <div>
                           <p className="text-gray-600 dark:text-gray-400">
-                            {proximaParcela ? 'Próximo Vencimento' : 'Vencimento'}
+                            {proximaParcela ? 'Proximo Vencimento' : 'Vencimento'}
                           </p>
                           <p className="font-semibold text-gray-900 dark:text-white">
                             {todasPagas ? (
@@ -784,7 +789,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
                     </div>
                   </div>
 
-                  {/* Ações */}
+                  {/* Acoes */}
                   <div className="flex flex-wrap gap-2 mt-4">
                     <button
                       onClick={() => onEdit(gasto)}
@@ -796,7 +801,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
                     <button
                       onClick={() => onDuplicate(gasto)}
                       className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition"
-                      title="Criar uma cópia deste gasto"
+                      title="Criar uma cpia deste gasto"
                     >
                       <DocumentDuplicateIcon className="w-4 h-4" />
                       Duplicar
@@ -851,7 +856,7 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
                                 <span>
                                   {formatarMoeda(parcela.valor_parcela)}
                                 </span>
-                                <span>•</span>
+                                <span>"</span>
                                 <span>
                                   Vence em {formatarData(parcela.data_vencimento)}
                                 </span>
@@ -894,24 +899,24 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
       )}
         </>
       ) : abaAtiva === 'faturas' ? (
-        /* Aba de Faturas por Cartão */
+        /* Aba de Faturas por Cartao */
         <RelatorioFaturasCartao
           gastosFuturos={gastosFuturos}
           onMarcarParcelaComoPaga={onMarcarParcelaComoPaga}
         />
       ) : abaAtiva === 'historico' ? (
-        /* Aba de Histórico de Parcelas Pagas */
+        /* Aba de Historico de Parcelas Pagas */
         <HistoricoParcelasPagas gastosFuturos={gastosFuturos} />
       ) : (
         /* Aba de Resumo Anual */
         <ResumoAnualGastosFuturos gastosFuturos={gastosFuturos} />
       )}
 
-      {/* Dialog de Confirmação de Pagamento */}
+      {/* Dialog de Confirmacao de Pagamento */}
       <ConfirmDialog
         isOpen={confirmPago.isOpen}
         title="Marcar Parcela como Paga?"
-        message="Confirma o pagamento desta parcela? Um gasto normal será criado e impactará seu saldo."
+        message="Confirma o pagamento desta parcela? Um gasto normal ser criado e impactar seu saldo."
         confirmLabel="Sim, marcar como pago"
         cancelLabel="Cancelar"
         onConfirm={confirmarMarcarComoPago}
@@ -919,16 +924,16 @@ const CardGastosFuturos: React.FC<CardGastosFuturosProps> = ({
         type="success"
       />
 
-      {/* Dialog de Confirmação - Pagar Todas as Parcelas do Mês */}
+      {/* Dialog de Confirmacao - Pagar Todas as Parcelas do Mes */}
       <ConfirmDialog
         isOpen={confirmPagarTodasMes.isOpen}
-        title={`Pagar ${confirmPagarTodasMes.parcelas.length} Parcela(s) do Mês?`}
-        message={`Você está prestes a marcar ${confirmPagarTodasMes.parcelas.length} parcela(s) como pagas, no valor total de ${formatarMoeda(
+        title={`Pagar ${confirmPagarTodasMes.parcelas.length} Parcela(s) do Mes?`}
+        message={`Voce est prestes a marcar ${confirmPagarTodasMes.parcelas.length} parcela(s) como pagas, no valor total de ${formatarMoeda(
           confirmPagarTodasMes.parcelas.reduce(
             (acc, p) => acc + parseFloat(p.valor_parcela),
             0
           )
-        )}. Gastos normais serão criados e isso impactará seu saldo. Deseja continuar?`}
+        )}. Gastos normais serao criados e isso impactar seu saldo. Deseja continuar?`}
         confirmLabel={`Sim, pagar ${confirmPagarTodasMes.parcelas.length} parcela(s)`}
         cancelLabel="Cancelar"
         onConfirm={confirmarPagarTodasMes}

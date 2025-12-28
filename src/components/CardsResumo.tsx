@@ -62,7 +62,7 @@ export default function CardsResumo({
             </h3>
           </div>
         </div>
-        {/* Indicador de Tendência */}
+        {/* Indicador de Tendencia */}
         {variacaoReceitas !== 0 && (
           <div
             className={`flex items-center gap-1 text-sm mt-2 ${
@@ -80,7 +80,7 @@ export default function CardsResumo({
               {Math.abs(variacaoReceitas).toFixed(1)}%
             </span>
             <span className="text-gray-500 dark:text-gray-400 text-xs ml-1">
-              vs mês anterior
+              vs mes anterior
             </span>
           </div>
         )}
@@ -97,7 +97,7 @@ export default function CardsResumo({
             </h3>
           </div>
         </div>
-        {/* Indicador de Tendência */}
+        {/* Indicador de Tendencia */}
         {variacaoDespesas !== 0 && (
           <div
             className={`flex items-center gap-1 text-sm mt-2 ${
@@ -115,7 +115,7 @@ export default function CardsResumo({
               {Math.abs(variacaoDespesas).toFixed(1)}%
             </span>
             <span className="text-gray-500 dark:text-gray-400 text-xs ml-1">
-              vs mês anterior
+              vs mes anterior
             </span>
           </div>
         )}

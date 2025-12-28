@@ -132,7 +132,7 @@ export interface ReceitaDashboard {
   periodo_fim: string | null;
 }
 
-// Tipos para Gasto Futuro (Cartão de Crédito)
+// Tipos para Gasto Futuro (Cartao de Credito)
 export interface ParcelaResponse {
   id: string;
   gasto_futuro_id: string;
@@ -222,7 +222,7 @@ export interface MarcarComoPagoRequest {
   criar_gasto?: boolean;
 }
 
-// Tipos para Cartão de Crédito
+// Tipos para Cartao de Credito
 export interface CartaoCreditoCreate {
   nome_cartao: string;
   nome_titular: string;
@@ -283,7 +283,7 @@ export interface PagarFaturaRequest {
 }
 
 class ApiService {
-  // Event emitter para logout automático
+  // Event emitter para logout automatico
   private onUnauthorizedCallbacks: Array<() => void> = [];
 
   // Registrar callback para ser chamado quando houver 401
@@ -291,20 +291,20 @@ class ApiService {
     this.onUnauthorizedCallbacks.push(callback);
   }
 
-  // Método centralizado para tratar erro 401
+  // Metodo centralizado para tratar erro 401
   private handleUnauthorized() {
-    console.log('[API] Token expirado - fazendo logout automático');
+    console.log('[API] Token expirado - fazendo logout automatico');
     this.logout();
     // Notificar todos os listeners
     this.onUnauthorizedCallbacks.forEach(callback => callback());
   }
 
-  // Método centralizado para verificar resposta e tratar 401
+  // Metodo centralizado para verificar resposta e tratar 401
   private async handleResponse(response: Response, errorMessage: string) {
     if (!response.ok) {
       if (response.status === 401) {
         this.handleUnauthorized();
-        throw new Error('Sessão expirada. Faça login novamente.');
+        throw new Error('Sessao expirada. Faa login novamente.');
       }
       const errorData = await response.json().catch(() => null);
       throw new Error(errorData?.detail || errorData?.message || errorMessage);
@@ -333,7 +333,7 @@ class ApiService {
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         throw new Error(
-          errorData?.detail || errorData?.message || 'Erro ao cadastrar usuário'
+          errorData?.detail || errorData?.message || 'Erro ao cadastrar usurio'
         );
       }
 
@@ -401,9 +401,9 @@ class ApiService {
 
       if (!response.ok) {
         if (response.status === 401) {
-          // Token inválido ou expirado
+          // Token invlido ou expirado
           this.logout();
-          throw new Error('Sessão expirada. Faça login novamente.');
+          throw new Error('Sessao expirada. Faa login novamente.');
         }
         // Retorna a resposta mesmo com erro para o workaround funcionar
         return jsonResponse;
@@ -411,7 +411,7 @@ class ApiService {
 
       return jsonResponse;
     } catch (error) {
-      console.error('Erro ao obter usuário:', error);
+      console.error('Erro ao obter usurio:', error);
       throw error;
     }
   }
@@ -459,13 +459,13 @@ class ApiService {
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         throw new Error(
-          errorData?.detail || errorData?.message || 'Erro ao solicitar recuperação de senha'
+          errorData?.detail || errorData?.message || 'Erro ao solicitar recuperacao de senha'
         );
       }
 
       return await response.json();
     } catch (error) {
-      console.error('Erro ao solicitar recuperação:', error);
+      console.error('Erro ao solicitar recuperacao:', error);
       throw error;
     }
   }
@@ -713,7 +713,7 @@ class ApiService {
     }
   }
 
-  // ============ GASTOS FUTUROS (CARTÃO DE CRÉDITO) ============
+  // ============ GASTOS FUTUROS (CARTO DE CREDITO) ============
 
   async getGastosFuturos(params?: {
     usuario?: string;
@@ -842,7 +842,7 @@ class ApiService {
     }
   }
 
-  // ============ CARTÕES DE CRÉDITO ============
+  // ============ CARTOES DE CREDITO ============
 
   async getCartoesCredito(params?: {
     usuario?: string;
@@ -863,10 +863,10 @@ class ApiService {
         headers: this.getAuthHeader(),
       });
 
-      await this.handleResponse(response, 'Erro ao buscar cartões de crédito');
+      await this.handleResponse(response, 'Erro ao buscar cartoes de credito');
       return await response.json();
     } catch (error) {
-      console.error('Erro ao buscar cartões de crédito:', error);
+      console.error('Erro ao buscar cartoes de credito:', error);
       throw error;
     }
   }
@@ -878,10 +878,10 @@ class ApiService {
         headers: this.getAuthHeader(),
       });
 
-      await this.handleResponse(response, 'Erro ao buscar cartão de crédito');
+      await this.handleResponse(response, 'Erro ao buscar cartao de credito');
       return await response.json();
     } catch (error) {
-      console.error('Erro ao buscar cartão de crédito:', error);
+      console.error('Erro ao buscar cartao de credito:', error);
       throw error;
     }
   }
@@ -894,10 +894,10 @@ class ApiService {
         body: JSON.stringify(data),
       });
 
-      await this.handleResponse(response, 'Erro ao criar cartão de crédito');
+      await this.handleResponse(response, 'Erro ao criar cartao de credito');
       return await response.json();
     } catch (error) {
-      console.error('Erro ao criar cartão de crédito:', error);
+      console.error('Erro ao criar cartao de credito:', error);
       throw error;
     }
   }
@@ -910,10 +910,10 @@ class ApiService {
         body: JSON.stringify(data),
       });
 
-      await this.handleResponse(response, 'Erro ao atualizar cartão de crédito');
+      await this.handleResponse(response, 'Erro ao atualizar cartao de credito');
       return await response.json();
     } catch (error) {
-      console.error('Erro ao atualizar cartão de crédito:', error);
+      console.error('Erro ao atualizar cartao de credito:', error);
       throw error;
     }
   }
@@ -925,9 +925,9 @@ class ApiService {
         headers: this.getAuthHeader(),
       });
 
-      await this.handleResponse(response, 'Erro ao deletar cartão de crédito');
+      await this.handleResponse(response, 'Erro ao deletar cartao de credito');
     } catch (error) {
-      console.error('Erro ao deletar cartão de crédito:', error);
+      console.error('Erro ao deletar cartao de credito:', error);
       throw error;
     }
   }

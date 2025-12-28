@@ -50,7 +50,7 @@ const RelatorioFaturasCartao: React.FC<RelatorioFaturasCartaoProps> = ({
       const response = await apiService.getCartoesCredito({ page_size: 100 });
       setCartoes(response.data || []);
     } catch (error) {
-      console.error('Erro ao carregar cartões:', error);
+      console.error('Erro ao carregar cartoes:', error);
     }
   };
 
@@ -66,11 +66,11 @@ const RelatorioFaturasCartao: React.FC<RelatorioFaturasCartaoProps> = ({
     return date.toLocaleDateString('pt-BR');
   };
 
-  // Agrupar parcelas por cartão
+  // Agrupar parcelas por cartao
   const getFaturasCartao = (): FaturaCartao[] => {
     const faturasPorCartao = new Map<string, FaturaCartao>();
 
-    // Inicializar com todos os cartões cadastrados
+    // Inicializar com todos os cartoes cadastrados
     cartoes.forEach((cartao) => {
       faturasPorCartao.set(cartao.id, {
         cartao,
@@ -82,11 +82,11 @@ const RelatorioFaturasCartao: React.FC<RelatorioFaturasCartaoProps> = ({
       });
     });
 
-    // Adicionar cartão especial "Sem Cartão"
+    // Adicionar cartao especial "Sem Cartao"
     faturasPorCartao.set('sem_cartao', {
       cartao: null,
       cartaoId: null,
-      nomeCartao: 'Sem Cartão',
+      nomeCartao: 'Sem Cartao',
       parcelas: [],
       totalPendente: 0,
       quantidadePendente: 0,
@@ -105,7 +105,7 @@ const RelatorioFaturasCartao: React.FC<RelatorioFaturasCartaoProps> = ({
               fatura.totalPendente += parseFloat(parcela.valor_parcela);
               fatura.quantidadePendente++;
             } else if (!gasto.cartao_credito_id) {
-              // Se não encontrar o cartão e não tem cartao_credito_id, adiciona em "sem_cartao"
+              // Se nao encontrar o cartao e nao tem cartao_credito_id, adiciona em "sem_cartao"
               const semCartao = faturasPorCartao.get('sem_cartao')!;
               semCartao.parcelas.push(parcela);
               semCartao.totalPendente += parseFloat(parcela.valor_parcela);
@@ -116,7 +116,7 @@ const RelatorioFaturasCartao: React.FC<RelatorioFaturasCartaoProps> = ({
       }
     });
 
-    // Filtrar apenas cartões com parcelas pendentes e ordenar
+    // Filtrar apenas cartoes com parcelas pendentes e ordenar
     return Array.from(faturasPorCartao.values())
       .filter((fatura) => fatura.quantidadePendente > 0)
       .sort((a, b) => b.totalPendente - a.totalPendente);
@@ -166,17 +166,17 @@ const RelatorioFaturasCartao: React.FC<RelatorioFaturasCartaoProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Cabeçalho */}
+      {/* Cabecalho */}
       <div className="flex items-center gap-3">
         <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
           <CreditCardIcon className="w-6 h-6 text-purple-600 dark:text-purple-400" />
         </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Relatório de Faturas por Cartão
+            Relatorio de Faturas por Cartao
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Visualize e pague faturas de cada cartão separadamente
+            Visualize e pague faturas de cada cartao separadamente
           </p>
         </div>
       </div>
@@ -187,7 +187,7 @@ const RelatorioFaturasCartao: React.FC<RelatorioFaturasCartaoProps> = ({
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                Total Pendente em Todos os Cartões
+                Total Pendente em Todos os Cartoes
               </h3>
               <div className="flex items-baseline gap-3">
                 <span className="text-3xl font-bold text-purple-700 dark:text-purple-400">
@@ -200,7 +200,7 @@ const RelatorioFaturasCartao: React.FC<RelatorioFaturasCartaoProps> = ({
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {faturas.length} cartão(ões) com faturas pendentes
+                {faturas.length} cartao(oes) com faturas pendentes
               </p>
             </div>
           </div>
@@ -217,14 +217,14 @@ const RelatorioFaturasCartao: React.FC<RelatorioFaturasCartaoProps> = ({
                 Processando Pagamento da Fatura...
               </h3>
               <p className="text-sm text-gray-700 dark:text-gray-300">
-                Aguarde enquanto processamos todas as parcelas do cartão.
+                Aguarde enquanto processamos todas as parcelas do cartao.
               </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Lista de Faturas por Cartão */}
+      {/* Lista de Faturas por Cartao */}
       {faturas.length === 0 ? (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
           <CreditCardIcon className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
@@ -232,7 +232,7 @@ const RelatorioFaturasCartao: React.FC<RelatorioFaturasCartaoProps> = ({
             Nenhuma fatura pendente
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            Não há parcelas pendentes em nenhum cartão de crédito no momento.
+            Nao ha parcelas pendentes em nenhum cartao de credito no momento.
           </p>
         </div>
       ) : (
@@ -247,7 +247,7 @@ const RelatorioFaturasCartao: React.FC<RelatorioFaturasCartaoProps> = ({
                 className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border-l-4"
                 style={{ borderLeftColor: corCartao }}
               >
-                {/* Header do Cartão */}
+                {/* Header do Cartao */}
                 <div className="p-5">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
@@ -268,7 +268,7 @@ const RelatorioFaturasCartao: React.FC<RelatorioFaturasCartaoProps> = ({
                         </h3>
                         {fatura.cartao && (
                           <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {fatura.cartao.nome_titular} • Vencimento dia{' '}
+                            {fatura.cartao.nome_titular}  Vencimento dia{' '}
                             {fatura.cartao.dia_vencimento}
                           </p>
                         )}
@@ -284,7 +284,7 @@ const RelatorioFaturasCartao: React.FC<RelatorioFaturasCartaoProps> = ({
                     </div>
                   </div>
 
-                  {/* Botões de Ação */}
+                  {/* Botoes de Acao */}
                   <div className="flex gap-2">
                     <button
                       onClick={() => handlePagarFaturaCartao(fatura)}
@@ -331,7 +331,7 @@ const RelatorioFaturasCartao: React.FC<RelatorioFaturasCartaoProps> = ({
                             new Date(b.data_vencimento).getTime()
                         )
                         .map((parcela) => {
-                          // Buscar informação do gasto relacionado
+                          // Buscar informacao do gasto relacionado
                           const gastoRelacionado = gastosFuturos.find((g) =>
                             g.parcelas.some((p) => p.id === parcela.id)
                           );
@@ -343,15 +343,15 @@ const RelatorioFaturasCartao: React.FC<RelatorioFaturasCartaoProps> = ({
                             >
                               <div className="flex-1">
                                 <p className="font-medium text-gray-900 dark:text-white">
-                                  {gastoRelacionado?.descricao || 'Sem descrição'}
+                                  {gastoRelacionado?.descricao || 'Sem descricao'}
                                 </p>
                                 <div className="flex items-center gap-3 mt-1 text-sm text-gray-600 dark:text-gray-400">
                                   <span>
                                     Parcela {parcela.numero_parcela}/{parcela.total_parcelas}
                                   </span>
-                                  <span>•</span>
+                                  <span></span>
                                   <span>{formatarMoeda(parseFloat(parcela.valor_parcela))}</span>
-                                  <span>•</span>
+                                  <span></span>
                                   <span>Vence em {formatarData(parcela.data_vencimento)}</span>
                                 </div>
                               </div>
@@ -367,18 +367,18 @@ const RelatorioFaturasCartao: React.FC<RelatorioFaturasCartaoProps> = ({
         </div>
       )}
 
-      {/* Dialog de Confirmação - Pagar Fatura do Cartão */}
+      {/* Dialog de Confirmacao - Pagar Fatura do Cartao */}
       <ConfirmDialog
         isOpen={confirmPagarFatura.isOpen}
         title={`Pagar Fatura do ${confirmPagarFatura.nomeCartao}?`}
-        message={`Você está prestes a marcar ${
+        message={`Voce esta prestes a marcar ${
           confirmPagarFatura.parcelas.length
         } parcela(s) como pagas, no valor total de ${formatarMoeda(
           confirmPagarFatura.parcelas.reduce(
             (acc, p) => acc + parseFloat(p.valor_parcela),
             0
           )
-        )}. Gastos normais serão criados e isso impactará seu saldo. Deseja continuar?`}
+        )}. Gastos normais serao criados e isso impactara seu saldo. Deseja continuar?`}
         confirmLabel={`Sim, pagar ${confirmPagarFatura.parcelas.length} parcela(s)`}
         cancelLabel="Cancelar"
         onConfirm={confirmarPagarFatura}

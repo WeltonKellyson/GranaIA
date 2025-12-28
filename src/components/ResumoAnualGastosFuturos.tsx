@@ -21,7 +21,7 @@ const ResumoAnualGastosFuturos: React.FC<ResumoAnualGastosFuturosProps> = ({
     });
   };
 
-  // Calcular projeção dos próximos 12 meses
+  // Calcular projecao dos proximos 12 meses
   const calcularResumoAnual = () => {
     const hoje = new Date();
     const meses: Array<{
@@ -33,7 +33,7 @@ const ResumoAnualGastosFuturos: React.FC<ResumoAnualGastosFuturosProps> = ({
       quantidadeParcelas: number;
     }> = [];
 
-    // Inicializar próximos 12 meses
+    // Inicializar proximos 12 meses
     for (let i = 0; i < 12; i++) {
       const data = new Date(hoje.getFullYear(), hoje.getMonth() + i, 1);
       const mesAno = data.toLocaleDateString('pt-BR', {
@@ -55,7 +55,7 @@ const ResumoAnualGastosFuturos: React.FC<ResumoAnualGastosFuturosProps> = ({
       });
     }
 
-    // Calcular valores por mês
+    // Calcular valores por mes
     gastosFuturos.forEach((gasto) => {
       if (gasto.status === 'ativo' && gasto.parcelas) {
         gasto.parcelas.forEach((parcela) => {
@@ -84,7 +84,7 @@ const ResumoAnualGastosFuturos: React.FC<ResumoAnualGastosFuturosProps> = ({
     return meses;
   };
 
-  // Calcular estatísticas anuais
+  // Calcular estatisticas anuais
   const calcularEstatisticas = (
     meses: ReturnType<typeof calcularResumoAnual>
   ) => {
@@ -117,7 +117,7 @@ const ResumoAnualGastosFuturos: React.FC<ResumoAnualGastosFuturosProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Cabeçalho */}
+      {/* Cabecalho */}
       <div className="flex items-center gap-3">
         <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
           <CalendarDaysIcon className="w-6 h-6 text-purple-600 dark:text-purple-400" />
@@ -127,12 +127,12 @@ const ResumoAnualGastosFuturos: React.FC<ResumoAnualGastosFuturosProps> = ({
             Resumo Anual de Gastos Futuros
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Visão geral dos próximos 12 meses
+            Visao geral dos proximos 12 meses
           </p>
         </div>
       </div>
 
-      {/* Cards de Estatísticas */}
+      {/* Cards de Estatisticas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Anual */}
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md p-4 text-white">
@@ -158,23 +158,23 @@ const ResumoAnualGastosFuturos: React.FC<ResumoAnualGastosFuturosProps> = ({
           </p>
         </div>
 
-        {/* Média Mensal */}
+        {/* Media Mensal */}
         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-md p-4 text-white">
           <div className="flex items-center gap-2 mb-2">
             <ChartBarIcon className="w-5 h-5" />
-            <p className="text-sm font-medium opacity-90">Média Mensal</p>
+            <p className="text-sm font-medium opacity-90">Media Mensal</p>
           </div>
           <p className="text-2xl font-bold">{formatarMoeda(estatisticas.mediaMensal)}</p>
           <p className="text-xs opacity-75 mt-1">
-            Projeção de gasto por mês
+            Projecao de gasto por mes
           </p>
         </div>
 
-        {/* Maior Mês */}
+        {/* Maior Mes */}
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-md p-4 text-white">
           <div className="flex items-center gap-2 mb-2">
             <CalendarDaysIcon className="w-5 h-5" />
-            <p className="text-sm font-medium opacity-90">Mês com Maior Gasto</p>
+            <p className="text-sm font-medium opacity-90">Mes com Maior Gasto</p>
           </div>
           <p className="text-2xl font-bold">
             {formatarMoeda(estatisticas.mesComMaiorGasto.total)}
@@ -192,7 +192,7 @@ const ResumoAnualGastosFuturos: React.FC<ResumoAnualGastosFuturosProps> = ({
             Detalhamento Mensal
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Valores projetados para cada mês
+            Valores projetados para cada mes
           </p>
         </div>
 
@@ -201,7 +201,7 @@ const ResumoAnualGastosFuturos: React.FC<ResumoAnualGastosFuturosProps> = ({
             <thead className="bg-gray-50 dark:bg-gray-900/50">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                  Mês
+                  Mes
                 </th>
                 <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   Total
@@ -285,36 +285,36 @@ const ResumoAnualGastosFuturos: React.FC<ResumoAnualGastosFuturosProps> = ({
             <SparklesIcon className="w-6 h-6 text-indigo-600 dark:text-indigo-400 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                Insights e Análises
+                Insights e Analises
               </h3>
               <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <li className="flex items-start gap-2">
-                  <span className="text-indigo-600 dark:text-indigo-400">•</span>
+                  <span className="text-indigo-600 dark:text-indigo-400"></span>
                   <span>
-                    Você tem gastos projetados em{' '}
-                    <strong>{estatisticas.mesesComGastos} meses</strong> nos próximos 12 meses.
+                    Voce tem gastos projetados em{' '}
+                    <strong>{estatisticas.mesesComGastos} meses</strong> nos proximos 12 meses.
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-indigo-600 dark:text-indigo-400">•</span>
+                  <span className="text-indigo-600 dark:text-indigo-400"></span>
                   <span>
-                    Seu mês com maior gasto será{' '}
+                    Seu mes com maior gasto sera{' '}
                     <strong className="capitalize">{estatisticas.mesComMaiorGasto.mes}</strong> com{' '}
                     <strong>{formatarMoeda(estatisticas.mesComMaiorGasto.total)}</strong>.
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-indigo-600 dark:text-indigo-400">•</span>
+                  <span className="text-indigo-600 dark:text-indigo-400"></span>
                   <span>
-                    A média de gastos por mês é de{' '}
+                    A media de gastos por mes e de{' '}
                     <strong>{formatarMoeda(estatisticas.mediaMensal)}</strong>.
                   </span>
                 </li>
                 {estatisticas.totalPendente > 0 && (
                   <li className="flex items-start gap-2">
-                    <span className="text-blue-600 dark:text-blue-400">•</span>
+                    <span className="text-blue-600 dark:text-blue-400"></span>
                     <span>
-                      Você ainda tem{' '}
+                      Voce ainda tem{' '}
                       <strong className="text-blue-600 dark:text-blue-400">
                         {formatarMoeda(estatisticas.totalPendente)}
                       </strong>{' '}
@@ -333,10 +333,10 @@ const ResumoAnualGastosFuturos: React.FC<ResumoAnualGastosFuturosProps> = ({
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-12 text-center">
           <CalendarDaysIcon className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Sem projeções anuais
+            Sem projecoes anuais
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            Adicione gastos futuros para visualizar o resumo anual dos próximos 12 meses
+            Adicione gastos futuros para visualizar o resumo anual dos proximos 12 meses
           </p>
         </div>
       )}

@@ -38,7 +38,7 @@ const CartoesContent: React.FC<CartoesContentProps> = ({
 }) => {
   return (
     <div className="space-y-10">
-      {/* ===== BOTÕES DE AÇÃO ===== */}
+      {/* ===== BOTOES DE ACAO ===== */}
       <section className="flex flex-wrap gap-3 justify-center md:justify-start">
         <button
           onClick={() => {
@@ -74,11 +74,11 @@ const CartoesContent: React.FC<CartoesContentProps> = ({
           }`}
         >
           <CreditCardIcon className="w-5 h-5" />
-          Meus Cartões
+          Meus Cartoes
         </button>
       </section>
 
-      {/* ===== GRÁFICO DE EVOLUÇÃO ===== */}
+      {/* ===== GRAFICO DE EVOLUCAO ===== */}
       <GraficoEvolucaoGastosFuturos gastosFuturos={gastosFuturos} />
 
       {/* ===== GASTOS FUTUROS ===== */}

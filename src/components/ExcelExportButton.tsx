@@ -89,7 +89,7 @@ export default function ExcelExportButton({
       views: [{ showGridLines: false }],
     });
 
-    // Título principal
+    // Titulo principal
     wsResumo.mergeCells('A1:C1');
     const titleCell = wsResumo.getCell('A1');
     titleCell.value = 'RESUMO FINANCEIRO';
@@ -102,7 +102,7 @@ export default function ExcelExportButton({
     titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
     wsResumo.getRow(1).height = 30;
 
-    // Cabeçalhos da tabela de resumo
+    // Cabecalhos da tabela de resumo
     wsResumo.getCell('A3').value = 'Indicador';
     wsResumo.getCell('B3').value = 'Valor';
     const headerRow = wsResumo.getRow(3);
@@ -258,7 +258,7 @@ export default function ExcelExportButton({
       views: [{ showGridLines: false }],
     });
 
-    // Título
+    // Titulo
     wsReceitas.mergeCells('A1:E1');
     const receitasTitleMainCell = wsReceitas.getCell('A1');
     receitasTitleMainCell.value = 'RECEITAS';
@@ -271,8 +271,8 @@ export default function ExcelExportButton({
     receitasTitleMainCell.alignment = { horizontal: 'center', vertical: 'middle' };
     wsReceitas.getRow(1).height = 30;
 
-    // Cabeçalhos
-    const receitasHeaders = ['Data', 'Descrição', 'Categoria', 'Origem', 'Valor'];
+    // Cabecalhos
+    const receitasHeaders = ['Data', 'Descricao', 'Categoria', 'Origem', 'Valor'];
     receitasHeaders.forEach((header, idx) => {
       const cell = wsReceitas.getCell(3, idx + 1);
       cell.value = header;
@@ -353,7 +353,7 @@ export default function ExcelExportButton({
       views: [{ showGridLines: false }],
     });
 
-    // Título
+    // Titulo
     wsDespesas.mergeCells('A1:D1');
     const despesasTitleMainCell = wsDespesas.getCell('A1');
     despesasTitleMainCell.value = 'DESPESAS';
@@ -366,8 +366,8 @@ export default function ExcelExportButton({
     despesasTitleMainCell.alignment = { horizontal: 'center', vertical: 'middle' };
     wsDespesas.getRow(1).height = 30;
 
-    // Cabeçalhos
-    const despesasHeaders = ['Data', 'Descrição', 'Categoria', 'Valor'];
+    // Cabecalhos
+    const despesasHeaders = ['Data', 'Descricao', 'Categoria', 'Valor'];
     despesasHeaders.forEach((header, idx) => {
       const cell = wsDespesas.getCell(3, idx + 1);
       cell.value = header;
@@ -441,16 +441,16 @@ export default function ExcelExportButton({
     wsDespesas.getColumn(3).width = 20;
     wsDespesas.getColumn(4).width = 15;
 
-    // ===== ABA 4: TODAS AS TRANSAÇÕES =====
+    // ===== ABA 4: TODAS AS TRANSACOES =====
     if (transacoesFiltradas && transacoesFiltradas.length > 0) {
-      const wsTodas = workbook.addWorksheet('Todas Transações', {
+      const wsTodas = workbook.addWorksheet('Todas Transacoes', {
         views: [{ showGridLines: false }],
       });
 
-      // Título
+      // Titulo
       wsTodas.mergeCells('A1:E1');
       const todasTitleCell = wsTodas.getCell('A1');
-      todasTitleCell.value = 'TODAS AS TRANSAÇÕES';
+      todasTitleCell.value = 'TODAS AS TRANSACOES';
       todasTitleCell.font = { name: 'Arial', size: 18, bold: true, color: { argb: 'FFFFFFFF' } };
       todasTitleCell.fill = {
         type: 'pattern',
@@ -460,8 +460,8 @@ export default function ExcelExportButton({
       todasTitleCell.alignment = { horizontal: 'center', vertical: 'middle' };
       wsTodas.getRow(1).height = 30;
 
-      // Cabeçalhos
-      const todasHeaders = ['Data', 'Descrição', 'Tipo', 'Categoria', 'Valor'];
+      // Cabecalhos
+      const todasHeaders = ['Data', 'Descricao', 'Tipo', 'Categoria', 'Valor'];
       todasHeaders.forEach((header, idx) => {
         const cell = wsTodas.getCell(3, idx + 1);
         cell.value = header;
@@ -532,7 +532,7 @@ export default function ExcelExportButton({
           for (let col = 1; col <= 5; col++) {
             const cell = row.getCell(col);
             if (col !== 3) {
-              // Não sobrescrever a cor do tipo
+              // Nao sobrescrever a cor do tipo
               cell.fill = {
                 type: 'pattern',
                 pattern: 'solid',
@@ -565,10 +565,10 @@ export default function ExcelExportButton({
   return (
     <button
       onClick={exportToExcel}
-      className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-medium shadow-md transition"
+      className="flex w-full sm:w-auto items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-medium shadow-md transition"
     >
       <ArrowUpTrayIcon className="w-5 h-5" />
-      Exportar Relatório Excel
+      Exportar Relatorio Excel
     </button>
   );
 }

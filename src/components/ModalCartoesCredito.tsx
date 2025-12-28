@@ -29,8 +29,8 @@ const ModalCartoesCredito: React.FC<ModalCartoesCreditoProps> = ({ isOpen, onClo
       const response = await apiService.getCartoesCredito({ page_size: 100 });
       setCartoes(response.data || []);
     } catch (error) {
-      console.error('Erro ao carregar cartões:', error);
-      setToast({ message: 'Erro ao carregar cartões. Tente novamente.', type: 'error' });
+      console.error('Erro ao carregar cartoes:', error);
+      setToast({ message: 'Erro ao carregar cartoes. Tente novamente.', type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -59,11 +59,11 @@ const ModalCartoesCredito: React.FC<ModalCartoesCreditoProps> = ({ isOpen, onClo
   const confirmarDelete = async () => {
     try {
       await apiService.deleteCartaoCredito(confirmDelete.id);
-      setToast({ message: 'Cartão deletado com sucesso!', type: 'success' });
+      setToast({ message: 'Cartao deletado com sucesso!', type: 'success' });
       await loadCartoes();
     } catch (error: any) {
-      console.error('Erro ao deletar cartão:', error);
-      setToast({ message: error.message || 'Erro ao deletar cartão. Tente novamente.', type: 'error' });
+      console.error('Erro ao deletar cartao:', error);
+      setToast({ message: error.message || 'Erro ao deletar cartao. Tente novamente.', type: 'error' });
     } finally {
       setConfirmDelete({ isOpen: false, id: '', nome: '' });
     }
@@ -76,7 +76,7 @@ const ModalCartoesCredito: React.FC<ModalCartoesCreditoProps> = ({ isOpen, onClo
   const handleFormSuccess = async () => {
     setShowForm(false);
     setEditingCartao(null);
-    const message = editingCartao ? 'Cartão atualizado com sucesso!' : 'Cartão criado com sucesso!';
+    const message = editingCartao ? 'Cartao atualizado com sucesso!' : 'Cartao criado com sucesso!';
     setToast({ message, type: 'success' });
     await loadCartoes();
   };
@@ -97,35 +97,35 @@ const ModalCartoesCredito: React.FC<ModalCartoesCreditoProps> = ({ isOpen, onClo
       <Modal
         isOpen={isOpen && !showForm}
         onClose={onClose}
-        title="Meus Cartões de Crédito"
+        title="Meus Cartoes de Credito"
         size="xl"
       >
         <div className="space-y-4">
-          {/* Botão Adicionar */}
+          {/* Botao Adicionar */}
           <button
             onClick={handleAddNew}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white rounded-lg font-medium transition"
           >
             <PlusIcon className="w-5 h-5" />
-            Adicionar Novo Cartão
+            Adicionar Novo Cartao
           </button>
 
           {/* Loading */}
           {loading && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              Carregando cartões...
+              Carregando cartoes...
             </div>
           )}
 
-          {/* Lista de Cartões */}
+          {/* Lista de Cartoes */}
           {!loading && cartoes.length === 0 && (
             <div className="text-center py-12">
               <CreditCardIcon className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
               <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Nenhum cartão cadastrado
+                Nenhum cartao cadastrado
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                Adicione seu primeiro cartão de crédito para começar
+                Adicione seu primeiro cartao de credito para comecar
               </p>
             </div>
           )}
@@ -148,7 +148,7 @@ const ModalCartoesCredito: React.FC<ModalCartoesCreditoProps> = ({ isOpen, onClo
                     </span>
                   )}
 
-                  {/* Conteúdo */}
+                  {/* Conteudo */}
                   <div className="mb-3">
                     <div className="flex items-start justify-between mb-2">
                       <div>
@@ -183,7 +183,7 @@ const ModalCartoesCredito: React.FC<ModalCartoesCreditoProps> = ({ isOpen, onClo
                     )}
                   </div>
 
-                  {/* Ações */}
+                  {/* Acoes */}
                   <div className="flex gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
                     <button
                       onClick={() => handleEdit(cartao)}
@@ -207,11 +207,11 @@ const ModalCartoesCredito: React.FC<ModalCartoesCreditoProps> = ({ isOpen, onClo
         </div>
       </Modal>
 
-      {/* Modal do Formulário */}
+      {/* Modal do Formulario */}
       <Modal
         isOpen={showForm}
         onClose={handleFormCancel}
-        title={editingCartao ? 'Editar Cartão' : 'Novo Cartão'}
+        title={editingCartao ? 'Editar Cartao' : 'Novo Cartao'}
       >
         <FormCartaoCredito
           cartao={editingCartao}
@@ -220,11 +220,11 @@ const ModalCartoesCredito: React.FC<ModalCartoesCreditoProps> = ({ isOpen, onClo
         />
       </Modal>
 
-      {/* Dialog de Confirmação */}
+      {/* Dialog de Confirmacao */}
       <ConfirmDialog
         isOpen={confirmDelete.isOpen}
-        title="Deletar Cartão?"
-        message={`Tem certeza que deseja deletar o cartão "${confirmDelete.nome}"? Os gastos futuros associados a este cartão terão o campo de cartão removido, mas não serão deletados.`}
+        title="Deletar Cartao?"
+        message={`Tem certeza que deseja deletar o cartao "${confirmDelete.nome}"? Os gastos futuros associados a este cartao terao o campo de cartao removido, mas nao serao deletados.`}
         confirmLabel="Sim, deletar"
         cancelLabel="Cancelar"
         onConfirm={confirmarDelete}

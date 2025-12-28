@@ -39,7 +39,7 @@ const FiltrosGastosFuturos: React.FC<FiltrosGastosFuturosProps> = ({
       const response = await apiService.getCartoesCredito({ page_size: 100 });
       setCartoes(response.data || []);
     } catch (error) {
-      console.error('Erro ao carregar cartões:', error);
+      console.error('Erro ao carregar cartoes:', error);
     }
   };
 
@@ -62,8 +62,8 @@ const FiltrosGastosFuturos: React.FC<FiltrosGastosFuturosProps> = ({
 
   return (
     <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
-      {/* Cabeçalho dos Filtros */}
-      <div className="flex items-center justify-between mb-4">
+      {/* Cabecalho dos Filtros */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
           <FunnelIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -76,7 +76,7 @@ const FiltrosGastosFuturos: React.FC<FiltrosGastosFuturosProps> = ({
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {temFiltrosAtivos && (
             <button
               onClick={handleLimparFiltros}
@@ -98,10 +98,10 @@ const FiltrosGastosFuturos: React.FC<FiltrosGastosFuturosProps> = ({
       {/* Grid de Filtros */}
       {mostrarFiltros && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          {/* Filtro por Cartão */}
+          {/* Filtro por Cartao */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Cartão de Crédito
+              Cartao de Credito
             </label>
             <select
               value={filtros.cartao}
@@ -110,8 +110,8 @@ const FiltrosGastosFuturos: React.FC<FiltrosGastosFuturosProps> = ({
               }
               className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             >
-              <option value="todos">Todos os Cartões</option>
-              <option value="sem_cartao">Sem Cartão</option>
+              <option value="todos">Todos os Cartoes</option>
+              <option value="sem_cartao">Sem Cartao</option>
               {cartoes.map((cartao) => (
                 <option key={cartao.id} value={cartao.id}>
                   {cartao.nome_cartao}
@@ -160,7 +160,7 @@ const FiltrosGastosFuturos: React.FC<FiltrosGastosFuturosProps> = ({
             </select>
           </div>
 
-          {/* Filtro por Data de Vencimento - Início */}
+          {/* Filtro por Data de Vencimento - Inicio */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Vencimento a partir de
@@ -178,7 +178,7 @@ const FiltrosGastosFuturos: React.FC<FiltrosGastosFuturosProps> = ({
           {/* Filtro por Data de Vencimento - Fim */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Vencimento até
+              Vencimento ate
             </label>
             <input
               type="date"
@@ -201,9 +201,9 @@ const FiltrosGastosFuturos: React.FC<FiltrosGastosFuturosProps> = ({
             </span>
             {filtros.cartao !== 'todos' && (
               <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-full text-xs font-medium">
-                Cartão:{' '}
+                Cartao:{' '}
                 {filtros.cartao === 'sem_cartao'
-                  ? 'Sem Cartão'
+                  ? 'Sem Cartao'
                   : cartoes.find((c) => c.id === filtros.cartao)?.nome_cartao ||
                     filtros.cartao}
               </span>
@@ -225,7 +225,7 @@ const FiltrosGastosFuturos: React.FC<FiltrosGastosFuturosProps> = ({
             )}
             {filtros.dataFim && (
               <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-xs font-medium">
-                Até: {new Date(filtros.dataFim).toLocaleDateString('pt-BR')}
+                Ate: {new Date(filtros.dataFim).toLocaleDateString('pt-BR')}
               </span>
             )}
           </div>

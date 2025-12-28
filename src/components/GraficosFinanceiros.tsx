@@ -80,16 +80,16 @@ export default function GraficosFinanceiros({
     '#8b5cf6', // Violet 500
   ];
 
-  // === AGRUPAMENTO POR MÊS PARA O GRÁFICO DE LINHA ===
+  // === AGRUPAMENTO POR MES PARA O GRAFICO DE LINHA ===
   const fluxoMensal = (() => {
     const mapa: Record<string, { receitas: number; despesas: number; gastosFuturos: number; data: Date }> = {};
 
-    // Adicionar transações normais (receitas e despesas)
+    // Adicionar transacoes normais (receitas e despesas)
     transacoesFiltradas.forEach((t) => {
       const data = new Date(t.data);
       if (isNaN(data.getTime())) return;
 
-      // Chave única com ano e mês: "2025-12"
+      // Chave unica com ano e mes: "2025-12"
       const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`;
 
       if (!mapa[chave]) {
@@ -103,7 +103,7 @@ export default function GraficosFinanceiros({
       }
     });
 
-    // Adicionar gastos futuros pendentes por mês
+    // Adicionar gastos futuros pendentes por mes
     gastosFuturos.forEach((gasto) => {
       if (gasto.status === 'ativo' && gasto.parcelas) {
         gasto.parcelas.forEach((parcela) => {
@@ -130,7 +130,7 @@ export default function GraficosFinanceiros({
         receitas: valores.receitas > 0 ? valores.receitas : null,
         despesas: valores.despesas > 0 ? valores.despesas : null,
         gastosFuturos: valores.gastosFuturos > 0 ? valores.gastosFuturos : null,
-        ordem: valores.data.getTime(), // Para ordenação
+        ordem: valores.data.getTime(), // Para ordenacao
       }))
       .sort((a, b) => a.ordem - b.ordem) // Ordenar cronologicamente
       .map(({ mes, receitas, despesas, gastosFuturos }) => ({
@@ -145,7 +145,7 @@ export default function GraficosFinanceiros({
   const categoriasGastos = (() => {
     const categoriaMap: Record<string, number> = {};
 
-    // Adicionar APENAS despesas normais (não incluir gastos futuros)
+    // Adicionar APENAS despesas normais (nao incluir gastos futuros)
     transacoesFiltradas
       .filter((t) => t.tipo === 'Despesa')
       .forEach((t) => {
@@ -163,7 +163,7 @@ export default function GraficosFinanceiros({
       .sort((a, b) => b.value - a.value); // Ordenar para cores consistentes
   })();
 
-  // Criar mapeamento de cores fixas para despesas (agora já ordenado)
+  // Criar mapeamento de cores fixas para despesas (agora ja ordenado)
   const coresMapDespesas = categoriasGastos.reduce((acc, categoria, index) => {
     acc[categoria.name] = coresDespesas[index % coresDespesas.length];
     return acc;
@@ -215,7 +215,7 @@ export default function GraficosFinanceiros({
       .sort((a, b) => b.value - a.value); // Ordenar para cores consistentes
   })();
 
-  // Criar mapeamento de cores fixas para receitas (agora já ordenado)
+  // Criar mapeamento de cores fixas para receitas (agora ja ordenado)
   const coresMapReceitas = categoriasReceitas.reduce((acc, categoria, index) => {
     acc[categoria.name] = coresReceitas[index % coresReceitas.length];
     return acc;
@@ -223,7 +223,7 @@ export default function GraficosFinanceiros({
 
   return (
     <>
-      {/* ===== GRÁFICO: FLUXO DE CAIXA MENSAL ===== */}
+      {/* ===== GRAFICO: FLUXO DE CAIXA MENSAL ===== */}
       {fluxoMensal.length > 0 && (
         <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700 overflow-hidden">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
@@ -290,10 +290,10 @@ export default function GraficosFinanceiros({
         </section>
       )}
 
-      {/* ===== GRÁFICOS DE PIZZA ===== */}
+      {/* ===== GRAFICOS DE PIZZA ===== */}
       {(categoriasGastos.length > 0 || categoriasReceitas.length > 0) && (
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Gráfico de Despesas */}
+          {/* Grafico de Despesas */}
           {categoriasGastos.length > 0 && (
             <div
               className={`bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700 transition-all duration-500 ease-in-out ${
@@ -301,7 +301,7 @@ export default function GraficosFinanceiros({
               } overflow-hidden`}
             >
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
-                Distribuição de Despesas por Categoria
+                Distribuicao de Despesas por Categoria
               </h2>
               <ResponsiveContainer width="100%" height={350}>
                 <PieChart>
@@ -339,7 +339,7 @@ export default function GraficosFinanceiros({
                 </PieChart>
               </ResponsiveContainer>
 
-              {/* Botão para mostrar/ocultar detalhes */}
+              {/* Botao para mostrar/ocultar detalhes */}
               <div className="mt-4">
                 <button
                   onClick={() => setMostrarDetalhesDespesas(!mostrarDetalhesDespesas)}
@@ -394,7 +394,7 @@ export default function GraficosFinanceiros({
             </div>
           )}
 
-          {/* Gráfico de Receitas */}
+          {/* Grafico de Receitas */}
           {categoriasReceitas.length > 0 && (
             <div
               className={`bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700 transition-all duration-500 ease-in-out ${
@@ -402,7 +402,7 @@ export default function GraficosFinanceiros({
               } overflow-hidden`}
             >
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
-                Distribuição de Receitas por Categoria
+                Distribuicao de Receitas por Categoria
               </h2>
               <ResponsiveContainer width="100%" height={350}>
                 <PieChart>
@@ -440,7 +440,7 @@ export default function GraficosFinanceiros({
                 </PieChart>
               </ResponsiveContainer>
 
-              {/* Botão para mostrar/ocultar detalhes */}
+              {/* Botao para mostrar/ocultar detalhes */}
               <div className="mt-4">
                 <button
                   onClick={() => setMostrarDetalhesReceitas(!mostrarDetalhesReceitas)}

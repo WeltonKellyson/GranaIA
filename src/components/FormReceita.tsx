@@ -20,7 +20,7 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
     data: receita?.data ? receita.data.split('T')[0] : new Date().toISOString().split('T')[0],
   });
 
-  // Formatar valor para exibição
+  // Formatar valor para exibicao
   const formatarValorDisplay = (valor: number): string => {
     if (valor === 0) return '';
     const valorStr = valor.toFixed(2).replace('.', ',');
@@ -55,16 +55,16 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
   const handleValorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let input = e.target.value;
 
-    // Remove tudo exceto números e vírgula
+    // Remove tudo exceto numeros e virgula
     input = input.replace(/[^\d,]/g, '');
 
-    // Garante apenas uma vírgula
+    // Garante apenas uma virgula
     const parts = input.split(',');
     if (parts.length > 2) {
       input = parts[0] + ',' + parts.slice(1).join('');
     }
 
-    // Limita a 2 casas decimais após a vírgula
+    // Limita a 2 casas decimais apos a virgula
     if (parts.length === 2 && parts[1].length > 2) {
       input = parts[0] + ',' + parts[1].slice(0, 2);
     }
@@ -78,7 +78,7 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
 
     setValorDisplay(input);
 
-    // Converte para número para salvar no formData
+    // Converte para numero para salvar no formData
     const valorNumerico = parseFloat(
       input.replace(/\./g, '').replace(',', '.')
     ) || 0;
@@ -93,19 +93,19 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validações mais robustas
+    // Validacoes mais robustas
     if (!formData.descricao || formData.descricao.trim().length === 0) {
-      setError('Por favor, informe uma descrição válida');
+      setError('Por favor, informe uma descricao valida');
       return;
     }
 
     if (formData.descricao.trim().length < 3) {
-      setError('A descrição deve ter pelo menos 3 caracteres');
+      setError('A descricao deve ter pelo menos 3 caracteres');
       return;
     }
 
     if (formData.descricao.trim().length > 200) {
-      setError('A descrição deve ter no máximo 200 caracteres');
+      setError('A descricao deve ter no maximo 200 caracteres');
       return;
     }
 
@@ -115,7 +115,7 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
     }
 
     if (formData.valor > 999999999) {
-      setError('O valor é muito alto. Máximo permitido: R$ 999.999.999,00');
+      setError('O valor e muito alto. Maximo permitido: R$ 999.999.999,00');
       return;
     }
 
@@ -125,7 +125,7 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
     }
 
     if (formData.origem && formData.origem.trim().length > 100) {
-      setError('A origem deve ter no máximo 100 caracteres');
+      setError('A origem deve ter no maximo 100 caracteres');
       return;
     }
 
@@ -159,17 +159,17 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
     } catch (err: any) {
       console.error('Erro ao salvar receita:', err);
 
-      // Tratamento de erros mais específico
+      // Tratamento de erros mais especifico
       let errorMessage = 'Erro ao salvar receita. Tente novamente.';
 
       if (err.response) {
         // Erro da API
         if (err.response.status === 401) {
-          errorMessage = 'Sessão expirada. Por favor, faça login novamente.';
+          errorMessage = 'Sessao expirada. Por favor, faca login novamente.';
         } else if (err.response.status === 403) {
-          errorMessage = 'Você não tem permissão para realizar esta ação.';
+          errorMessage = 'Voce nao tem permissao para realizar esta acao.';
         } else if (err.response.status === 404) {
-          errorMessage = 'Receita não encontrada.';
+          errorMessage = 'Receita nao encontrada.';
         } else if (err.response.status === 500) {
           errorMessage = 'Erro no servidor. Tente novamente mais tarde.';
         } else if (err.response.data?.message) {
@@ -177,7 +177,7 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
         }
       } else if (err.request) {
         // Erro de rede
-        errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
+        errorMessage = 'Erro de conexao. Verifique sua internet e tente novamente.';
       }
 
       setError(errorMessage);
@@ -187,10 +187,10 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
   };
 
   const categorias = [
-    'Salário',
+    'Salario',
     'Freelance',
     'Investimentos',
-    'Bonificação',
+    'Bonificacao',
     'Presente',
     'Aluguel',
     'Venda',
@@ -219,10 +219,10 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
         </div>
       )}
 
-      {/* Descrição */}
+      {/* Descricao */}
       <div>
         <label htmlFor="descricao" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Descrição <span className="text-red-500 dark:text-red-400">*</span>
+          Descricao <span className="text-red-500 dark:text-red-400">*</span>
         </label>
         <input
           type="text"
@@ -231,7 +231,7 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
           value={formData.descricao}
           onChange={handleChange}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 placeholder-gray-400 dark:placeholder-gray-500"
-          placeholder="Ex: Salário mensal"
+          placeholder="Ex: Salario mensal"
           required
         />
       </div>
@@ -306,7 +306,7 @@ const FormReceita: React.FC<FormReceitaProps> = ({ receita, onSuccess, onCancel 
         />
       </div>
 
-      {/* Botões */}
+      {/* Botoes */}
       <div className="flex gap-3 pt-4">
         <button
           type="button"

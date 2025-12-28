@@ -30,7 +30,7 @@ import FormGastoFuturo from '../components/FormGastoFuturo';
 import PremiumExpiredModal from '../components/PremiumExpiredModal';
 import ExcelExportButton from '../components/ExcelExportButton';
 import Toast from '../components/Toast';
-// import MetasGastos from '../components/MetasGastos'; // TODO: Implementar módulo de metas
+// import MetasGastos from '../components/MetasGastos'; // TODO: Implementar mdulo de metas
 import EmptyState from '../components/EmptyState';
 import ConfirmDialog from '../components/ConfirmDialog';
 import ModalCartoesCredito from '../components/ModalCartoesCredito';
@@ -46,7 +46,7 @@ interface ToastMessage {
   type: 'success' | 'error' | 'info';
 }
 
-// Função para formatar valores em Real brasileiro
+// Funcao para formatar valores em Real brasileiro
 const formatarMoeda = (valor: number): string => {
   return valor.toLocaleString('pt-BR', {
     style: 'currency',
@@ -78,10 +78,10 @@ export default function Dashboard() {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [toast, setToast] = useState<ToastMessage | null>(null);
 
-  // Verifica se o premium está ativo
+  // Verifica se o premium est ativo
   const isPremiumActive = userProfile?.is_premium_active ?? false;
 
-  // Função para pegar apenas o primeiro e segundo nome
+  // Funcao para pegar apenas o primeiro e segundo nome
   const getShortName = (fullName?: string) => {
     if (!fullName) return '';
     const nameParts = fullName.trim().split(' ');
@@ -124,17 +124,17 @@ export default function Dashboard() {
   // Estado da pesquisa (separado dos filtros)
   const [pesquisaDescricao, setPesquisaDescricao] = useState('');
 
-  // Estado de comparação entre períodos
+  // Estado de comparacao entre periodos
   const [mostrarComparacao, setMostrarComparacao] = useState(false);
 
-  // Estado para confirmação de exclusão
+  // Estado para confirmacao de exclusao
   const [confirmDelete, setConfirmDelete] = useState<{
     isOpen: boolean;
     id: string;
     tipo: 'gasto' | 'receita';
   }>({ isOpen: false, id: '', tipo: 'gasto' });
 
-  // Estado de visualização (tabela ou calendário)
+  // Estado de visualizacao (tabela ou calendrio)
   const [visualizacao, setVisualizacao] = useState<'tabela' | 'calendario'>('tabela');
 
   // Estado da aba ativa
@@ -151,7 +151,7 @@ export default function Dashboard() {
       return;
     }
 
-    // Se o premium não está ativo, não carrega os dados
+    // Se o premium nao est ativo, nao carrega os dados
     if (!isPremiumActive) {
       setLoading(false);
       setShowPremiumModal(true);
@@ -211,7 +211,7 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userProfile?.remotejid]);
 
-  // Monitora mudanças no status do premium
+  // Monitora mudanas no status do premium
   useEffect(() => {
     if (userProfile && !isPremiumActive) {
       setShowPremiumModal(true);
@@ -299,8 +299,8 @@ export default function Dashboard() {
   };
 
   const handleDuplicateGastoFuturo = (gastoFuturo: GastoFuturoResponse) => {
-    // Criar uma cópia do gasto futuro, removendo o ID para criar um novo
-    // e ajustando a data de vencimento para 1 mês à frente
+    // Criar uma cpia do gasto futuro, removendo o ID para criar um novo
+    // e ajustando a data de vencimento para 1 mes a frente
     const hoje = new Date();
     const proximaData = new Date(hoje.getFullYear(), hoje.getMonth() + 1, hoje.getDate());
     const dataFormatada = proximaData.toISOString().split('T')[0];
@@ -308,10 +308,10 @@ export default function Dashboard() {
     const gastoFuturoDuplicado: GastoFuturoResponse = {
       ...gastoFuturo,
       id: '', // Remove o ID para criar um novo
-      descricao: `${gastoFuturo.descricao} (Cópia)`,
+      descricao: `${gastoFuturo.descricao} (Copia)`,
       data_vencimento: dataFormatada,
       status: 'ativo',
-      parcelas: [], // Limpar parcelas pois será recriado
+      parcelas: [], // Limpar parcelas pois ser recriado
       created_at: '',
       updated_at: '',
     };
@@ -385,7 +385,7 @@ export default function Dashboard() {
     }
   };
 
-  // Combinar APENAS gastos e receitas (gastos futuros NÃO impactam o saldo)
+  // Combinar APENAS gastos e receitas (gastos futuros NAO impactam o saldo)
   const todasTransacoes: Transacao[] = [
     ...gastos.map((g) => ({
       id: g.id,
@@ -405,10 +405,10 @@ export default function Dashboard() {
     })),
   ];
 
-  // Lista separada para visualização: transações + gastos futuros (apenas para exibição)
+  // Lista separada para visualizacao: transacoes + gastos futuros (apenas para exibicao)
   const todasTransacoesComFuturos: Transacao[] = [
     ...todasTransacoes,
-    // Adicionar parcelas pendentes de gastos futuros APENAS para visualização
+    // Adicionar parcelas pendentes de gastos futuros APENAS para visualizacao
     ...gastosFuturos.flatMap((gasto) => {
       if (gasto.status === 'ativo' && gasto.parcelas) {
         return gasto.parcelas
@@ -432,10 +432,10 @@ export default function Dashboard() {
     const hoje = new Date();
     const anoMes = t.data.slice(0, 7); // pega "2025-03" por exemplo
 
-    // Filtro de mês específico (se selecionado, tem prioridade sobre período)
+    // Filtro de mes especifico (se selecionado, tem prioridade sobre periodo)
     const filtroMesOK = filtros.mes ? anoMes === filtros.mes : true;
 
-    // Filtro de período customizado
+    // Filtro de periodo customizado
     let filtroPeriodoOK = true;
     if (!filtros.mes && filtros.periodo !== 'todos') {
       const diffTime = hoje.getTime() - dataTransacao.getTime();
@@ -477,7 +477,7 @@ export default function Dashboard() {
     return filtroMesOK && filtroPeriodoOK && filtroCategoriaOK && filtroTipoOK && filtroDescricaoOK;
   });
 
-  // === APLICAR FILTROS (incluindo gastos futuros para visualização) ===
+  // === APLICAR FILTROS (incluindo gastos futuros para visualizacao) ===
   const transacoesFiltradasComFuturos = todasTransacoesComFuturos.filter((t) => {
     const dataTransacao = new Date(t.data);
     const hoje = new Date();
@@ -526,7 +526,7 @@ export default function Dashboard() {
     return filtroMesOK && filtroPeriodoOK && filtroCategoriaOK && filtroTipoOK && filtroDescricaoOK;
   });
 
-  // Calcular resumo com base nas transações FILTRADAS (sem gastos futuros)
+  // Calcular resumo com base nas transacoes FILTRADAS (sem gastos futuros)
   const totalReceitas = transacoesFiltradas
     .filter((t) => t.tipo === 'Receita')
     .reduce((acc, t) => acc + t.valor, 0);
@@ -537,19 +537,19 @@ export default function Dashboard() {
 
   const saldo = totalReceitas - totalDespesas;
 
-  // === CÁLCULO DE TENDÊNCIAS (Mês Atual vs Mês Anterior) ===
+  // === CALCULO DE TENDENCIAS (Mes Atual vs Mes Anterior) ===
   const calcularTendencias = () => {
     const hoje = new Date();
     const mesAtual = hoje.getMonth();
     const anoAtual = hoje.getFullYear();
 
-    // Transações do mês atual
+    // Transacoes do mes atual
     const transacoesMesAtual = todasTransacoes.filter((t) => {
       const data = new Date(t.data);
       return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
     });
 
-    // Transações do mês anterior
+    // Transacoes do mes anterior
     const mesAnterior = mesAtual === 0 ? 11 : mesAtual - 1;
     const anoMesAnterior = mesAtual === 0 ? anoAtual - 1 : anoAtual;
     const transacoesMesAnterior = todasTransacoes.filter((t) => {
@@ -573,7 +573,7 @@ export default function Dashboard() {
       .filter((t) => t.tipo === 'Despesa')
       .reduce((acc, t) => acc + t.valor, 0);
 
-    // Calcular percentual de variação
+    // Calcular percentual de variacao
     const variacaoReceitas = receitasMesAnterior > 0
       ? ((receitasMesAtual - receitasMesAnterior) / receitasMesAnterior) * 100
       : receitasMesAtual > 0 ? 100 : 0;
@@ -590,7 +590,7 @@ export default function Dashboard() {
 
   const { variacaoReceitas, variacaoDespesas } = calcularTendencias();
 
-  // === CÁLCULO DE GASTOS FUTUROS PENDENTES ===
+  // === CALCULO DE GASTOS FUTUROS PENDENTES ===
   const calcularGastosFuturos = () => {
     let totalGastosFuturos = 0;
     let quantidadeParcelas = 0;
@@ -614,10 +614,10 @@ export default function Dashboard() {
 
   const { totalGastosFuturos, quantidadeGastosFuturos } = calcularGastosFuturos();
 
-  // === CÁLCULO DE PARCELAS ATRASADAS ===
-  const calcularParcelasAtrasadas = () => {
+  // === CALCULO DE PARCELAS ATRASADAS ===
+  const calcularParcelasAtrasaidas = () => {
     const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0); // Zerar horas para comparação precisa
+    hoje.setHours(0, 0, 0, 0); // Zerar horas para comparacao precisa
 
     let count = 0;
 
@@ -639,9 +639,9 @@ export default function Dashboard() {
     return count;
   };
 
-  const parcelasAtrasadas = calcularParcelasAtrasadas();
+  const parcelasAtrasaidas = calcularParcelasAtrasaidas();
 
-  // TODO: Descomentar quando implementar o módulo de metas de gastos
+  // TODO: Descomentar quando implementar o mdulo de metas de gastos
   // Agrupar despesas por categoria (para MetasGastos)
   // const categoriasGastos = (() => {
   //   const categoriaMap: Record<string, number> = {};
@@ -663,26 +663,26 @@ export default function Dashboard() {
 
   // Lista completa de categorias do sistema
   const todasCategorias = [
-    'Alimentação',
+    'Alimentacao',
     'Transporte',
     'Moradia',
     'Lazer',
-    'Saúde',
-    'Educação',
+    'Saude',
+    'Educacao',
     'Compras',
     'Viagem',
     'Assinaturas',
-    'Salário',
+    'Salario',
     'Freelance',
     'Investimentos',
-    'Bonificação',
+    'Bonificacao',
     'Presente',
     'Aluguel',
     'Venda',
     'Outros',
   ];
 
-  // Contar transações por categoria (sem filtros aplicados, usa todas as transações)
+  // Contar transacoes por categoria (sem filtros aplicados, usa todas as transacoes)
   const contagemPorCategoria = (() => {
     const contagem: Record<string, number> = {};
     todasTransacoes.forEach((t) => {
@@ -713,7 +713,7 @@ export default function Dashboard() {
             Carregando seu Dashboard
           </h3>
           <p className="text-sm text-gray-600 mb-4">
-            Estamos preparando suas informações financeiras...
+            Estamos preparando suas informacoes financeiras...
           </p>
 
           {/* Indicadores de progresso */}
@@ -728,7 +728,7 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center gap-3 text-sm text-gray-500">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse delay-150"></div>
-              <span>Gerando gráficos</span>
+              <span>Gerando graficos</span>
             </div>
           </div>
         </div>
@@ -738,7 +738,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-6 md:p-10 space-y-10 overflow-x-hidden">
-      {/* ===== CABEÇALHO ===== */}
+      {/* ===== CABECALHO ===== */}
       <header className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
@@ -746,7 +746,7 @@ export default function Dashboard() {
           </h1>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-center md:justify-end gap-4 w-full md:w-auto">
           <ExcelExportButton
             gastos={gastos}
             receitas={receitas}
@@ -759,7 +759,7 @@ export default function Dashboard() {
             filtros={filtros}
           />
 
-          {/* Botão de toggle do tema */}
+          {/* Botao de toggle do tema */}
           <button
             onClick={toggleTheme}
             className="p-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg shadow-sm transition"
@@ -772,7 +772,7 @@ export default function Dashboard() {
             )}
           </button>
 
-          {/* Menu do usuário */}
+          {/* Menu do usurio */}
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
@@ -817,7 +817,7 @@ export default function Dashboard() {
                   GranaIA pelo WhatsApp
                 </a>
 
-                {/* Já existente - Sair da conta */}
+                {/* Ja existente - Sair da conta */}
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition"
@@ -831,12 +831,12 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* ===== NAVEGAÇÃO POR ABAS ===== */}
+      {/* ===== NAVEGACAO POR ABAS ===== */}
       <nav className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="flex items-center">
           <button
             onClick={() => setAbaAtiva('dashboard')}
-            className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 font-semibold transition border-b-4 ${
+            className={`flex-1 min-w-0 flex items-center justify-center gap-2 px-6 py-4 font-semibold transition border-b-4 ${
               abaAtiva === 'dashboard'
                 ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-600'
                 : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-transparent hover:bg-gray-50 dark:hover:bg-gray-700'
@@ -845,55 +845,55 @@ export default function Dashboard() {
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
-            <span className="hidden md:inline">Dashboard</span>
+            <span className="hidden md:inline min-w-0 truncate">Dashboard</span>
             <span className="sr-only">Dashboard</span>
           </button>
           <button
             onClick={() => setAbaAtiva('cartoes')}
-            className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 font-semibold transition border-b-4 relative ${
+            className={`flex-1 min-w-0 flex items-center justify-center gap-2 px-6 py-4 font-semibold transition border-b-4 relative ${
               abaAtiva === 'cartoes'
                 ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border-purple-600'
                 : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-transparent hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
           >
             <CreditCardIcon className="w-5 h-5" />
-            <span className="hidden md:inline">Cartões de Crédito</span>
-            <span className="sr-only">Cartões de Crédito</span>
-            {parcelasAtrasadas > 0 && (
+            <span className="hidden md:inline min-w-0 truncate">Cartoes de Credito</span>
+            <span className="sr-only">Cartoes de Credito</span>
+            {parcelasAtrasaidas > 0 && (
               <span className="absolute -top-1 -right-1 sm:relative sm:top-0 sm:right-0 flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-red-600 text-white text-xs font-bold rounded-full animate-pulse">
-                {parcelasAtrasadas}
+                {parcelasAtrasaidas}
               </span>
             )}
           </button>
           <button
             onClick={() => setAbaAtiva('config')}
             disabled
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-4 font-semibold transition border-b-4 bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-600 border-transparent cursor-not-allowed opacity-50"
+            className="flex-1 min-w-0 flex items-center justify-center gap-2 px-6 py-4 font-semibold transition border-b-4 bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-600 border-transparent cursor-not-allowed opacity-50"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            <span className="hidden md:inline">Configurações</span>
-            <span className="sr-only">Configurações</span>
+            <span className="hidden md:inline min-w-0 truncate">Configuracoes</span>
+            <span className="sr-only">Configuracoes</span>
             <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 px-2 py-0.5 rounded-full">Em breve</span>
           </button>
           <button
             onClick={() => setAbaAtiva('lembretes')}
             disabled
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-4 font-semibold transition border-b-4 bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-600 border-transparent cursor-not-allowed opacity-50"
+            className="flex-1 min-w-0 flex items-center justify-center gap-2 px-6 py-4 font-semibold transition border-b-4 bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-600 border-transparent cursor-not-allowed opacity-50"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
-            <span className="hidden md:inline">Lembretes</span>
+            <span className="hidden md:inline min-w-0 truncate">Lembretes</span>
             <span className="sr-only">Lembretes</span>
             <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 px-2 py-0.5 rounded-full">Em breve</span>
           </button>
         </div>
       </nav>
 
-      {/* ===== CONTEÚDO BASEADO NA ABA ATIVA ===== */}
+      {/* ===== CONTEUDO BASEADO NA ABA ATIVA ===== */}
       {abaAtiva === 'dashboard' ? (
         <DashboardContent
           saldo={saldo}
@@ -992,7 +992,7 @@ export default function Dashboard() {
         />
       </Modal>
 
-      {/* Modal de Cartões de Crédito */}
+      {/* Modal de Cartoes de Credito */}
       <ModalCartoesCredito
         isOpen={showCartoesCreditoModal}
         onClose={() => setShowCartoesCreditoModal(false)}
@@ -1005,7 +1005,7 @@ export default function Dashboard() {
         premiumUntil={userProfile?.premium_until}
       />
 
-      {/* Toast de Notificação */}
+      {/* Toast de Notificacao */}
       {toast && (
         <Toast
           message={toast.message}
@@ -1014,11 +1014,11 @@ export default function Dashboard() {
         />
       )}
 
-      {/* Dialog de Confirmação de Exclusão */}
+      {/* Dialog de Confirmacao de Exclusao */}
       <ConfirmDialog
         isOpen={confirmDelete.isOpen}
         title={`Deletar ${confirmDelete.tipo === 'gasto' ? 'Gasto' : 'Receita'}?`}
-        message={`Tem certeza que deseja deletar est${confirmDelete.tipo === 'gasto' ? 'e gasto' : 'a receita'}? Esta ação não pode ser desfeita.`}
+        message={`Tem certeza que deseja deletar est${confirmDelete.tipo === 'gasto' ? 'e gasto' : 'a receita'}? Esta acao nao pode ser desfeita.`}
         confirmLabel="Sim, deletar"
         cancelLabel="Cancelar"
         onConfirm={confirmarDelete}

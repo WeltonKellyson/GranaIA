@@ -46,6 +46,9 @@ export default function CalendarioTransacoes({
   const [mesCalendario, setMesCalendario] = useState<Date>(new Date());
   const [diaSelecionado, setDiaSelecionado] = useState<string | null>(null);
   const [seletorMesAberto, setSeletorMesAberto] = useState(false);
+  const [modoVisualizacao, setModoVisualizacao] = useState<'mensal' | 'semanal' | 'diario'>('mensal');
+  const [dataFoco, setDataFoco] = useState<Date>(new Date());
+  const [seletorDataAberto, setSeletorDataAberto] = useState(false);
   const corIndicadorPorTipo: Record<Transacao['tipo'], string> = {
     Receita: 'bg-green-500',
     Despesa: 'bg-red-500',
@@ -66,6 +69,49 @@ export default function CalendarioTransacoes({
 
     return mapa;
   })();
+
+  const formatarDataCompleta = (data: Date) =>
+    data
+      .toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      })
+      .replace(/^\w/, (c) => c.toUpperCase());
+
+  const getInicioSemana = (data: Date) => {
+    const inicio = new Date(data);
+    const diaSemana = inicio.getDay();
+    inicio.setDate(inicio.getDate() - diaSemana);
+    inicio.setHours(0, 0, 0, 0);
+    return inicio;
+  };
+
+  const criarDiaInfo = (data: Date, mesAtual: boolean) => {
+    const dataStr = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-${String(
+      data.getDate(),
+    ).padStart(2, '0')}`;
+    const transacoesDia = transacoesPorDia[dataStr] || [];
+    const totalReceitas = transacoesDia
+      .filter((t) => t.tipo === 'Receita')
+      .reduce((acc, t) => acc + t.valor, 0);
+    const totalDespesas = transacoesDia
+      .filter((t) => t.tipo === 'Despesa')
+      .reduce((acc, t) => acc + t.valor, 0);
+    const totalGastosFuturos = transacoesDia
+      .filter((t) => t.tipo === 'Gasto Futuro')
+      .reduce((acc, t) => acc + t.valor, 0);
+
+    return {
+      data: dataStr,
+      dia: data.getDate(),
+      mesAtual,
+      transacoes: transacoesDia,
+      totalReceitas,
+      totalDespesas,
+      totalGastosFuturos,
+    };
+  };
 
   // Gerar dias do calendario
   const gerarDiasCalendario = () => {
@@ -176,7 +222,110 @@ export default function CalendarioTransacoes({
     return dias;
   };
 
-  const diasCalendario = gerarDiasCalendario();
+  const gerarDiasSemana = () => {
+    const inicioSemana = getInicioSemana(dataFoco);
+    return Array.from({ length: 7 }, (_, index) => {
+      const data = new Date(inicioSemana);
+      data.setDate(inicioSemana.getDate() + index);
+      return criarDiaInfo(data, true);
+    });
+  };
+
+  const gerarDiaUnico = () => [criarDiaInfo(dataFoco, true)];
+
+  const diasCalendario =
+    modoVisualizacao === 'mensal'
+      ? gerarDiasCalendario()
+      : modoVisualizacao === 'semanal'
+      ? gerarDiasSemana()
+      : gerarDiaUnico();
+
+  const tituloCalendario = (() => {
+    if (modoVisualizacao === 'mensal') {
+      return mesCalendario
+        .toLocaleDateString('pt-BR', {
+          month: 'long',
+          year: 'numeric',
+        })
+        .replace(/^\w/, (c) => c.toUpperCase());
+    }
+
+    if (modoVisualizacao === 'semanal') {
+      const inicioSemana = getInicioSemana(dataFoco);
+      const fimSemana = new Date(inicioSemana);
+      fimSemana.setDate(inicioSemana.getDate() + 6);
+      const mesmoMes =
+        inicioSemana.getMonth() === fimSemana.getMonth() &&
+        inicioSemana.getFullYear() === fimSemana.getFullYear();
+
+      if (mesmoMes) {
+        return `${inicioSemana.getDate()} a ${fimSemana.getDate()} de ${fimSemana
+          .toLocaleDateString('pt-BR', {
+            month: 'long',
+            year: 'numeric',
+          })
+          .replace(/^\w/, (c) => c.toUpperCase())}`;
+      }
+
+      return `${inicioSemana
+        .toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+        .replace('.', '')} a ${fimSemana
+        .toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+        .replace('.', '')}`;
+    }
+
+    return formatarDataCompleta(dataFoco);
+  })();
+
+  const cabecalhoDias =
+    modoVisualizacao === 'mensal'
+      ? ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab']
+      : diasCalendario.map((diaInfo) =>
+          new Date(diaInfo.data + 'T00:00:00')
+            .toLocaleDateString('pt-BR', { weekday: 'short' })
+            .replace('.', '')
+            .replace(/^\w/, (c) => c.toUpperCase()),
+        );
+
+  const colunasGrid = modoVisualizacao === 'diario' ? 'grid-cols-1' : 'grid-cols-7';
+
+  const handleMudarModo = (modo: 'mensal' | 'semanal' | 'diario') => {
+    setModoVisualizacao(modo);
+    setSeletorMesAberto(false);
+    setSeletorDataAberto(false);
+    const base = diaSelecionado ? new Date(diaSelecionado) : new Date();
+    if (modo === 'mensal') {
+      setMesCalendario(new Date(base.getFullYear(), base.getMonth(), 1));
+    } else {
+      setDataFoco(base);
+    }
+  };
+
+  const handleAnterior = () => {
+    if (modoVisualizacao === 'mensal') {
+      const novoMes = new Date(mesCalendario);
+      novoMes.setMonth(novoMes.getMonth() - 1);
+      setMesCalendario(novoMes);
+      return;
+    }
+
+    const novaData = new Date(dataFoco);
+    novaData.setDate(novaData.getDate() - (modoVisualizacao === 'semanal' ? 7 : 1));
+    setDataFoco(novaData);
+  };
+
+  const handleProximo = () => {
+    if (modoVisualizacao === 'mensal') {
+      const novoMes = new Date(mesCalendario);
+      novoMes.setMonth(novoMes.getMonth() + 1);
+      setMesCalendario(novoMes);
+      return;
+    }
+
+    const novaData = new Date(dataFoco);
+    novaData.setDate(novaData.getDate() + (modoVisualizacao === 'semanal' ? 7 : 1));
+    setDataFoco(novaData);
+  };
 
   // Transacoes do dia selecionado
   const transacoesDiaSelecionado = diaSelecionado
@@ -185,150 +334,230 @@ export default function CalendarioTransacoes({
 
   return (
     <div>
-      {/* Navegacao do calendario */}
-      <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={() => {
-            const novoMes = new Date(mesCalendario);
-            novoMes.setMonth(novoMes.getMonth() - 1);
-            setMesCalendario(novoMes);
-          }}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
-        >
-          <ChevronLeftIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-        </button>
-
-        {/* Titulo do mes (clicavel) com seletor */}
-        <div className="relative">
-          <button
-            onClick={() => setSeletorMesAberto(!seletorMesAberto)}
-            className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
-          >
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {mesCalendario
-                .toLocaleDateString('pt-BR', {
-                  month: 'long',
-                  year: 'numeric',
-                })
-                .replace(/^\w/, (c) => c.toUpperCase())}
-            </h3>
-            <ChevronDownIcon
-              className={`w-4 h-4 text-gray-600 dark:text-gray-300 transition-transform ${
-                seletorMesAberto ? 'rotate-180' : ''
+      <div className="flex flex-col gap-3 mb-6">
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+            <button
+              onClick={() => handleMudarModo('mensal')}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
+                modoVisualizacao === 'mensal'
+                  ? 'bg-white dark:bg-gray-600 text-green-600 dark:text-green-400 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
               }`}
-            />
-          </button>
-
-          {/* Dropdown de selecao rapida de mes/ano */}
-          {seletorMesAberto && (
-            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-20 p-4 w-80">
-              {/* Seletor de Ano */}
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
-                <button
-                  onClick={() => {
-                    const novoMes = new Date(mesCalendario);
-                    novoMes.setFullYear(novoMes.getFullYear() - 1);
-                    setMesCalendario(novoMes);
-                  }}
-                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
-                >
-                  <ChevronLeftIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-                </button>
-
-                <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                  {mesCalendario.getFullYear()}
-                </span>
-
-                <button
-                  onClick={() => {
-                    const novoMes = new Date(mesCalendario);
-                    novoMes.setFullYear(novoMes.getFullYear() + 1);
-                    setMesCalendario(novoMes);
-                  }}
-                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
-                >
-                  <ChevronRightIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-                </button>
-              </div>
-
-              {/* Grid de Meses */}
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  'Jan',
-                  'Fev',
-                  'Mar',
-                  'Abr',
-                  'Mai',
-                  'Jun',
-                  'Jul',
-                  'Ago',
-                  'Set',
-                  'Out',
-                  'Nov',
-                  'Dez',
-                ].map((mes, index) => {
-                  const ehMesAtual = mesCalendario.getMonth() === index;
-                  const hoje = new Date();
-                  const ehMesHoje =
-                    hoje.getMonth() === index &&
-                    hoje.getFullYear() === mesCalendario.getFullYear();
-
-                  return (
-                    <button
-                      key={mes}
-                      onClick={() => {
-                        const novoMes = new Date(mesCalendario);
-                        novoMes.setMonth(index);
-                        setMesCalendario(novoMes);
-                        setSeletorMesAberto(false);
-                      }}
-                      className={`
-                        px-3 py-2 rounded-lg text-sm font-medium transition-all
-                        ${
-                          ehMesAtual
-                            ? 'bg-green-600 text-white shadow-md'
-                            : ehMesHoje
-                              ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800'
-                              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                        }
-                      `}
-                    >
-                      {mes}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Botao "Hoje" */}
-              <button
-                onClick={() => {
-                  setMesCalendario(new Date());
-                  setSeletorMesAberto(false);
-                }}
-                className="w-full mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-sm font-medium text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition"
-              >
-                Ir para hoje
-              </button>
-            </div>
-          )}
+            >
+              Mensal
+            </button>
+            <button
+              onClick={() => handleMudarModo('semanal')}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
+                modoVisualizacao === 'semanal'
+                  ? 'bg-white dark:bg-gray-600 text-green-600 dark:text-green-400 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              Semanal
+            </button>
+            <button
+              onClick={() => handleMudarModo('diario')}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
+                modoVisualizacao === 'diario'
+                  ? 'bg-white dark:bg-gray-600 text-green-600 dark:text-green-400 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              Dia
+            </button>
+            <button
+              onClick={() => {
+                const hoje = new Date();
+                if (modoVisualizacao === 'mensal') {
+                  setMesCalendario(new Date(hoje.getFullYear(), hoje.getMonth(), 1));
+                } else {
+                  setDataFoco(hoje);
+                }
+                setDiaSelecionado(hoje.toISOString().split('T')[0]);
+              }}
+              className="px-3 py-1.5 rounded-lg text-sm font-medium text-green-600 dark:text-green-400 border border-green-200 dark:border-green-700 hover:text-green-700 dark:hover:text-green-300 hover:border-green-300 dark:hover:border-green-500 transition"
+            >
+              Hoje
+            </button>
+          </div>
         </div>
 
-        <button
-          onClick={() => {
-            const novoMes = new Date(mesCalendario);
-            novoMes.setMonth(novoMes.getMonth() + 1);
-            setMesCalendario(novoMes);
-          }}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
-        >
-          <ChevronRightIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-        </button>
+        {/* Navegacao do calendario */}
+        <div className="flex items-center justify-between">
+          <button
+            onClick={handleAnterior}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
+          >
+            <ChevronLeftIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          </button>
+
+          {/* Titulo do mes (clicavel) com seletor */}
+          <div className="relative">
+            {modoVisualizacao === 'mensal' ? (
+              <button
+                onClick={() => setSeletorMesAberto(!seletorMesAberto)}
+                className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
+              >
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {tituloCalendario}
+                </h3>
+                <ChevronDownIcon
+                  className={`w-4 h-4 text-gray-600 dark:text-gray-300 transition-transform ${
+                    seletorMesAberto ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+            ) : (
+              <button
+                onClick={() => setSeletorDataAberto(!seletorDataAberto)}
+                className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
+              >
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {tituloCalendario}
+                </h3>
+                <ChevronDownIcon
+                  className={`w-4 h-4 text-gray-600 dark:text-gray-300 transition-transform ${
+                    seletorDataAberto ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+            )}
+
+            {/* Dropdown de selecao rapida de mes/ano */}
+            {modoVisualizacao === 'mensal' && seletorMesAberto && (
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-20 p-4 w-80">
+                {/* Seletor de Ano */}
+                <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={() => {
+                      const novoMes = new Date(mesCalendario);
+                      novoMes.setFullYear(novoMes.getFullYear() - 1);
+                      setMesCalendario(novoMes);
+                    }}
+                    className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
+                  >
+                    <ChevronLeftIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                  </button>
+
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {mesCalendario.getFullYear()}
+                  </span>
+
+                  <button
+                    onClick={() => {
+                      const novoMes = new Date(mesCalendario);
+                      novoMes.setFullYear(novoMes.getFullYear() + 1);
+                      setMesCalendario(novoMes);
+                    }}
+                    className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
+                  >
+                    <ChevronRightIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                  </button>
+                </div>
+
+                {/* Grid de Meses */}
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    'Jan',
+                    'Fev',
+                    'Mar',
+                    'Abr',
+                    'Mai',
+                    'Jun',
+                    'Jul',
+                    'Ago',
+                    'Set',
+                    'Out',
+                    'Nov',
+                    'Dez',
+                  ].map((mes, index) => {
+                    const ehMesAtual = mesCalendario.getMonth() === index;
+                    const hoje = new Date();
+                    const ehMesHoje =
+                      hoje.getMonth() === index &&
+                      hoje.getFullYear() === mesCalendario.getFullYear();
+
+                    return (
+                      <button
+                        key={mes}
+                        onClick={() => {
+                          const novoMes = new Date(mesCalendario);
+                          novoMes.setMonth(index);
+                          setMesCalendario(novoMes);
+                          setSeletorMesAberto(false);
+                        }}
+                        className={`
+                          px-3 py-2 rounded-lg text-sm font-medium transition-all
+                          ${
+                            ehMesAtual
+                              ? 'bg-green-600 text-white shadow-md'
+                              : ehMesHoje
+                                ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800'
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                          }
+                        `}
+                      >
+                        {mes}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Botao "Hoje" */}
+                <button
+                  onClick={() => {
+                    setMesCalendario(new Date());
+                    setSeletorMesAberto(false);
+                  }}
+                  className="w-full mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-sm font-medium text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition"
+                >
+                  Ir para hoje
+                </button>
+              </div>
+            )}
+
+            {modoVisualizacao !== 'mensal' && seletorDataAberto && (
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-20 p-4 w-72">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Selecionar data
+                </label>
+                <input
+                  type="date"
+                  value={dataFoco.toISOString().split('T')[0]}
+                  onChange={(e) => {
+                    setDataFoco(new Date(e.target.value + 'T00:00:00'));
+                    setSeletorDataAberto(false);
+                  }}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                />
+                <button
+                  onClick={() => {
+                    setDataFoco(new Date());
+                    setSeletorDataAberto(false);
+                  }}
+                  className="w-full mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-sm font-medium text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition"
+                >
+                  Ir para hoje
+                </button>
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={handleProximo}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
+          >
+            <ChevronRightIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          </button>
+        </div>
       </div>
 
       {/* Grade do calendario */}
-      <div className="grid grid-cols-7 gap-1.5 md:gap-2">
+      <div className={`grid ${colunasGrid} gap-1.5 md:gap-2`}>
         {/* Cabecalho dos dias da semana */}
-        {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'].map((dia) => (
+        {cabecalhoDias.map((dia) => (
           <div
             key={dia}
             className="text-center text-sm font-semibold text-gray-600 dark:text-gray-400 py-2"

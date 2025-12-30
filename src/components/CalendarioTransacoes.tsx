@@ -46,6 +46,11 @@ export default function CalendarioTransacoes({
   const [mesCalendario, setMesCalendario] = useState<Date>(new Date());
   const [diaSelecionado, setDiaSelecionado] = useState<string | null>(null);
   const [seletorMesAberto, setSeletorMesAberto] = useState(false);
+  const corIndicadorPorTipo: Record<Transacao['tipo'], string> = {
+    Receita: 'bg-green-500',
+    Despesa: 'bg-red-500',
+    'Gasto Futuro': 'bg-blue-500',
+  };
 
   // Agrupar transacoes por dia
   const transacoesPorDia = (() => {
@@ -337,6 +342,10 @@ export default function CalendarioTransacoes({
           const temTransacoes = diaInfo.transacoes.length > 0;
           const hoje = new Date().toISOString().split('T')[0];
           const ehHoje = diaInfo.data === hoje;
+          const indicadoresMobile = diaInfo.transacoes.slice(0, 4);
+          const possuiExcedenteMobile = diaInfo.transacoes.length > 4;
+          const quantidadeTransacoesDesktop = Math.min(diaInfo.transacoes.length, 3);
+          const possuiMaisTransacoesDesktop = diaInfo.transacoes.length > 3;
 
           return (
             <div
@@ -366,10 +375,10 @@ export default function CalendarioTransacoes({
               `}
             >
               <div className="flex flex-col items-center text-center text-[10px] md:text-xs leading-tight text-gray-700 dark:text-gray-200 gap-1">
-                <div className="text-sm font-semibold">
-                  {diaInfo.dia}
+                <div className="flex flex-col items-center">
+                  <span className="text-sm font-semibold">{diaInfo.dia}</span>
                   {ehHoje && (
-                    <span className="ml-1 text-xs text-blue-600 dark:text-blue-400 font-semibold">
+                    <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">
                       Hoje
                     </span>
                   )}
@@ -377,13 +386,21 @@ export default function CalendarioTransacoes({
 
                 {temTransacoes && (
                   <>
-                    {/* Mobile: apenas indicador e contagem vertical */}
+                    {/* Mobile: indicadores por tipo e excedente */}
                     <div className="md:hidden flex flex-col items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-red-500 inline-block"></span>
-                      <span className="whitespace-pre-line break-words">
-                        {diaInfo.transacoes.length}
-                        {'\ntran\nsa\ncoes'}
-                      </span>
+                      <div className="flex flex-col items-center gap-1">
+                        {indicadoresMobile.map((transacao, indicadorIndex) => (
+                          <span
+                            key={`${diaInfo.data}-indicador-${indicadorIndex}`}
+                            className={`h-1 w-6 rounded-full ${corIndicadorPorTipo[transacao.tipo]}`}
+                          />
+                        ))}
+                        {possuiExcedenteMobile && (
+                          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                            +
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {/* Desktop/tablet: valores detalhados */}
@@ -406,8 +423,8 @@ export default function CalendarioTransacoes({
                         )}
                       </div>
                       <div className="text-gray-500 dark:text-gray-400 pt-0.5 truncate">
-                        {diaInfo.transacoes.length}{' '}
-                        {diaInfo.transacoes.length === 1 ? 'transacao' : 'transacoes'}
+                        {quantidadeTransacoesDesktop}{possuiMaisTransacoesDesktop ? '+' : ''}{' '}
+                        {quantidadeTransacoesDesktop === 1 ? 'transacao' : 'transacoes'}
                       </div>
                     </div>
                   </>

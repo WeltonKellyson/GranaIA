@@ -101,6 +101,7 @@ export default function Dashboard() {
   const [gastoFuturoDashboard, setGastoFuturoDashboard] =
     useState<GastoFuturoDashboard | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   // Estados dos modais
   const [showGastoModal, setShowGastoModal] = useState(false);
@@ -145,9 +146,11 @@ export default function Dashboard() {
     navigate('/login');
   };
 
-  const loadData = async () => {
+  const loadData = async (options?: { showLoading?: boolean }) => {
+    const shouldShowLoading = options?.showLoading ?? true;
     if (!userProfile?.remotejid) {
       setLoading(false);
+      setHasLoaded(true);
       return;
     }
 
@@ -155,10 +158,13 @@ export default function Dashboard() {
     if (!isPremiumActive) {
       setLoading(false);
       setShowPremiumModal(true);
+      setHasLoaded(true);
       return;
     }
 
-    setLoading(true);
+    if (shouldShowLoading) {
+      setLoading(true);
+    }
     try {
       // Buscar gastos
       const gastosResponse = await apiService.getGastos({
@@ -202,7 +208,10 @@ export default function Dashboard() {
         type: 'error',
       });
     } finally {
-      setLoading(false);
+      setHasLoaded(true);
+      if (shouldShowLoading) {
+        setLoading(false);
+      }
     }
   };
 
@@ -235,7 +244,7 @@ export default function Dashboard() {
         await apiService.deleteReceita(confirmDelete.id);
         setToast({ message: 'Receita deletada com sucesso!', type: 'success' });
       }
-      await loadData();
+      await loadData({ showLoading: false });
     } catch (error) {
       setToast({
         message: `Erro ao deletar ${confirmDelete.tipo}. Tente novamente.`,
@@ -264,7 +273,7 @@ export default function Dashboard() {
     setShowGastoModal(false);
     const isEditing = editingGasto !== null;
     setEditingGasto(null);
-    await loadData();
+    await loadData({ showLoading: false });
     setToast({
       message: isEditing ? 'Gasto atualizado com sucesso!' : 'Gasto criado com sucesso!',
       type: 'success',
@@ -275,7 +284,7 @@ export default function Dashboard() {
     setShowReceitaModal(false);
     const isEditing = editingReceita !== null;
     setEditingReceita(null);
-    await loadData();
+    await loadData({ showLoading: false });
     setToast({
       message: isEditing ? 'Receita atualizada com sucesso!' : 'Receita criada com sucesso!',
       type: 'success',
@@ -696,7 +705,7 @@ export default function Dashboard() {
 
 
 
-  if (loading) {
+  if (loading && !hasLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center max-w-md mx-auto px-6">

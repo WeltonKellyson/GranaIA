@@ -337,13 +337,20 @@ export default function GraficosFinanceiros({
                     labelStyle={{ fontWeight: 'bold', color: 'var(--tooltip-text)' }}
                     itemStyle={{ color: 'var(--tooltip-text)' }}
                   />
-                  <Legend
-                    verticalAlign="bottom"
-                    height={36}
-                    wrapperStyle={{ paddingTop: '20px' }}
-                  />
                 </PieChart>
               </ResponsiveContainer>
+
+              <div className="mt-4 flex flex-wrap gap-3 text-xs text-gray-700 dark:text-gray-300 max-h-24 md:max-h-none overflow-y-auto md:overflow-visible">
+                {categoriasGastos.map((categoria) => (
+                  <div key={`legenda-despesa-${categoria.name}`} className="flex items-center gap-1.5">
+                    <span
+                      className="w-3 h-3 rounded-sm flex-shrink-0"
+                      style={{ backgroundColor: coresMapDespesas[categoria.name] }}
+                    />
+                    <span className="truncate max-w-[120px]">{categoria.name}</span>
+                  </div>
+                ))}
+              </div>
 
               {/* Botao para mostrar/ocultar detalhes */}
               <div className="mt-4">
@@ -441,13 +448,20 @@ export default function GraficosFinanceiros({
                     labelStyle={{ fontWeight: 'bold', color: 'var(--tooltip-text)' }}
                     itemStyle={{ color: 'var(--tooltip-text)' }}
                   />
-                  <Legend
-                    verticalAlign="bottom"
-                    height={36}
-                    wrapperStyle={{ paddingTop: '20px' }}
-                  />
                 </PieChart>
               </ResponsiveContainer>
+
+              <div className="mt-4 flex flex-wrap gap-3 text-xs text-gray-700 dark:text-gray-300 max-h-24 md:max-h-none overflow-y-auto md:overflow-visible">
+                {categoriasReceitas.map((categoria) => (
+                  <div key={`legenda-receita-${categoria.name}`} className="flex items-center gap-1.5">
+                    <span
+                      className="w-3 h-3 rounded-sm flex-shrink-0"
+                      style={{ backgroundColor: coresMapReceitas[categoria.name] }}
+                    />
+                    <span className="truncate max-w-[120px]">{categoria.name}</span>
+                  </div>
+                ))}
+              </div>
 
               {/* Botao para mostrar/ocultar detalhes */}
               <div className="mt-4">

@@ -435,6 +435,23 @@ export default function CalendarioTransacoes({
         })}
       </div>
 
+      {diaSelecionado && transacoesDiaSelecionado.length > 0 && (
+        <div className="flex justify-center py-3">
+          <svg
+            className="w-6 h-6 text-gray-500 dark:text-gray-400 animate-bounce"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 5v12" />
+            <path d="M7 12l5 5 5-5" />
+          </svg>
+        </div>
+      )}
+
       {/* Detalhes do dia selecionado */}
       {diaSelecionado && transacoesDiaSelecionado.length > 0 && (
         <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
